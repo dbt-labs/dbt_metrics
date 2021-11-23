@@ -27,7 +27,8 @@
 
 -------------------------------------------------------------
 
-
+-- This jumps straight ahead to the named subtypes, instead of having a default__secondary_calculations macro first. 
+-- As long as that is by convention instead of mandatory, I actually prefer skipping it in this case. 
 {% macro secondary_calculations(metric_name, aggregate, dims, config) %}
     {{ return(adapter.dispatch('metric_secondary_calculations_' ~ config.type)(metric_name, aggregate, dims, config)) }}
 {% endmacro %}
