@@ -221,7 +221,7 @@ order by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
         calcs=[
             {"type": "period_over_period", "lag": 1, "how": "difference"},
             {"type": "period_over_period", "lag": 1, "how": "ratio"},
-            {"type": "rolling", "window": 3, "aggregate": "avg"},
+            {"type": "rolling", "window": 3, "aggregate": "average"},
             {"type": "rolling", "window": 3, "aggregate": "sum"},
             {"type": "period_to_date", "aggregate": "sum", "period": "year"},
             {"type": "period_to_date", "aggregate": "max", "period": "month"},
