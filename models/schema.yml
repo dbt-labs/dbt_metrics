@@ -1,0 +1,61 @@
+
+version: 2
+
+metrics:
+  - model: fct_orders
+    name: revenue
+    description: "Order revenue"
+    label: Revenue
+    type: sum
+    sql: order_total
+    timestamp: created_at
+    dimensions:
+      - company
+      - order_total_band
+    time_grains:
+      - day
+      - week
+      - month
+
+  - model: fct_orders
+    name: average_order_value
+    description: "Average order Value"
+    label: Average Order Value
+    type: avg
+    sql: order_total
+    timestamp: created_at
+    dimensions:
+      - company
+      - order_total_band
+    time_grains:
+      - day
+      - week
+      - month
+
+  - model: fct_orders
+    name: orders
+    description: "Total number of orders"
+    label: Total orders
+    type: count
+    timestamp: created_at
+    dimensions:
+      - company
+      - order_total_band
+    time_grains:
+      - day
+      - week
+      - month
+
+  - model: fct_orders
+    name: customers
+    description: "Total distinct customers"
+    label: Total customers
+    type: count_distinct
+    sql: email
+    timestamp: created_at
+    dimensions:
+      - company
+    time_grains:
+      - day
+      - week
+      - month
