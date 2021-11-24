@@ -2,15 +2,30 @@
 --TODO: there would need to be some way to catch bad input (e.g. non-existent `how` or `aggregate`)
 -- I also don't like how much I have to pass around metric_name, but maybe that's unavoidable
 
+--TODO: Do we have a list of aggregations that we're supporting? 
 {% macro aggregate_primary_metric(aggregate, expression) %}
     {{ return(adapter.dispatch('aggregate_primary_metric')(aggregate, expression)) }}
 {% endmacro %}
 
 -- Discuss: I'm open to this intermediary macro not existing, 
 -- and aggregate_primary_metric just calling dispatch() for metric_* directly. 
--- I've tried that in secondary_calculations, and I think I like it better
+-- Would that break others' ability to override this?
 {% macro default__aggregate_primary_metric(aggregate, expression) %}
-    {{ return(adapter.dispatch('metric_' ~ aggregate)(expression)) }}
+    {% if aggregate == 'count' %}
+        {{ return(adapter.dispatch('metric_count')(expression)) }}
+    
+    {% elif aggregate == 'count_distinct' %}
+        {{ return(adapter.dispatch('metric_count_distinct')(expression)) }}
+    
+    {% elif aggregate == 'average' %}
+        {{ return(adapter.dispatch('metric_average')(expression)) }}
+    
+    {% elif aggregate == 'max' %}
+        {{ return(adapter.dispatch('metric_max')(expression)) }}
+    
+    {% else %}
+        {% do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) %}  
+    {% endif %}
 {% endmacro %}
 
 {% macro default__metric_count(expression) %}
@@ -25,12 +40,44 @@
     avg({{ expression }})
 {% endmacro %}
 
+{% macro default__metric_max(expression) %}
+    max({{ expression }})
+{% endmacro %}
+
 -------------------------------------------------------------
 
--- This jumps straight ahead to the named subtypes, instead of having a default__secondary_calculations macro first. 
--- As long as that is by convention instead of mandatory, I actually prefer skipping it in this case. 
-{% macro secondary_calculations(metric_name, aggregate, dims, config) %}
-    {{ return(adapter.dispatch('metric_secondary_calculations_' ~ config.type)(metric_name, aggregate, dims, config)) }}
+{% macro metric_secondary_calculations(metric_name, aggregate, dims, config) %}
+    {{ return(adapter.dispatch('metric_secondary_calculations')(metric_name, aggregate, dims, config)) }}
+{% endmacro %}
+
+{% macro default__metric_secondary_calculations(metric_name, aggregate, dims, config) %}
+    {% set calc_type = config.type %}
+    {% set calc_sql = '' %}
+    
+    {% if calc_type == 'period_over_period' %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_over_period')(metric_name, aggregate, dims, config) %}
+   
+    {% elif calc_type == 'rolling' %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_rolling')(expression) %}
+    
+    {% elif calc_type == 'period_to_date' %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_to_date')(expression) %}
+    
+    {% else %}
+        {% do exceptions.raise_compiler_error("Unknown secondary calculation: " ~ calc_type) %}  
+    {% endif %}
+
+
+    {% if config.how == 'difference' %}
+        {{ adapter.dispatch('metric_how_difference')(metric_name, calc_sql) }}
+    
+    {% elif config.how == 'ratio' %}
+        {{ adapter.dispatch('metric_how_ratio')(metric_name, calc_sql) }}
+    
+    {% else %}
+        {% do exceptions.raise_compiler_error("Bad 'how' for period_over_period: " ~ calc.how) %}
+    {% endif %}
+
 {% endmacro %}
 
 {% macro default__metric_secondary_calculations_period_over_period(metric_name, aggregate, dims, config) %}
@@ -45,20 +92,13 @@
         )
     {% endset %}
     
-    --The how component could either work like this... 
-    {% if config.how == 'difference' %}
-        coalesce({{ metric_name }}, 0) - coalesce({{ calc_sql }}, 0)
-    {% elif config.how == 'ratio' %}
-        coalesce({{ metric_name }}, 0) / nullif({{ calc_sql }}, 0)::float
-    {% else %}
-        {% do exceptions.raise_compiler_error("Bad 'how' for period_over_period: " ~ calc.how) %}
-    {% endif %}
+    {% do return (calc_sql) %}
 
 {% endmacro %}
 
 {% macro default__metric_secondary_calculations_rolling(metric_name, aggregate, dims, config) %}
     {% set calc_sql %}
-        {{ adapter.dispatch('metric_' ~ aggregate)(expression) }}
+        {{ adapter.dispatch('aggregate_primary_metric')(aggregate, metric_name) }}
         over (
             {% if dims -%}
                 partition by {{ dims | join(", ") }} 
@@ -68,9 +108,25 @@
         rows between {{ config.window - 1 }} preceding and current row
     {% endset %}
 
-    -- ... or like this, which adds another hop for people to follow but would be DRYer
-    {{ adapter.dispatch('metric_how_' ~ config.how)(metric_name, calc_sql) }}
+    {% do return (calc_sql) %}
+
 {% endmacro %}
+
+{% macro default__metric_secondary_calculations_period_to_date(metric_name, aggregate, dims, config) %}
+    {% set calc_sql %}
+        {{ adapter.dispatch('aggregate_primary_metric')(aggregate, metric_name) }}
+        over (
+            partition by period__{{ config.period }}
+            {% if dims -%}
+                , {{ dims | join(", ") }}
+            {%- endif %}
+            order by period
+        )
+        rows between unbounded preceding and current row
+    {% endset %}
+{% endmacro %}
+
+
 
 {% macro default__metric_how_difference(metric_name, calc_sql) %}
     coalesce({{ metric_name }}, 0) - coalesce({{ calc_sql }}, 0)
