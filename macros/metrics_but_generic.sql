@@ -110,7 +110,7 @@ with_calcs as (
         
         {% for calc in calcs %}
 
-            , {{ secondary_calculations(metric_name, metric.type, dims, calc) }} as calc_{{ loop.index }}
+            , {{ metric_secondary_calculations(metric_name, metric.type, dims, calc) }} as calc_{{ loop.index }}
 
         {% endfor %}
 

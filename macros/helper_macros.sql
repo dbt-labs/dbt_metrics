@@ -67,16 +67,7 @@
         {% do exceptions.raise_compiler_error("Unknown secondary calculation: " ~ calc_type) %}  
     {% endif %}
 
-
-    {% if config.how == 'difference' %}
-        {{ adapter.dispatch('metric_how_difference')(metric_name, calc_sql) }}
-    
-    {% elif config.how == 'ratio' %}
-        {{ adapter.dispatch('metric_how_ratio')(metric_name, calc_sql) }}
-    
-    {% else %}
-        {% do exceptions.raise_compiler_error("Bad 'how' for period_over_period: " ~ calc.how) %}
-    {% endif %}
+    {{ calc_sql }}
 
 {% endmacro %}
 
@@ -92,7 +83,16 @@
         )
     {% endset %}
     
-    {% do return (calc_sql) %}
+
+    {% if config.how == 'difference' %}
+        {% do return (adapter.dispatch('metric_how_difference')(metric_name, calc_sql)) %}
+    
+    {% elif config.how == 'ratio' %}
+        {% do return (adapter.dispatch('metric_how_ratio')(metric_name, calc_sql)) %}
+    
+    {% else %}
+        {% do exceptions.raise_compiler_error("Bad 'how' for period_over_period: " ~ config.how) %}
+    {% endif %}
 
 {% endmacro %}
 
