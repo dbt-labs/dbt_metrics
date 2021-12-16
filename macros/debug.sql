@@ -62,7 +62,7 @@
 
 {% endmacro %}
 
-{% macro debug(metric_name) %}
+{% macro get_metric(metric_name) %}
     {% set metric_info = namespace(metric_id=none) %}
     {% for metric in graph.metrics.values() %}
         {% if metric.name == metric_name %}
@@ -75,23 +75,32 @@
     {% endif %}
     
 
-    {% set metric = graph.metrics[metric_info.metric_id] %}
-    {% do log(metric, info=true) %}
-    {% set sql = get_metric_sql(
+    {% do return(graph.metrics[metric_info.metric_id]) %}
+
+{% endmacro %}
+
+{% macro debug(metric_name) %}
+
+    {% set metric = get_metric(metric_name) %}
+
+    {%- set sql = get_metric_sql(
         metric,
         grain='day',
         dims=['order_total_band'],
         calcs=[
+            {"type": "period_to_date", "aggregate": "sum", "period": "year"},
+            {"type": "period_to_date", "aggregate": "max", "period": "month"},
             {"type": "period_over_period", "lag": 1, "how": "difference"},
             {"type": "period_over_period", "lag": 1, "how": "ratio"},
             {"type": "rolling", "window": 3, "aggregate": "average"},
             {"type": "rolling", "window": 3, "aggregate": "sum"},
-            {"type": "period_to_date", "aggregate": "sum", "period": "year"},
-            {"type": "period_to_date", "aggregate": "max", "period": "month"},
-        ]
+        ], 
+        metric_name=metric.name
     ) %}
     {% set res = run_query('select * from (' ~ sql ~ ') order by 2,1') %}
     {% do res.print_table(max_columns=none, max_rows=10) %}
+    {{ sql | length }}
+    {{ sql }}
 
 {% endmacro %}
 
