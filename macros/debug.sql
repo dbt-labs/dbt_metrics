@@ -97,9 +97,9 @@
         ], 
         metric_name=metric.name
     ) %}
-    {% set res = run_query('select * from (' ~ sql ~ ') order by 2,1') %}
-    {% do res.print_table(max_columns=none, max_rows=10) %}
-    {{ sql | length }}
+    -- {# {% set res = run_query('select * from (' ~ sql ~ ') order by 2,1') %} #}
+    -- {# {% do res.print_table(max_columns=none, max_rows=10) %} #}
+
     {{ sql }}
 
 {% endmacro %}
