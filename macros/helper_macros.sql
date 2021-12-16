@@ -58,10 +58,10 @@
         {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_over_period')(metric_name, aggregate, dims, config) %}
    
     {% elif calc_type == 'rolling' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_rolling')(expression) %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_rolling')(metric_name, aggregate, dims, config) %}
     
     {% elif calc_type == 'period_to_date' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_to_date')(expression) %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_to_date')(metric_name, aggregate, dims, config) %}
     
     {% else %}
         {% do exceptions.raise_compiler_error("Unknown secondary calculation: " ~ calc_type) %}  
