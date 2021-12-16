@@ -7,16 +7,16 @@ metrics:
       type: count
       sql: "user_id"
       timestamp: joined_at
-      time_grains: [day, week, month] #does it make sense to have num weekly active members over a month?
+      time_grains: [day, week, month, flerbl] #does it make sense to have num weekly active members over a month?
 
       dimensions: 
         - is_active_past_quarter
         - has_messaged
 
-      # filters: 
-      #   - field: has_joined_workspace
-      #     operator: "="
-      #     value: "1"
+      filters: 
+        - field: has_joined_workspace
+          operator: "="
+          value: "1"
 
       meta: 
         dimensions: 

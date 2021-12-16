@@ -85,8 +85,8 @@
 
     {%- set sql = get_metric_sql(
         metric,
-        grain='day',
-        dims=['order_total_band'],
+        grain='4_5_4_month',
+        dims=['has_messaged', 'is_weekend'],
         calcs=[
             {"type": "period_to_date", "aggregate": "sum", "period": "year"},
             {"type": "period_to_date", "aggregate": "max", "period": "month"},
@@ -99,7 +99,6 @@
     ) %}
     -- {# {% set res = run_query('select * from (' ~ sql ~ ') order by 2,1') %} #}
     -- {# {% do res.print_table(max_columns=none, max_rows=10) %} #}
-
     {{ sql }}
 
 {% endmacro %}

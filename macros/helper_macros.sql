@@ -23,6 +23,9 @@
     {% elif aggregate == 'max' %}
         {{ return(adapter.dispatch('metric_max')(expression)) }}
     
+    {% elif aggregate == 'sum' %}
+        {{ return(adapter.dispatch('metric_sum')(expression)) }}
+    
     {% else %}
         {% do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) %}  
     {% endif %}
@@ -42,6 +45,10 @@
 
 {% macro default__metric_max(expression) %}
     max({{ expression }})
+{% endmacro %}
+
+{% macro default__metric_sum(expression) %}
+    sum({{ expression }})
 {% endmacro %}
 
 -------------------------------------------------------------
@@ -116,7 +123,7 @@
     {% set calc_sql %}
         {{ adapter.dispatch('aggregate_primary_metric')(aggregate, metric_name) }}
         over (
-            partition by period__{{ config.period }}
+            partition by date_{{ config.period }}
             {% if dims -%}
                 , {{ dims | join(", ") }}
             {%- endif %}
@@ -124,6 +131,9 @@
         )
         rows between unbounded preceding and current row
     {% endset %}
+
+    {% do return (calc_sql) %}
+    
 {% endmacro %}
 
 
