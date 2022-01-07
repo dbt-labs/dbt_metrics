@@ -19,11 +19,11 @@ with source_query as (
         -- Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. 
         -- DEBUG: Don't hard-code the time dimension? hmm....
         -- DEBUG: Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :(
-        date_trunc(day, {{ metric.timestamp }})::date as date_day
+        date_trunc(day, {{ metric.timestamp }})::date as date_day,
 
         {% for dim in dims %}
-            {% if is_dim_from_model(metric, dim) %}
-                , {{ dim }}
+            {% if metrics.is_dim_from_model(metric, dim) %}
+                 {{ dim }},
             {% endif %}
 
         {% endfor %}
@@ -46,6 +46,8 @@ with source_query as (
  spine__time as (
      {% set calendar_tbl = var('metrics_calendar_table', ref('all_days_extended')) %}
      select 
+        date_day,
+        -- this could be the same as date_day if grain is day. That's OK! They're used for different things: date_day for joining to the spine, period for aggregating.
         date_{{ grain }} as period, 
         {{ dbt_utils.star(calendar_tbl, except=['date_'~ grain]) }}
      from {{ calendar_tbl }}
@@ -53,7 +55,7 @@ with source_query as (
  ),
 
 {% for dim in dims %}
-    {% if is_dim_from_model(metric, dim) %}
+    {% if metrics.is_dim_from_model(metric, dim) %}
           
         spine__values__{{ dim }} as (
 
@@ -72,7 +74,7 @@ spine as (
     from spine__time
     {% for dim in dims %}
 
-        {% if is_dim_from_model(metric, dim) %}
+        {% if metrics.is_dim_from_model(metric, dim) %}
             cross join spine__values__{{ dim }}
         {% endif %}
     {% endfor %}
@@ -83,15 +85,17 @@ joined as (
     select 
         spine.period,
         {% for dim in dims %}
-        {{ dim }},
+        spine.{{ dim }},
         {% endfor %}
 
-        {{ aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric_name }}
+        -- TODO: distinct calcs periods (month/year)
+
+        {{ metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric_name }}
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
     {% for dim in dims %}
-        {% if is_dim_from_model(metric, dim) %}
+        {% if metrics.is_dim_from_model(metric, dim) %}
             and source_query.{{ dim }} = spine.{{ dim }}
         {% endif %}
     {% endfor %}
@@ -115,7 +119,7 @@ with_calcs as (
         
         {% for calc in calcs %}
 
-            , {{ metric_secondary_calculations(metric_name, metric.type, dims, calc) }} as calc_{{ loop.index }}
+            , {{ metrics.metric_secondary_calculations(metric_name, metric.type, dims, calc) }} as calc_{{ loop.index }}
 
         {% endfor %}
 
@@ -139,8 +143,11 @@ order by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
 {% endmacro %}
 
 {% macro is_dim_from_model(metric, dim_name) %}
+    {% if execute %}
 
-    {% set model_dims = metric['meta']['dimensions'][0]['columns'] %}
-    {% do return (dim_name in model_dims) %}
-
+        {% set model_dims = metric['meta']['dimensions'][0]['columns'] %}
+        {% do return (dim_name in model_dims) %}
+    {% else %}
+        {% do return (False) %}
+    {% endif %}
 {% endmacro %}

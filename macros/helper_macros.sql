@@ -4,7 +4,7 @@
 
 --TODO: Do we have a list of aggregations that we're supporting? 
 {% macro aggregate_primary_metric(aggregate, expression) %}
-    {{ return(adapter.dispatch('aggregate_primary_metric')(aggregate, expression)) }}
+    {{ return(adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, expression)) }}
 {% endmacro %}
 
 -- Discuss: I'm open to this intermediary macro not existing, 
@@ -12,19 +12,19 @@
 -- Would that break others' ability to override this?
 {% macro default__aggregate_primary_metric(aggregate, expression) %}
     {% if aggregate == 'count' %}
-        {{ return(adapter.dispatch('metric_count')(expression)) }}
+        {{ return(adapter.dispatch('metric_count', 'metrics')(expression)) }}
     
     {% elif aggregate == 'count_distinct' %}
-        {{ return(adapter.dispatch('metric_count_distinct')(expression)) }}
+        {{ return(adapter.dispatch('metric_count_distinct', 'metrics')(expression)) }}
     
     {% elif aggregate == 'average' %}
-        {{ return(adapter.dispatch('metric_average')(expression)) }}
+        {{ return(adapter.dispatch('metric_average', 'metrics')(expression)) }}
     
     {% elif aggregate == 'max' %}
-        {{ return(adapter.dispatch('metric_max')(expression)) }}
+        {{ return(adapter.dispatch('metric_max', 'metrics')(expression)) }}
     
     {% elif aggregate == 'sum' %}
-        {{ return(adapter.dispatch('metric_sum')(expression)) }}
+        {{ return(adapter.dispatch('metric_sum', 'metrics')(expression)) }}
     
     {% else %}
         {% do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) %}  
@@ -54,7 +54,7 @@
 -------------------------------------------------------------
 
 {% macro metric_secondary_calculations(metric_name, aggregate, dims, config) %}
-    {{ return(adapter.dispatch('metric_secondary_calculations')(metric_name, aggregate, dims, config)) }}
+    {{ return(adapter.dispatch('metric_secondary_calculations', 'metrics')(metric_name, aggregate, dims, config)) }}
 {% endmacro %}
 
 {% macro default__metric_secondary_calculations(metric_name, aggregate, dims, config) %}
@@ -62,13 +62,13 @@
     {% set calc_sql = '' %}
     
     {% if calc_type == 'period_over_period' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_over_period')(metric_name, aggregate, dims, config) %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_over_period', 'metrics')(metric_name, aggregate, dims, config) %}
    
     {% elif calc_type == 'rolling' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_rolling')(metric_name, aggregate, dims, config) %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_rolling', 'metrics')(metric_name, aggregate, dims, config) %}
     
     {% elif calc_type == 'period_to_date' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_to_date')(metric_name, aggregate, dims, config) %}
+        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_to_date', 'metrics')(metric_name, aggregate, dims, config) %}
     
     {% else %}
         {% do exceptions.raise_compiler_error("Unknown secondary calculation: " ~ calc_type) %}  
@@ -92,10 +92,10 @@
     
 
     {% if config.how == 'difference' %}
-        {% do return (adapter.dispatch('metric_how_difference')(metric_name, calc_sql)) %}
+        {% do return (adapter.dispatch('metric_how_difference', 'metrics')(metric_name, calc_sql)) %}
     
     {% elif config.how == 'ratio' %}
-        {% do return (adapter.dispatch('metric_how_ratio')(metric_name, calc_sql)) %}
+        {% do return (adapter.dispatch('metric_how_ratio', 'metrics')(metric_name, calc_sql)) %}
     
     {% else %}
         {% do exceptions.raise_compiler_error("Bad 'how' for period_over_period: " ~ config.how) %}
@@ -105,14 +105,14 @@
 
 {% macro default__metric_secondary_calculations_rolling(metric_name, aggregate, dims, config) %}
     {% set calc_sql %}
-        {{ adapter.dispatch('aggregate_primary_metric')(aggregate, metric_name) }}
+        {{ adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, metric_name) }}
         over (
             {% if dims -%}
                 partition by {{ dims | join(", ") }} 
             {% endif -%}
             order by period
+            rows between {{ config.window - 1 }} preceding and current row
         )
-        rows between {{ config.window - 1 }} preceding and current row
     {% endset %}
 
     {% do return (calc_sql) %}
@@ -121,15 +121,15 @@
 
 {% macro default__metric_secondary_calculations_period_to_date(metric_name, aggregate, dims, config) %}
     {% set calc_sql %}
-        {{ adapter.dispatch('aggregate_primary_metric')(aggregate, metric_name) }}
+        {{ adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, metric_name) }}
         over (
             partition by date_{{ config.period }}
             {% if dims -%}
                 , {{ dims | join(", ") }}
             {%- endif %}
             order by period
+            rows between unbounded preceding and current row
         )
-        rows between unbounded preceding and current row
     {% endset %}
 
     {% do return (calc_sql) %}
