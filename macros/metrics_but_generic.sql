@@ -9,7 +9,24 @@
       - validate that the requested dim is actually an option :rage:
 */
 
+{% macro get_metric_relation(ref_name) %}
+    {% if execute %}
+        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name) | first %}
+        {% set relation = api.Relation.create(
+            database = model_ref_node.database,
+            schema = model_ref_node.schema,
+            identifier = model_ref_node.alias
+        )
+        %}
+        {% do return(relation) %}
+    {% else %}
+        {% do return(api.Relation.create()) %}
+    {% endif %} 
+{% endmacro %}
+
 {%- macro get_metric_sql(metric, grain, dims, calcs, metric_name) %}
+{% set model = metrics.get_metric_relation(metric.model) %}
+{% set calendar_tbl = metrics.get_metric_relation(var('metrics_calendar_table', 'all_days_extended')) %}
 
 with source_query as (
 
@@ -30,7 +47,7 @@ with source_query as (
 
         {{ metric.sql }} as property_to_aggregate
 
-    from {{ ref(metric.model) }}
+    from {{ model }}
     where 1=1
         -- via metric definition
         -- DEBUG: and customers.plan != 'free'
@@ -44,7 +61,6 @@ with source_query as (
 ),
 
  spine__time as (
-     {% set calendar_tbl = var('metrics_calendar_table', ref('all_days_extended')) %}
      select 
         date_day,
         -- this could be the same as date_day if grain is day. That's OK! They're used for different things: date_day for joining to the spine, period for aggregating.
