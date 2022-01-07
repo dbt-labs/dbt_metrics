@@ -20,31 +20,6 @@
 {% endmacro %}
 
 
-/*
-    Small helper to return the metric subquery as a Selectable, ie.
-    a thing that can be selected from, rather than a select statement itself
-*/
-{% macro query(metric_name, grain) %}
-    {% set def = get_metric(metric_name) %}
-    {% set sql = get_metric_sql(
-        table = ref(def['table']),
-        aggregate = def['aggregate'],
-        expression = def['expression'],
-        datetime = def['datetime'],
-
-        grain = grain,
-        dims = varargs
-    ) %}
-
-    {% set as_subquery %}
-    (
-        {{ sql }}
-    )
-    {% endset %}
-
-    {% do return(as_subquery) %}
-{% endmacro %}
-
 /* -------------------------------------------------- */
 
 /*
@@ -63,6 +38,9 @@
 {% endmacro %}
 
 {% macro get_metric(metric_name) %}
+    {% if not execute %}
+        {% do return(None) %}
+    {% else %}
     {% set metric_info = namespace(metric_id=none) %}
     {% for metric in graph.metrics.values() %}
         {% if metric.name == metric_name %}
@@ -76,16 +54,20 @@
     
 
     {% do return(graph.metrics[metric_info.metric_id]) %}
+    {% endif %}
 
 {% endmacro %}
 
 {% macro debug(metric_name) %}
+    {% if not execute %}
+        {% do return("not execute") %}
+    {% endif %}
 
-    {% set metric = get_metric(metric_name) %}
+    {% set metric = metrics.get_metric(metric_name) %}
 
-    {%- set sql = get_metric_sql(
+    {%- set sql = metrics.get_metric_sql(
         metric,
-        grain='4_5_4_month',
+        grain='day',
         dims=['has_messaged', 'is_weekend'],
         calcs=[
             {"type": "period_to_date", "aggregate": "sum", "period": "year"},
@@ -102,4 +84,3 @@
     {{ sql }}
 
 {% endmacro %}
-
