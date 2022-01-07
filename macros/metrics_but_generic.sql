@@ -104,7 +104,7 @@ joined as (
         spine.{{ dim }},
         {% endfor %}
 
-        -- TODO: distinct calcs periods (month/year)
+        -- TODO: distinct calcs periods (month/year/custom time periods)
 
         {{ metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric_name }}
 

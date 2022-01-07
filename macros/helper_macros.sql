@@ -32,7 +32,7 @@
 {% endmacro %}
 
 {% macro default__metric_count(expression) %}
-    count({{ expression }})
+    count({{ expression if expression is not None else '*' }})
 {% endmacro %}
 
 {% macro default__metric_count_distinct(expression) %}
