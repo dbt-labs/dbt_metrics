@@ -9,20 +9,6 @@
       - validate that the requested dim is actually an option :rage:
 */
 
-{% macro get_metric_relation(ref_name) %}
-    {% if execute %}
-        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name) | first %}
-        {% set relation = api.Relation.create(
-            database = model_ref_node.database,
-            schema = model_ref_node.schema,
-            identifier = model_ref_node.alias
-        )
-        %}
-        {% do return(relation) %}
-    {% else %}
-        {% do return(api.Relation.create()) %}
-    {% endif %} 
-{% endmacro %}
 
 {%- macro get_metric_sql(metric, grain, dims, calcs) %}
 {% set model = metrics.get_metric_relation(metric.model) %}
@@ -62,7 +48,7 @@ with source_query as (
         date_day,
         /* this could be the same as date_day if grain is day. That's OK! They're used for different things: date_day for joining to the spine, period for aggregating.*/
         date_{{ grain }} as period, 
-        {{ dbt_utils.star(calendar_tbl, except=['date_'~ grain]) }}
+        {{ dbt_utils.star(calendar_tbl, except=['date_day']) }}
      from {{ calendar_tbl }}
 
  ),
@@ -94,9 +80,12 @@ spine as (
 
 ),
 
+{% set relevant_calendar_columns = ['date_month', 'date_year'] %}
+
 joined as (
     select 
         spine.period,
+        spine.{{ relevant_calendar_columns | join(", spine.") }},
         {% for dim in dims %}
         spine.{{ dim }},
         {% endfor %}
@@ -156,4 +145,19 @@ order by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
     {% else %}
         {% do return (False) %}
     {% endif %}
+{% endmacro %}
+
+{% macro get_metric_relation(ref_name) %}
+    {% if execute %}
+        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name) | first %}
+        {% set relation = api.Relation.create(
+            database = model_ref_node.database,
+            schema = model_ref_node.schema,
+            identifier = model_ref_node.alias
+        )
+        %}
+        {% do return(relation) %}
+    {% else %}
+        {% do return(api.Relation.create()) %}
+    {% endif %} 
 {% endmacro %}

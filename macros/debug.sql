@@ -67,7 +67,7 @@
 
     {%- set sql = metrics.get_metric_sql(
         metric,
-        grain='day',
+        grain='month',
         dims=['has_messaged', 'is_weekend'],
         calcs=[
             {"type": "period_to_date", "aggregate": "sum", "period": "year"},
