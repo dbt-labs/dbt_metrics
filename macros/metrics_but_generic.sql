@@ -31,47 +31,44 @@
 with source_query as (
 
     select
-        -- requested dimensions
-
-        -- Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. 
-        -- DEBUG: Don't hard-code the time dimension? hmm....
-        -- DEBUG: Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :(
+        /* Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. */
+        /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
         date_trunc(day, {{ metric.timestamp }})::date as date_day,
 
-        {% for dim in dims %}
-            {% if metrics.is_dim_from_model(metric, dim) %}
+        {%- for dim in dims %}
+            {%- if metrics.is_dim_from_model(metric, dim) %}
                  {{ dim }},
-            {% endif %}
+            {% endif -%}
 
         {% endfor %}
 
-        {{ metric.sql }} as property_to_aggregate
+        {%- if metric.sql -%}
+            {{ metric.sql }} as property_to_aggregate
+        {%- elif metric.type == 'count' -%}
+            1 as property_to_aggregate /*property to aggregate not provided, this is effectively count(*) */
+        {%- else -%}
+            {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric " ~ metric.name) -%}  
+        {%- endif %}
 
     from {{ model }}
     where 1=1
-        -- via metric definition
-        -- DEBUG: and customers.plan != 'free'
-
-        -- user-supplied. Filters that are not present in the
-        -- list of selected dimensions are applied at the source query
-        -- DEBUG: and not customers.is_training_account
-    {% for filter in metric.filters %}
+    {%- for filter in metric.filters %}
         and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
-    {% endfor %}
+    {%- endfor %}
 ),
 
  spine__time as (
      select 
         date_day,
-        -- this could be the same as date_day if grain is day. That's OK! They're used for different things: date_day for joining to the spine, period for aggregating.
+        /* this could be the same as date_day if grain is day. That's OK! They're used for different things: date_day for joining to the spine, period for aggregating.*/
         date_{{ grain }} as period, 
         {{ dbt_utils.star(calendar_tbl, except=['date_'~ grain]) }}
      from {{ calendar_tbl }}
 
  ),
 
-{% for dim in dims %}
-    {% if metrics.is_dim_from_model(metric, dim) %}
+{%- for dim in dims -%}
+    {%- if metrics.is_dim_from_model(metric, dim) %}
           
         spine__values__{{ dim }} as (
 
@@ -79,21 +76,21 @@ with source_query as (
             from source_query
 
         ),  
-    {% endif %}
+    {% endif -%}
 
 
-{% endfor %}
+{%- endfor %}
 
 spine as (
 
     select *
     from spine__time
-    {% for dim in dims %}
+    {%- for dim in dims -%}
 
-        {% if metrics.is_dim_from_model(metric, dim) %}
+        {%- if metrics.is_dim_from_model(metric, dim) %}
             cross join spine__values__{{ dim }}
-        {% endif %}
-    {% endfor %}
+        {%- endif %}
+    {%- endfor %}
 
 ),
 
@@ -106,7 +103,7 @@ joined as (
 
         -- TODO: distinct calcs periods (month/year/custom time periods)
 
-        {{ metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric_name }}
+        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric_name }}
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
@@ -125,17 +122,10 @@ joined as (
 with_calcs as (
 
     select *
-
-        /*
-            TODO:
-                - Make sure denominators are all nonzero
-                - Make sure division happens with floats, not ints
-                - Wrap these expressions up in macros in this package
-        */
         
-        {% for calc in calcs %}
+        {% for calc in calcs -%}
 
-            , {{ metrics.metric_secondary_calculations(metric_name, metric.type, dims, calc) }} as calc_{{ loop.index }}
+            , {{ metrics.metric_secondary_calculations(metric_name, dims, calc) -}} as calc_{{ loop.index -}}
 
         {% endfor %}
 
