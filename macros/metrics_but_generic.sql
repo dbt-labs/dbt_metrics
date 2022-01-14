@@ -24,7 +24,7 @@
     {% endif %} 
 {% endmacro %}
 
-{%- macro get_metric_sql(metric, grain, dims, calcs, metric_name) %}
+{%- macro get_metric_sql(metric, grain, dims, calcs) %}
 {% set model = metrics.get_metric_relation(metric.model) %}
 {% set calendar_tbl = metrics.get_metric_relation(var('metrics_calendar_table', 'all_days_extended')) %}
 
@@ -103,7 +103,7 @@ joined as (
 
         -- TODO: distinct calcs periods (month/year/custom time periods)
 
-        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric_name }}
+        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }}
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
@@ -125,7 +125,7 @@ with_calcs as (
         
         {% for calc in calcs -%}
 
-            , {{ metrics.metric_secondary_calculations(metric_name, dims, calc) -}} as calc_{{ loop.index -}}
+            , {{ metrics.metric_secondary_calculations(metric.name, dims, calc) -}} as calc_{{ loop.index -}}
 
         {% endfor %}
 
@@ -138,7 +138,7 @@ select
     {% for dim in dims %}
     , {{ dim }}
     {% endfor %}
-    , coalesce({{ metric_name }}, 0) as {{ metric_name }}
+    , coalesce({{ metric.name }}, 0) as {{ metric.name }}
     {% for calc in calcs %}
     , calc_{{ loop.index }}
     {% endfor %}

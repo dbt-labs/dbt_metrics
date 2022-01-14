@@ -76,8 +76,7 @@
             {"type": "period_over_period", "lag": 1, "how": "ratio"},
             {"type": "rolling", "window": 3, "aggregate": "average"},
             {"type": "rolling", "window": 3, "aggregate": "sum"},
-        ], 
-        metric_name=metric.name
+        ]
     ) %}
     -- {# {% set res = run_query('select * from (' ~ sql ~ ') order by 2,1') %} #}
     -- {# {% do res.print_table(max_columns=none, max_rows=10) %} #}
