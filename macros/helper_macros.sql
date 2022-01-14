@@ -32,7 +32,7 @@
 {% endmacro %}
 
 {% macro default__metric_count(expression) %}
-    count({{ expression if expression is not None else '*' }})
+    count({{ expression }})
 {% endmacro %}
 
 {% macro default__metric_count_distinct(expression) %}
@@ -53,32 +53,32 @@
 
 -------------------------------------------------------------
 
-{% macro metric_secondary_calculations(metric_name, aggregate, dims, config) %}
-    {{ return(adapter.dispatch('metric_secondary_calculations', 'metrics')(metric_name, aggregate, dims, config)) }}
+{% macro metric_secondary_calculations(metric_name, dims, config) %}
+    {{ return(adapter.dispatch('metric_secondary_calculations', 'metrics')(metric_name, dims, config)) }}
 {% endmacro %}
 
-{% macro default__metric_secondary_calculations(metric_name, aggregate, dims, config) %}
-    {% set calc_type = config.type %}
-    {% set calc_sql = '' %}
+{% macro default__metric_secondary_calculations(metric_name, dims, config) %}
+    {%- set calc_type = config.type %}
+    {%- set calc_sql = '' %}
     
-    {% if calc_type == 'period_over_period' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_over_period', 'metrics')(metric_name, aggregate, dims, config) %}
+    {%- if calc_type == 'period_over_period' %}
+        {%- set calc_sql = adapter.dispatch('metric_secondary_calculations_period_over_period', 'metrics')(metric_name, dims, config) %}
    
-    {% elif calc_type == 'rolling' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_rolling', 'metrics')(metric_name, aggregate, dims, config) %}
+    {%- elif calc_type == 'rolling' %}
+        {%- set calc_sql = adapter.dispatch('metric_secondary_calculations_rolling', 'metrics')(metric_name, dims, config) %}
     
-    {% elif calc_type == 'period_to_date' %}
-        {% set calc_sql = adapter.dispatch('metric_secondary_calculations_period_to_date', 'metrics')(metric_name, aggregate, dims, config) %}
+    {%- elif calc_type == 'period_to_date' %}
+        {%- set calc_sql = adapter.dispatch('metric_secondary_calculations_period_to_date', 'metrics')(metric_name, dims, config) %}
     
-    {% else %}
-        {% do exceptions.raise_compiler_error("Unknown secondary calculation: " ~ calc_type) %}  
-    {% endif %}
+    {%- else %}
+        {%- do exceptions.raise_compiler_error("Unknown secondary calculation: " ~ calc_type) %}  
+    {%- endif %}
 
-    {{ calc_sql }}
+    {{- calc_sql }}
 
 {% endmacro %}
 
-{% macro default__metric_secondary_calculations_period_over_period(metric_name, aggregate, dims, config) %}
+{% macro default__metric_secondary_calculations_period_over_period(metric_name, dims, config) %}
     {% set calc_sql %}
         lag(
             {{- metric_name }}, {{ config.lag -}}
@@ -103,9 +103,9 @@
 
 {% endmacro %}
 
-{% macro default__metric_secondary_calculations_rolling(metric_name, aggregate, dims, config) %}
+{% macro default__metric_secondary_calculations_rolling(metric_name, dims, config) %}
     {% set calc_sql %}
-        {{ adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, metric_name) }}
+        {{ adapter.dispatch('aggregate_primary_metric', 'metrics')(config.aggregate, metric_name) }}
         over (
             {% if dims -%}
                 partition by {{ dims | join(", ") }} 
@@ -119,9 +119,9 @@
 
 {% endmacro %}
 
-{% macro default__metric_secondary_calculations_period_to_date(metric_name, aggregate, dims, config) %}
-    {% set calc_sql %}
-        {{ adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, metric_name) }}
+{% macro default__metric_secondary_calculations_period_to_date(metric_name, dims, config) %}
+    {%- set calc_sql %}
+        {{- adapter.dispatch('aggregate_primary_metric', 'metrics')(config.aggregate, metric_name) -}}
         over (
             partition by date_{{ config.period }}
             {% if dims -%}
@@ -130,9 +130,9 @@
             order by period
             rows between unbounded preceding and current row
         )
-    {% endset %}
+    {%- endset %}
 
-    {% do return (calc_sql) %}
+    {%- do return (calc_sql) %}
     
 {% endmacro %}
 
