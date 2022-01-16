@@ -80,17 +80,20 @@ spine as (
 
 ),
 
-{% set relevant_calendar_columns = ['date_month', 'date_year'] %}
+{% set relevant_periods = [] %}
+{% for calc in calcs if calc.period and calc.period not in relevant_periods %}
+    {% set _ = relevant_periods.append(calc.period) %}
+{% endfor %}
 
 joined as (
     select 
         spine.period,
-        spine.{{ relevant_calendar_columns | join(", spine.") }},
+        {% for period in relevant_periods %}
+        spine.date_{{ period }},
+        {% endfor %}
         {% for dim in dims %}
         spine.{{ dim }},
         {% endfor %}
-
-        -- TODO: distinct calcs periods (month/year/custom time periods)
 
         {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }}
 
@@ -103,7 +106,7 @@ joined as (
     {% endfor %}
 
     -- DEBUG: Add 1 twice to account for 1) timeseries dim and 2) to be inclusive of the last dim
-    group by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
+    group by {{ range(1, (dims | length) + (relevant_periods | length) + 1 + 1) | join (", ") }}
 
 
 ),
