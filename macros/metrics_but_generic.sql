@@ -1,11 +1,7 @@
 /*
     Core metric query generation logic.
     TODO:
-      - Lots of stuff!
-      - account for adding timeseries calcs (eg. period-over-period change, Year-to-date, etc)
       - add support for defining filters (either in metric definition or in user query)
-      - do something smarter about the date spine used below
-      - think harder about how we actually calculate aggregates...
       - validate that the requested dim is actually an option :rage:
 */
 
@@ -28,10 +24,12 @@ with source_query as (
 
         {% endfor %}
 
-        {%- if metric.sql -%}
+        {# /*When metric.sql is undefined or '*' for a count, 
+            it's unnecessary to pull through the whole table */ #}
+        {%- if metric.sql and metric.sql | trim != '*' -%}
             {{ metric.sql }} as property_to_aggregate
         {%- elif metric.type == 'count' -%}
-            1 as property_to_aggregate /*property to aggregate not provided, this is effectively count(*) */
+            1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
         {%- else -%}
             {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric " ~ metric.name) -%}  
         {%- endif %}
@@ -117,7 +115,7 @@ with_calcs as (
         
         {% for calc in calcs -%}
 
-            , {{ metrics.metric_secondary_calculations(metric.name, dims, calc) -}} as calc_{{ loop.index -}}
+            , {{ metrics.metric_secondary_calculations(metric.name, dims, calc) -}} as {{ metrics.secondary_calculation_alias(calc, grain) }}
 
         {% endfor %}
 
@@ -132,7 +130,7 @@ select
     {% endfor %}
     , coalesce({{ metric.name }}, 0) as {{ metric.name }}
     {% for calc in calcs %}
-    , calc_{{ loop.index }}
+    , {{ metrics.secondary_calculation_alias(calc, grain) }}
     {% endfor %}
 
 from with_calcs

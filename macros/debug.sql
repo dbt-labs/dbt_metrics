@@ -70,11 +70,11 @@
         grain='month',
         dims=['has_messaged', 'is_weekend'],
         calcs=[
-            {"type": "period_to_date", "aggregate": "sum", "period": "year"},
+            {"type": "period_to_date", "aggregate": "sum", "period": "year", "alias": "ytd_sum"},
             {"type": "period_to_date", "aggregate": "max", "period": "month"},
-            {"type": "period_over_period", "lag": 1, "how": "difference"},
+            {"type": "period_over_period", "lag": 1, "how": "difference", "alias": "pop_1mth"},
             {"type": "period_over_period", "lag": 1, "how": "ratio"},
-            {"type": "rolling", "window": 3, "aggregate": "average"},
+            {"type": "rolling", "window": 3, "aggregate": "average", "alias": "avg_3mth"},
             {"type": "rolling", "window": 3, "aggregate": "sum"},
         ]
     ) %}
