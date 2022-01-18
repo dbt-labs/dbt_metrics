@@ -14,13 +14,13 @@
 {% set calendar_tbl = metrics.get_metric_calendar(var('metrics_calendar_table', "ref('all_days_extended')")) %}
 
 -- TODO: Do I need to validate that the requested grain is defined on the metric?
+{# /* TODO: build a list of failures and return them all at once*/ #}
 {% for calc in calcs if calc.aggregate %}
-    -- TODO: build a list of failures and return them all at once
     {% do metrics.validate_aggregate_coherence(metric.type, calc.aggregate) %}
 {% endfor %}
 
-{% for calc in calcs if calc.period %}
-    -- TODO: build a list of failures and return them all at once
+{# /* TODO: build a list of failures and return them all at once*/ #}
+{% for calc in calcs if calc.period %}    
     {% do metrics.validate_grain_order(grain, calc.period) %}
 {% endfor %}
 
