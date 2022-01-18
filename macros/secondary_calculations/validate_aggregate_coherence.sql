@@ -13,8 +13,8 @@
 {% macro default__get_metric_allowlist() %}
     {% do return ({
         "average": ['max', 'min'],
-        "count": ['max', 'min', 'sum'],
-        "count_distinct": ['max', 'min', 'sum'],
+        "count": ['max', 'min', 'sum', 'average'],
+        "count_distinct": ['max', 'min', 'sum', 'average'],
         "sum": ['min', 'max', 'sum', 'average'],
         "average": []
     }) %}

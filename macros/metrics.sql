@@ -13,6 +13,19 @@
 {% set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
 {% set calendar_tbl = metrics.get_metric_calendar(var('metrics_calendar_table', "ref('all_days_extended')")) %}
 
+-- TODO: Do I need to validate that the requested grain is defined on the metric?
+{% for calc in calcs if calc.aggregate %}
+    -- TODO: build a list of failures and return them all at once
+    {% do metrics.validate_aggregate_coherence(metric.type, calc.aggregate) %}
+{% endfor %}
+
+{% for calc in calcs if calc.period %}
+    -- TODO: build a list of failures and return them all at once
+    {% do metrics.validate_grain_order(grain, calc.period) %}
+{% endfor %}
+
+
+
 with source_query as (
 
     select
@@ -141,35 +154,4 @@ select
 from with_calcs
 order by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
 
-{% endmacro %}
-
-{% macro is_dim_from_model(metric, dim_name) %}
-    {% if execute %}
-
-        {% set model_dims = metric['meta']['dimensions'][0]['columns'] %}
-        {% do return (dim_name in model_dims) %}
-    {% else %}
-        {% do return (False) %}
-    {% endif %}
-{% endmacro %}
-
-{% macro get_metric_relation(ref_name) %}
-    {% if execute %}
-        /* TODO: How do we properly handle refs[0] for the metric's model, and the ref() syntax for the calendar table? */
-        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name[0]) | first %}
-        {% set relation = api.Relation.create(
-            database = model_ref_node.database,
-            schema = model_ref_node.schema,
-            identifier = model_ref_node.alias
-        )
-        %}
-        {% do return(relation) %}
-    {% else %}
-        {% do return(api.Relation.create()) %}
-    {% endif %} 
-{% endmacro %}
-
-{% macro get_metric_calendar(ref_name) %}
-    -- HORRID.
-    {% do return(metrics.get_metric_relation([(ref_name.split("'")[1])])) %}
 {% endmacro %}
