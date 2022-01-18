@@ -4,6 +4,7 @@
       - add support for defining filters (either in metric definition or in user query)
       - validate that the requested dim is actually an option :rage:
       - provide fallback calendar table(?)
+      - protect against nonsense secondary calculations (avg of avg, impossible grains)
 */
 
 
