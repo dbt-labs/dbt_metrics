@@ -5,6 +5,7 @@
       - validate that the requested dim is actually an option :rage:
       - provide fallback calendar table(?)
       - allow start/end dates on metrics. Maybe special-case "today"?
+      - target seeds
 */
 
 
@@ -96,10 +97,7 @@ spine as (
 
 ),
 
-{% set relevant_periods = [] %}
-{% for calc in calcs if calc.period and calc.period not in relevant_periods %}
-    {% set _ = relevant_periods.append(calc.period) %}
-{% endfor %}
+{% set relevant_periods = calcs | selectattr('period', 'defined') | map(attribute='period') | unique %}
 
 joined as (
     select 
