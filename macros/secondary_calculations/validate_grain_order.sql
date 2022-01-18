@@ -1,10 +1,14 @@
 {% macro validate_grain_order(metric_grain, calculation_grain) %}
-    -- TODO: Can you have the _same_ grain? I think so, it doesn't make sense but it's not broken
-
     {% set grains = metrics.get_grain_order() %}
+    
+    {% if metric_grain not in grains or calculation_grain not in grains %}
+        {% do exceptions.raise_compiler_error("Unknown grain: " ~ (metric_grain if metric_grain not in grains) ~ " " ~ (calculation_grain if calculation_grain not in grains)) %}
+    {% endif %}
+
     {% set metric_grain_index = grains.index(metric_grain) %}
     {% set calculation_grain_index = grains.index(calculation_grain) %}
 
+    -- TODO: Can you have the _same_ grain? I think so
     {% if (calculation_grain_index < metric_grain_index) %}
         {% do exceptions.raise_compiler_error("Can't calculate secondary metric at " ~ calculation_grain ~"-level when metric is at " ~ metric_grain ~ "-level") %}
     {% endif %}
