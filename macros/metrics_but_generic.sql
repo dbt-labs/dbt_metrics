@@ -3,12 +3,14 @@
     TODO:
       - add support for defining filters (either in metric definition or in user query)
       - validate that the requested dim is actually an option :rage:
+      - provide fallback calendar table(?)
 */
 
 
 {%- macro get_metric_sql(metric, grain, dims, calcs) %}
-{% set model = metrics.get_metric_relation(metric.model) %}
-{% set calendar_tbl = metrics.get_metric_relation(var('metrics_calendar_table', 'all_days_extended')) %}
+{#/* TODO: This refs[0][0] stuff is totally ick */#}
+{% set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
+{% set calendar_tbl = metrics.get_metric_calendar(var('metrics_calendar_table', "ref('all_days_extended')")) %}
 
 with source_query as (
 
@@ -44,7 +46,9 @@ with source_query as (
  spine__time as (
      select 
         date_day,
-        /* this could be the same as date_day if grain is day. That's OK! They're used for different things: date_day for joining to the spine, period for aggregating.*/
+        
+        /* this could be the same as date_day if grain is day. That's OK! 
+        They're used for different things: date_day for joining to the spine, period for aggregating.*/
         date_{{ grain }} as period, 
         {{ dbt_utils.star(calendar_tbl, except=['date_day']) }}
      from {{ calendar_tbl }}
@@ -150,7 +154,8 @@ order by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
 
 {% macro get_metric_relation(ref_name) %}
     {% if execute %}
-        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name) | first %}
+        /* TODO: How do we properly handle refs[0] for the metric's model, and the ref() syntax for the calendar table? */
+        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name[0]) | first %}
         {% set relation = api.Relation.create(
             database = model_ref_node.database,
             schema = model_ref_node.schema,
@@ -161,4 +166,9 @@ order by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
     {% else %}
         {% do return(api.Relation.create()) %}
     {% endif %} 
+{% endmacro %}
+
+{% macro get_metric_calendar(ref_name) %}
+    -- HORRID.
+    {% do return(metrics.get_metric_relation([(ref_name.split("'")[1])])) %}
 {% endmacro %}
