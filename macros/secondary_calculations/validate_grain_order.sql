@@ -2,7 +2,8 @@
     {% set grains = metrics.get_grain_order() %}
     
     {% if metric_grain not in grains or calculation_grain not in grains %}
-        {% do exceptions.raise_compiler_error("Unknown grain: " ~ (metric_grain if metric_grain not in grains) ~ " " ~ (calculation_grain if calculation_grain not in grains)) %}
+        {% set comma = joiner(", ") %}
+        {% do exceptions.raise_compiler_error("Unknown grains: [" ~ (comma() ~ metric_grain if metric_grain not in grains) ~ (comma() ~ calculation_grain if calculation_grain not in grains) ~ "]") %}
     {% endif %}
 
     {% set metric_grain_index = grains.index(metric_grain) %}
