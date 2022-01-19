@@ -35,6 +35,9 @@ from {{ metrics.metric(
 ) }}
 ```
 
+## Secondary calculations
+_Documentation tk once the terminology has stabilised_
+
 ## Customisation
 Most behaviour in the package can be overridden or customised.
 
