@@ -1,8 +1,5 @@
 
---TODO: there would need to be some way to catch bad input (e.g. non-existent `how` or `aggregate`)
--- I also don't like how much I have to pass around metric_name, but maybe that's unavoidable
-
---TODO: Do we have a list of aggregations that we're supporting? 
+--TODO: Do we have a list of aggregations that we're supporting on day one? 
 {% macro aggregate_primary_metric(aggregate, expression) %}
     {{ return(adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, expression)) }}
 {% endmacro %}

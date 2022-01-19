@@ -44,7 +44,9 @@ Most behaviour in the package can be overridden or customised.
 ### Calendar 
 The package comes with a basic calendar table, running between 2010-01-01 and 2029-12-31 inclusive. You can replace it with any custom calendar table which meets the following requirements:
 - non-ephemeral (i.e. materialized as a table or view)
-- contains the following columns: `date_day`, `date_week`, `date_month`, `date_quarter`, `date_year`. 
+- contains a `date_day` column. 
+- It should additionally contain the following columns: `date_week`, `date_month`, `date_quarter`, `date_year`, or equivalents. 
+- Additional date columns need to be prefixed with `date_`, e.g. `date_4_5_4_month` for a 4-5-4 retail calendar date set. Dimensions can have any name (see [dimensions on calendar tables](#dimensions-on-calendar-tables)).
 
 To do this, set the value of the `dbt_metrics_calendar_model` variable in your `dbt_project.yml` file: 
 ```
@@ -55,7 +57,7 @@ vars:
 ```
 
 ### Time Grains 
-The package protects against nonsensical secondary calculations, such as a month-to-date aggregate of a data which has been rolled up to the quarter. If you customise your calendar (for example by adding a [4-5-4 retail calendar](https://nrf.com/resources/4-5-4-calendar) month), you will need to override the `get_grain_order()` macro. In that case, you might remove `month` and replace it with `month_4_5_4`. All date columns must be prefixed with `date_` in the table, but this is not necessary in the model config.
+The package protects against nonsensical secondary calculations, such as a month-to-date aggregate of data which has been rolled up to the quarter. If you customise your calendar (for example by adding a [4-5-4 retail calendar](https://nrf.com/resources/4-5-4-calendar) month), you will need to override the `get_grain_order()` macro. In that case, you might remove `month` and replace it with `month_4_5_4`. All date columns must be prefixed with `date_` in the table, but this is not necessary in the model config.
 
 ### Custom aggregations 
 To create a custom primary aggregation (as exposed through the `type` config of a metric), create a macro of the form `metric_my_aggregate(expression)`, then override the `aggregate_primary_metric(aggregate, expression)` macro to add it to the dispatch list. The package also protects against nonsensical secondary calculations such as an average of an average; you will need to override the `get_metric_allowlist()` macro to both add your new aggregate to to the existing aggregations' allowlists, and to make an allowlist for your new aggregation:
