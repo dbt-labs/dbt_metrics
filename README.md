@@ -70,7 +70,8 @@ To create a custom secondary aggregation (as exposed through the `secondary_calc
 ### Secondary calculation column aliases
 Aliases can be passed into the `calcs` object. If no alias is provided, one will be automatically generated. To modify the existing alias logic, or add support for a custom secondary calculation, override `secondary_calculation_alias(calc_config, grain)`.
 
-## Experimental behaviour 
+## 🧪 Experimental behaviour 
+:warning: This behaviour is subject to change in future versions of dbt Core and this package.
 
 ### Dimensions on calendar tables
 You may want to aggregate metrics by a dimension in your custom calendar table, for example `is_weekend`. _In addition to_ the primary `dimensions` list, add the following `meta` properties to your metric, with the model's dimensions first and the calendar's dimensions second:
