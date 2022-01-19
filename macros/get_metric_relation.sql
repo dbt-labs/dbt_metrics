@@ -15,6 +15,6 @@
 {% endmacro %}
 
 {% macro get_metric_calendar(ref_name) %}
-    -- HORRID.
+    --TODO: this is HORRID.
     {% do return(metrics.get_metric_relation([(ref_name.split("'")[1])])) %}
 {% endmacro %}

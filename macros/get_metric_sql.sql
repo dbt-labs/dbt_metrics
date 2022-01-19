@@ -1,20 +1,19 @@
 /*
     Core metric query generation logic.
     TODO:
-      - add support for defining filters (either in metric definition or in user query)
-      - validate that the requested dim is actually an option :rage:
-      - provide fallback calendar table(?)
+      - add support for defining filters (either in metric definition or in user query) [Joel doesn't know what this means anymore]
+      - validate that the requested dim is actually an option (or fail at query execution instead of at compilation if they don't exist? is it a problem to expose columns that exist in the table but aren't "blessed" for the metric?)
       - allow start/end dates on metrics. Maybe special-case "today"?
-      - target seeds
+      - allow passing in a seed with targets for a metric's value
 */
 
 
 {%- macro get_metric_sql(metric, grain, dims, calcs) %}
-{#/* TODO: This refs[0][0] stuff is totally ick */#}
 {% if not execute %}
     {% do return("not execute") %}
 {% endif %}
 
+{#/* TODO: This refs[0][0] stuff is totally ick */#}
 {% set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
 {% set calendar_tbl = metrics.get_metric_calendar(var('dbt_metrics_calendar_model', "ref('dbt_metrics_default_calendar')")) %}
 
@@ -47,7 +46,7 @@ with source_query as (
 
         {# /*When metric.sql is undefined or '*' for a count, 
             it's unnecessary to pull through the whole table */ #}
-        {%- if metric.sql and metric.sql | trim != '*' -%}
+        {%- if metric.sql and metric.sql | replace('*', '') | trim != '' -%}
             {{ metric.sql }} as property_to_aggregate
         {%- elif metric.type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
