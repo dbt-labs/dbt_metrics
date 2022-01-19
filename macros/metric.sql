@@ -1,4 +1,4 @@
-{% macro metric(metric_name, grain, dimensions, secondary_calcs) %}
+{% macro metric(metric_name, grain, dimensions=[], secondary_calcs=[]) %}
     {% if not execute %}
         {% do return("not execute") %}
     {% endif %}
