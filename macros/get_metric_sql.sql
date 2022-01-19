@@ -11,6 +11,10 @@
 
 {%- macro get_metric_sql(metric, grain, dims, calcs) %}
 {#/* TODO: This refs[0][0] stuff is totally ick */#}
+{% if not execute %}
+    {% do return("not execute") %}
+{% endif %}
+
 {% set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
 {% set calendar_tbl = metrics.get_metric_calendar(var('dbt_metrics_calendar_model', "ref('dbt_metrics_default_calendar')")) %}
 
@@ -97,7 +101,10 @@ spine as (
 
 ),
 
-{% set relevant_periods = calcs | selectattr('period', 'defined') | map(attribute='period') | unique %}
+{% set relevant_periods = [] %}
+{% for calc in calcs if calc.period and calc.period not in relevant_periods %}
+    {% set _ = relevant_periods.append(calc.period) %}
+{% endfor %}
 
 joined as (
     select 
