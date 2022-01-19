@@ -1,0 +1,5 @@
+user_id,joined_at,is_active_past_quarter,has_messaged
+1,2021-01-01 14:18:27,true,true
+2,2021-02-03 17:18:55,false,true
+3,2021-04-01 11:01:28,false,false
+4,2021-04-08 22:43:09,false,false

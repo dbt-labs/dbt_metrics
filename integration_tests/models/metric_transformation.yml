@@ -1,0 +1,6 @@
+version: 2 
+models: 
+  - name: metric_transformation
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('slack_users_expected')

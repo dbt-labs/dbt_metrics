@@ -1,0 +1,24 @@
+version: 2 
+metrics:
+    - name: slack_joiners
+      label: Members of Community Slack
+      model: ref('seed_slack_users')
+
+      type: count
+      sql: "*"
+      timestamp: joined_at
+      time_grains: [day, week, month] #does it make sense to have num weekly active members over a month?
+
+      dimensions: 
+        - is_active_past_quarter
+        - has_messaged
+
+      meta: 
+        dimensions: 
+          - type: model
+            columns:
+              - is_active_past_quarter
+              - has_messaged
+          - type: calendar
+            columns: 
+              - is_weekend
