@@ -115,6 +115,7 @@ joined as (
         spine.{{ dim }},
         {% endfor %}
 
+        -- has to be done down here to allow dimensions coming from the calendar table
         {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }}
 
     from spine
