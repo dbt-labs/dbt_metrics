@@ -59,3 +59,38 @@ jobs:
           cd integration_tests
           dbt deps --target postgres
           dbt build --target postgres --full-refresh
+
+  integration-snowflake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install python dependencies
+        run: |
+          pip install --user --upgrade pip
+          pip --version
+          pip install --pre dbt-postgres
+
+      - name: Setup dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cp ./.github/sample.profiles.yml ~/.dbt/profiles.yml
+
+      - name: Run dbt
+        env:
+          SNOWFLAKE_TEST_ACCOUNT: ${{ secrets.SNOWFLAKE_TEST_ACCOUNT }}
+          SNOWFLAKE_TEST_USER: ${{ secrets.SNOWFLAKE_TEST_USER }}
+          SNOWFLAKE_TEST_PASSWORD: ${{ secrets.SNOWFLAKE_TEST_PASSWORD }}
+          SNOWFLAKE_TEST_ROLE: ${{ secrets.SNOWFLAKE_TEST_ROLE }}
+          SNOWFLAKE_TEST_DATABASE: ${{ secrets.SNOWFLAKE_TEST_DATABASE }}
+          SNOWFLAKE_TEST_WAREHOUSE: ${{ secrets.SNOWFLAKE_TEST_WAREHOUSE }}
+        run: |
+          cd integration_tests
+          dbt deps --target postgres
+          dbt build --target postgres --full-refresh
