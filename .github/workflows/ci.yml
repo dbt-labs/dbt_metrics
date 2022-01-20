@@ -17,11 +17,9 @@ jobs:
         image: postgres
         # Provide the password for postgres
         env:
-          POSTGRES_TEST_HOST: localhost
-          POSTGRES_TEST_USER: root
-          POSTGRES_TEST_PASS: ""
-          POSTGRES_TEST_PORT: 5432
-          POSTGRES_TEST_DBNAME: gha_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gha_test
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
