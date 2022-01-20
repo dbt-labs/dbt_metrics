@@ -1,7 +1,6 @@
 /*
     Core metric query generation logic.
     TODO:
-      - add support for defining filters (either in metric definition or in user query) [Joel doesn't know what this means anymore]
       - validate that the requested dim is actually an option (or fail at query execution instead of at compilation if they don't exist? is it a problem to expose columns that exist in the table but aren't "blessed" for the metric?)
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
