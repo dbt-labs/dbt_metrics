@@ -56,5 +56,6 @@ jobs:
 
       - name: Run dbt
         run: |
+          cd integration_tests
           dbt deps --target postgres
           dbt build --target postgres --full-refresh
