@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+
+jobs:
+  integration-postgres:
+    runs-on: ubuntu-latest
+
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_TEST_HOST: localhost
+          POSTGRES_TEST_USER: root
+          POSTGRES_TEST_PASS: ""
+          POSTGRES_TEST_PORT: 5432
+          POSTGRES_TEST_DBNAME: gha_test
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install python dependencies
+        run: |
+          pip install --user --upgrade pip
+          pip --version
+          pip install --pre dbt-postgres
+
+      - name: Setup dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cp ./.github/sample.profiles.yml ~/.dbt/profiles.yml
+
+      - name: Run dbt
+        run: |
+          dbt deps --target postgres
+          dbt build --target postgres --full-refresh
