@@ -34,7 +34,7 @@ with source_query as (
     select
         /* Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. */
         /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
-        date_trunc(day, {{ metric.timestamp }})::date as date_day,
+        cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date) as date_day,
 
         {%- for dim in dims %}
             {%- if metrics.is_dim_from_model(metric, dim) %}

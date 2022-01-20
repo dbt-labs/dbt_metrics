@@ -40,6 +40,10 @@
     avg({{ expression }})
 {% endmacro %}
 
+{% macro redshift__metric_average(expression) %}
+    avg(cast({{ expression }} as float))
+{% endmacro %}
+
 {% macro default__metric_max(expression) %}
     max({{ expression }})
 {% endmacro %}

@@ -1,2 +1,2 @@
 packages:
-  - local: ../dbt-metrics
+  - local: ../

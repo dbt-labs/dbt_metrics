@@ -28,5 +28,5 @@
 {% endmacro %}
 
 {% macro default__metric_how_ratio(metric_name, calc_sql) %}
-    coalesce({{ metric_name }}, 0) / nullif({{ calc_sql }}, 0)::float
+    cast(coalesce({{ metric_name }}, 0) / nullif({{ calc_sql }}, 0) as {{ dbt_utils.type_float() }})
 {% endmacro %}
