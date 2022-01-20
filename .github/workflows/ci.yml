@@ -10,6 +10,11 @@ jobs:
   integration-postgres:
     runs-on: ubuntu-latest
 
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gha_test
+
     services:
       # Label used to access the service container
       postgres:
@@ -17,9 +22,9 @@ jobs:
         image: postgres
         # Provide the password for postgres
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: gha_test
+          POSTGRES_USER: ${POSTGRES_USER}
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+          POSTGRES_DB: ${POSTGRES_DB}
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
