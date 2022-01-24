@@ -12,11 +12,11 @@ with days as (
 
 final as (
     select 
-        date_day, 
-        {{ dbt_utils.date_trunc('week', 'date_day') }} as date_week,
-        {{ dbt_utils.date_trunc('month', 'date_day') }} as date_month,
-        {{ dbt_utils.date_trunc('quarter', 'date_day') }} as date_quarter,
-        {{ dbt_utils.date_trunc('year', 'date_day') }} as date_year
+        cast(date_day as date) as date_day,
+        cast({{ dbt_utils.date_trunc('week', 'date_day') }} as date) as date_week,
+        cast({{ dbt_utils.date_trunc('month', 'date_day') }} as date) as date_month,
+        cast({{ dbt_utils.date_trunc('quarter', 'date_day') }} as date) as date_quarter,
+        cast({{ dbt_utils.date_trunc('year', 'date_day') }} as date) as date_year
     from days
 )
 
