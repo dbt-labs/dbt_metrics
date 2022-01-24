@@ -33,15 +33,31 @@ jobs:
           --health-retries 5
 
     steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
       - uses: ./.github/actions/end-to-end-test
         with:
           dbt-target: postgres
           database-adapter-package: dbt-postgres
 
-  integration-snowflake:
+  snowflake:
     needs: integration-postgres
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
       - uses: ./.github/actions/end-to-end-test
         env:
           SNOWFLAKE_TEST_ACCOUNT: ${{ secrets.SNOWFLAKE_TEST_ACCOUNT }}
@@ -54,10 +70,18 @@ jobs:
           dbt-target: snowflake
           database-adapter-package: dbt-snowflake
 
-  integration-redshift:
+  redshift:
     needs: integration-postgres
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
       - uses: ./.github/actions/end-to-end-test
         env:
           REDSHIFT_TEST_HOST: ${{ secrets.REDSHIFT_TEST_HOST }}
@@ -69,10 +93,18 @@ jobs:
           dbt-target: redshift
           database-adapter-package: dbt-redshift
 
-  integration-bigquery:
+  bigquery:
     needs: integration-postgres
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
       - uses: ./.github/actions/end-to-end-test
         env:
           BIGQUERY_SERVICE_KEY_PATH: ${{ secrets.BIGQUERY_SERVICE_KEY_PATH }}
