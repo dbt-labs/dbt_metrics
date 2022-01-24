@@ -48,7 +48,7 @@ jobs:
           database-adapter-package: dbt-postgres
 
   snowflake:
-    needs: integration-postgres
+    needs: postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -72,7 +72,7 @@ jobs:
           database-adapter-package: dbt-snowflake
 
   redshift:
-    needs: integration-postgres
+    needs: postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -95,7 +95,7 @@ jobs:
           database-adapter-package: dbt-redshift
 
   bigquery:
-    needs: integration-postgres
+    needs: postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
