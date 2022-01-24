@@ -109,13 +109,12 @@ jobs:
       - name: Set up service key file
         id: keyfile
         env:
-          BIGQUERY_SERVICE_ACCOUNT_JSON: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON }}
+          BIGQUERY_TEST_SERVICE_ACCOUNT_JSON: ${{ secrets.BIGQUERY_TEST_SERVICE_ACCOUNT_JSON }}
         run: |
           mkdir -p $HOME/.dbt
           KEYFILE_PATH=$HOME/.dbt/bigquery-service-key.json
-          echo $BIGQUERY_SERVICE_ACCOUNT_JSON > $KEYFILE_PATH
+          echo $BIGQUERY_TEST_SERVICE_ACCOUNT_JSON > $KEYFILE_PATH
           echo ::set-output name=path::$KEYFILE_PATH
-          head -n 3 $KEYFILE_PATH
 
       - uses: ./.github/actions/end-to-end-test
         env:
