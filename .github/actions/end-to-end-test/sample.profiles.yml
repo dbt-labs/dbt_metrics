@@ -10,11 +10,11 @@ dbt_metrics_integration_tests:
   outputs:
     postgres:
       type: postgres
-      host: localhost
-      user: "{{ env_var('POSTGRES_USER') }}"
-      pass: "{{ env_var('POSTGRES_PASSWORD') }}"
-      port: 5432
-      dbname: "{{ env_var('POSTGRES_DB') }}"
+      host: "{{ env_var('POSTGRES_TEST_HOST') }}"
+      user: "{{ env_var('POSTGRES_TEST_USER') }}"
+      pass: "{{ env_var('POSTGRES_TEST_PASSWORD') }}"
+      port: "{{ env_var('POSTGRES_TEST_PORT') | as_number }}"
+      dbname: "{{ env_var('POSTGRES_TEST_DB') }}"
       schema: dbt_metrics_integration_tests
       threads: 5
 

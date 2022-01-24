@@ -11,23 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gha_test
+      POSTGRES_TEST_USER: postgres
+      POSTGRES_TEST_PASSWORD: postgres
+      POSTGRES_TEST_DB: gha_test
+      POSTGRES_TEST_PORT: 5432
+      POSTGRES_TEST_HOST: localhost
 
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: gha_test
+          POSTGRES_USER: ${{ env.POSTGRES_TEST_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_TEST_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_TEST_DB }}
         ports:
           - 5432:5432
-        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -35,56 +33,16 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - uses: ./.github/actions/end-to-end-test
         with:
-          python-version: 3.9
-
-      - name: Install python dependencies
-        run: |
-          pip install --user --upgrade pip
-          pip --version
-          pip install --pre dbt-postgres
-
-      - name: Setup dbt profile
-        run: |
-          mkdir -p ~/.dbt
-          cp ./.github/sample.profiles.yml ~/.dbt/profiles.yml
-
-      - name: Run dbt
-        run: |
-          cd integration_tests
-          dbt deps --target postgres
-          dbt build --target postgres --full-refresh
+          dbt-target: postgres
+          database-adapter-package: dbt-postgres
 
   integration-snowflake:
-    # this requires the postgres integration tests to pass before running
-    # needs: integration-postgres
+    needs: integration-postgres
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install python dependencies
-        run: |
-          pip install --user --upgrade pip
-          pip --version
-          pip install --pre dbt-snowflake
-
-      - name: Setup dbt profile
-        run: |
-          mkdir -p ~/.dbt
-          cp ./.github/sample.profiles.yml ~/.dbt/profiles.yml
-
-      - name: Run dbt
+      - uses: ./.github/actions/end-to-end-test
         env:
           SNOWFLAKE_TEST_ACCOUNT: ${{ secrets.SNOWFLAKE_TEST_ACCOUNT }}
           SNOWFLAKE_TEST_USER: ${{ secrets.SNOWFLAKE_TEST_USER }}
@@ -92,7 +50,33 @@ jobs:
           SNOWFLAKE_TEST_ROLE: ${{ secrets.SNOWFLAKE_TEST_ROLE }}
           SNOWFLAKE_TEST_DATABASE: ${{ secrets.SNOWFLAKE_TEST_DATABASE }}
           SNOWFLAKE_TEST_WAREHOUSE: ${{ secrets.SNOWFLAKE_TEST_WAREHOUSE }}
-        run: |
-          cd integration_tests
-          dbt deps --target snowflake
-          dbt build --target snowflake --full-refresh
+        with:
+          dbt-target: snowflake
+          database-adapter-package: dbt-snowflake
+
+  integration-redshift:
+    needs: integration-postgres
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/end-to-end-test
+        env:
+          REDSHIFT_TEST_HOST: ${{ secrets.REDSHIFT_TEST_HOST }}
+          REDSHIFT_TEST_USER: ${{ secrets.REDSHIFT_TEST_USER }}
+          REDSHIFT_TEST_PASS: ${{ secrets.REDSHIFT_TEST_PASS }}
+          REDSHIFT_TEST_DBNAME: ${{ secrets.REDSHIFT_TEST_DBNAME }}
+          REDSHIFT_TEST_PORT: ${{ secrets.REDSHIFT_TEST_PORT }}
+        with:
+          dbt-target: redshift
+          database-adapter-package: dbt-redshift
+
+  integration-bigquery:
+    needs: integration-postgres
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/end-to-end-test
+        env:
+          BIGQUERY_SERVICE_KEY_PATH: ${{ secrets.BIGQUERY_SERVICE_KEY_PATH }}
+          BIGQUERY_TEST_DATABASE: ${{ secrets.BIGQUERY_TEST_DATABASE }}
+        with:
+          dbt-target: bigquery
+          database-adapter-package: dbt-bigquery
