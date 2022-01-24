@@ -27,7 +27,10 @@
     {% do metrics.validate_grain_order(grain, calc.period) %}
 {% endfor %}
 
-
+{% set relevant_periods = [] %}
+{% for calc in calcs if calc.period and calc.period not in relevant_periods %}
+    {% set _ = relevant_periods.append(calc.period) %}
+{% endfor %}
 
 with source_query as (
 
@@ -67,7 +70,9 @@ with source_query as (
         /* this could be the same as date_day if grain is day. That's OK! 
         They're used for different things: date_day for joining to the spine, period for aggregating.*/
         date_{{ grain }} as period, 
-        {{ dbt_utils.star(calendar_tbl, except=['date_day']) }}
+        {% for period in relevant_periods %}
+            date_{{ period }} {% "," if not loop.last %}
+        {% endfor %}
      from {{ calendar_tbl }}
 
  ),
@@ -98,11 +103,6 @@ spine as (
     {%- endfor %}
 
 ),
-
-{% set relevant_periods = [] %}
-{% for calc in calcs if calc.period and calc.period not in relevant_periods %}
-    {% set _ = relevant_periods.append(calc.period) %}
-{% endfor %}
 
 joined as (
     select 
