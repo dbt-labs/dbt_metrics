@@ -65,14 +65,17 @@ with source_query as (
 
  spine__time as (
      select 
-        date_day,
-        
         /* this could be the same as date_day if grain is day. That's OK! 
         They're used for different things: date_day for joining to the spine, period for aggregating.*/
         date_{{ grain }} as period, 
         {% for period in relevant_periods %}
-            date_{{ period }} {% "," if not loop.last %}
+            date_{{ period }},
         {% endfor %}
+        {% for dim in dims if not metrics.is_dim_from_model(metric, dim) %}
+            {{ dim }},
+        {% endfor %}
+        date_day
+
      from {{ calendar_tbl }}
 
  ),
