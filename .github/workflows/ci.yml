@@ -106,7 +106,7 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Set up keyfile
+      - name: Set up service key file
         id: keyfile
         env:
           BIGQUERY_SERVICE_ACCOUNT_JSON: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON }}
