@@ -31,5 +31,5 @@ runs:
       shell: bash
       run: |
         cd ${{ inputs.dbt-project }}
-        dbt deps --target ${{ inputs.target }}
-        dbt build --target ${{ inputs.target }} --full-refresh
+        dbt deps --target ${{ inputs.dbt-target }}
+        dbt build --target ${{ inputs.dbt-target }} --full-refresh

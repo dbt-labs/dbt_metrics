@@ -7,9 +7,10 @@ on:
   pull_request:
 
 jobs:
-  integration-postgres:
+  postgres:
     runs-on: ubuntu-latest
 
+    # set up env vars so that we can use them to start an instance of postgres
     env:
       POSTGRES_TEST_USER: postgres
       POSTGRES_TEST_PASSWORD: postgres
