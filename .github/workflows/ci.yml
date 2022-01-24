@@ -111,8 +111,9 @@ jobs:
         env:
           BIGQUERY_SERVICE_ACCOUNT_JSON: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON }}
         run: |
-          KEYFILE_PATH="~/keyfile.json"
-          echo $BIGQUERY_SERVICE_ACCOUNT_JSON >> $KEYFILE_PATH
+          mkdir -p $HOME/.dbt
+          KEYFILE_PATH=$HOME/.dbt/bigquery-service-key.json
+          echo $BIGQUERY_SERVICE_ACCOUNT_JSON > $KEYFILE_PATH
           echo ::set-output name=path::$KEYFILE_PATH
 
       - uses: ./.github/actions/end-to-end-test
