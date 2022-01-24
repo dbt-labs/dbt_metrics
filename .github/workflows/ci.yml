@@ -116,6 +116,10 @@ jobs:
           echo $BIGQUERY_SERVICE_ACCOUNT_JSON > $KEYFILE_PATH
           echo ::set-output name=path::$KEYFILE_PATH
 
+      - env:
+          TEST: ${{ steps.keyfile.outputs.path }}
+        run: echo $TEST
+
       - uses: ./.github/actions/end-to-end-test
         env:
           BIGQUERY_SERVICE_KEY_PATH: ${{ steps.keyfile.outputs.path }}
