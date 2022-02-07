@@ -17,5 +17,6 @@
         "count": ['max', 'min', 'sum', 'average'],
         "count_distinct": ['max', 'min', 'sum', 'average'],
         "sum": ['min', 'max', 'sum', 'average'],
+        "min": ['min', 'max', 'sum', 'average'],
     }) %}
 {% endmacro %}
