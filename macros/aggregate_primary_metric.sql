@@ -19,6 +19,9 @@
     
     {% elif aggregate == 'max' %}
         {{ return(adapter.dispatch('metric_max', 'metrics')(expression)) }}
+       
+    {% elif aggregate == 'min' %}
+        {{ return(adapter.dispatch('metric_min', 'metrics')(expression)) }}
     
     {% elif aggregate == 'sum' %}
         {{ return(adapter.dispatch('metric_sum', 'metrics')(expression)) }}
@@ -46,6 +49,10 @@
 
 {% macro default__metric_max(expression) %}
     max({{ expression }})
+{% endmacro %}
+
+{% macro default__metric_min(expression) %}
+    min({{ expression }})
 {% endmacro %}
 
 {% macro default__metric_sum(expression) %}
