@@ -3,6 +3,7 @@ name: Update table of contents
 # Controls when the workflow will run
 on:
   push:
+    branches: '*'
     paths: ['README.md']
 
 jobs:
