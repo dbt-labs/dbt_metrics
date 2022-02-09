@@ -2,22 +2,22 @@
 <!--This table of contents is automatically generated. Any manual changes between the ts and te tags will be overridden!-->
 <!--ts-->
 * [dbt_metrics](#dbt_metrics)
-   * [About](#about)
+* [About](#about)
    * [A note on refs](#warning-a-note-on-refs)
-   * [Usage](#usage)
-   * [Secondary calculations](#secondary-calculations)
-      * [Period over Period (<a href="/macros/secondary_calculations/secondary_calculation_period_over_period.sql">source</a>)](#period-over-period-source)
-      * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
-      * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
-   * [Customisation](#customisation)
-      * [Calendar](#calendar)
-      * [Time Grains](#time-grains)
-      * [Custom aggregations](#custom-aggregations)
-      * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
-   * [Experimental behaviour](#-experimental-behaviour)
-      * [Dimensions on calendar tables](#dimensions-on-calendar-tables)
+* [Usage](#usage)
+* [Secondary calculations](#secondary-calculations)
+   * [Period over Period (<a href="/macros/secondary_calculations/secondary_calculation_period_over_period.sql">source</a>)](#period-over-period-source)
+   * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
+   * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
+* [Customisation](#customisation)
+   * [Calendar](#calendar)
+   * [Time Grains](#time-grains)
+   * [Custom aggregations](#custom-aggregations)
+   * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
+* [Experimental behaviour](#-experimental-behaviour)
+   * [Dimensions on calendar tables](#dimensions-on-calendar-tables)
 
-<!-- Added by: runner, at: Wed Feb  9 05:23:49 UTC 2022 -->
+<!-- Added by: runner, at: Wed Feb  9 05:28:08 UTC 2022 -->
 
 <!--te-->
 
