@@ -6,8 +6,7 @@
             {% do return(True) %}
         {% endif %}
 
-        --TODO: This shouldn't care what order the model/calendar are defined in
-        {% set model_dims = metric['meta']['dimensions'][0]['columns'] %}
+        {% set model_dims = (metric['meta']['dimensions'] | selectattr('type', '==', 'model') | first)['columns'] %}
         {% do return (dim_name in model_dims) %}
     {% else %}
         {% do return (False) %}
