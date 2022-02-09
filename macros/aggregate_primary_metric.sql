@@ -4,9 +4,6 @@
     {{ return(adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, expression)) }}
 {% endmacro %}
 
--- Discuss: I'm open to this intermediary macro not existing, 
--- and aggregate_primary_metric just calling dispatch() for metric_* directly. 
--- Would that break others' ability to override this?
 {% macro default__aggregate_primary_metric(aggregate, expression) %}
     {% if aggregate == 'count' %}
         {{ return(adapter.dispatch('metric_count', 'metrics')(expression)) }}

@@ -7,30 +7,38 @@
 */
 
 
-{%- macro get_metric_sql(metric, grain, dims, calcs) %}
-{% if not execute %}
-    {% do return("not execute") %}
-{% endif %}
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations) %}
+{%- if not execute %}
+    {%- do return("not execute") %}
+{%- endif %}
 
-{#/* TODO: This refs[0][0] stuff is totally ick */#}
-{% set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
-{% set calendar_tbl = metrics.get_metric_calendar(var('dbt_metrics_calendar_model', "ref('dbt_metrics_default_calendar')")) %}
+{%- if not metric %}
+    {%- do exceptions.raise_compiler_error("No metric provided") %}
+{%- endif %}
 
--- TODO: Do I need to validate that the requested grain is defined on the metric?
-{# /* TODO: build a list of failures and return them all at once*/ #}
-{% for calc in calcs if calc.aggregate %}
-    {% do metrics.validate_aggregate_coherence(metric.type, calc.aggregate) %}
-{% endfor %}
+{%- if not grain %}
+    {%- do exceptions.raise_compiler_error("No date grain provided") %}
+{%- endif %}
 
-{# /* TODO: build a list of failures and return them all at once*/ #}
-{% for calc in calcs if calc.period %}
-    {% do metrics.validate_grain_order(grain, calc.period) %}
-{% endfor %}
+{#-/* TODO: This refs[0][0] stuff is totally ick */#}
+{%- set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
+{%- set calendar_tbl = metrics.get_metric_calendar(var('dbt_metrics_calendar_model', "ref('dbt_metrics_default_calendar')")) %}
 
-{% set relevant_periods = [] %}
-{% for calc in calcs if calc.period and calc.period not in relevant_periods %}
-    {% set _ = relevant_periods.append(calc.period) %}
-{% endfor %}
+{#- /* TODO: Do I need to validate that the requested grain is defined on the metric? */ #}
+{#- /* TODO: build a list of failures and return them all at once*/ #}
+{%- for calc_config in secondary_calculations if calc_config.aggregate %}
+    {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
+{%- endfor %}
+
+{#- /* TODO: build a list of failures and return them all at once*/ #}
+{%- for calc_config in secondary_calculations if calc_config.period %}
+    {%- do metrics.validate_grain_order(grain, calc_config.period) %}
+{%- endfor %}
+
+{%- set relevant_periods = [] %}
+{%- for calc_config in secondary_calculations if calc_config.period and calc_config.period not in relevant_periods %}
+    {%- set _ = relevant_periods.append(calc_config.period) %}
+{%- endfor -%}
 
 with source_query as (
 
@@ -39,14 +47,14 @@ with source_query as (
         /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
         cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date) as date_day,
 
-        {%- for dim in dims %}
-            {%- if metrics.is_dim_from_model(metric, dim) %}
+        {% for dim in dimensions %}
+            {%- if metrics.is_dim_from_model(metric, dim) -%}
                  {{ dim }},
             {% endif -%}
 
-        {% endfor %}
+        {%- endfor %}
 
-        {# /*When metric.sql is undefined or '*' for a count, 
+        {#- /*When metric.sql is undefined or '*' for a count, 
             it's unnecessary to pull through the whole table */ #}
         {%- if metric.sql and metric.sql | replace('*', '') | trim != '' -%}
             {{ metric.sql }} as property_to_aggregate
@@ -71,7 +79,7 @@ with source_query as (
         {% for period in relevant_periods %}
             date_{{ period }},
         {% endfor %}
-        {% for dim in dims if not metrics.is_dim_from_model(metric, dim) %}
+        {% for dim in dimensions if not metrics.is_dim_from_model(metric, dim) %}
             {{ dim }},
         {% endfor %}
         date_day
@@ -80,7 +88,7 @@ with source_query as (
 
  ),
 
-{%- for dim in dims -%}
+{%- for dim in dimensions -%}
     {%- if metrics.is_dim_from_model(metric, dim) %}
           
         spine__values__{{ dim }} as (
@@ -98,7 +106,7 @@ spine as (
 
     select *
     from spine__time
-    {%- for dim in dims -%}
+    {%- for dim in dimensions -%}
 
         {%- if metrics.is_dim_from_model(metric, dim) %}
             cross join spine__values__{{ dim }}
@@ -113,7 +121,7 @@ joined as (
         {% for period in relevant_periods %}
         spine.date_{{ period }},
         {% endfor %}
-        {% for dim in dims %}
+        {% for dim in dimensions %}
         spine.{{ dim }},
         {% endfor %}
 
@@ -122,43 +130,47 @@ joined as (
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
-    {% for dim in dims %}
-        {% if metrics.is_dim_from_model(metric, dim) %}
+    {% for dim in dimensions %}
+        {%- if metrics.is_dim_from_model(metric, dim) %}
             and source_query.{{ dim }} = spine.{{ dim }}
-        {% endif %}
+        {%- endif %}
     {% endfor %}
 
-    -- DEBUG: Add 1 twice to account for 1) timeseries dim and 2) to be inclusive of the last dim
-    group by {{ range(1, (dims | length) + (relevant_periods | length) + 1 + 1) | join (", ") }}
+    {#- /* Add 1 twice to account for 1) timeseries dim and 2) to be inclusive of the last dim */ #}
+    group by {{ range(1, (dimensions | length) + (relevant_periods | length) + 1 + 1) | join (", ") }}
 
 
 ),
 
-with_calcs as (
+secondary_calculations as (
 
     select *
         
-        {% for calc in calcs -%}
+        {% for calc_config in secondary_calculations -%}
 
-            , {{ metrics.metric_secondary_calculations(metric.name, dims, calc) -}} as {{ metrics.secondary_calculation_alias(calc, grain) }}
+            , {{ metrics.perform_secondary_calculation(metric.name, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
 
         {% endfor %}
 
     from joined
     
+),
+
+final as (
+    select
+        period
+        {% for dim in dimensions %}
+        , {{ dim }}
+        {% endfor %}
+        , coalesce({{ metric.name }}, 0) as {{ metric.name }}
+        {% for calc_config in secondary_calculations %}
+        , {{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
+        {% endfor %}
+
+    from secondary_calculations
+    order by {{ range(1, (dimensions | length) + 1 + 1) | join (", ") }}
 )
 
-select
-    period
-    {% for dim in dims %}
-    , {{ dim }}
-    {% endfor %}
-    , coalesce({{ metric.name }}, 0) as {{ metric.name }}
-    {% for calc in calcs %}
-    , {{ metrics.secondary_calculation_alias(calc, grain) }}
-    {% endfor %}
-
-from with_calcs
-order by {{ range(1, (dims | length) + 1 + 1) | join (", ") }}
+select * from final
 
 {% endmacro %}

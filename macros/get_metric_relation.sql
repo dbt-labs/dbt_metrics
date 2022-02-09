@@ -51,5 +51,7 @@
         to have the same shape as get_metric_relation expects,
         which is written to expect the metric's `model`.
     */
-    {% do return(metrics.get_metric_relation([(ref_name.split("'")[1])])) %}
+    
+    {% set split_ref_name = ref_name.split("'")[1] %}
+    {% do return(metrics.get_metric_relation([split_ref_name])) %}
 {% endmacro %}

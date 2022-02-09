@@ -13,10 +13,11 @@
 {% macro default__get_metric_allowlist() %}
     {# Keys are the primary aggregation, values are the permitted aggregations to run in secondary calculations. #}
     {% do return ({
-        "average": ['max', 'min'],
-        "count": ['max', 'min', 'sum', 'average'],
-        "count_distinct": ['max', 'min', 'sum', 'average'],
+        "average": ['min', 'max'],
+        "count": ['min', 'max', 'sum', 'average'],
+        "count_distinct": ['min', 'max', 'sum', 'average'],
         "sum": ['min', 'max', 'sum', 'average'],
+        "max": ['min', 'max', 'sum', 'average'],
         "min": ['min', 'max', 'sum', 'average'],
     }) %}
 {% endmacro %}

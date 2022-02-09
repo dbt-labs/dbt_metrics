@@ -9,7 +9,6 @@
     {% set metric_grain_index = grains.index(metric_grain) %}
     {% set calculation_grain_index = grains.index(calculation_grain) %}
 
-    -- TODO: Can you have the _same_ grain? I think so
     {% if (calculation_grain_index < metric_grain_index) %}
         {% do exceptions.raise_compiler_error("Can't calculate secondary metric at " ~ calculation_grain ~"-level when metric is at " ~ metric_grain ~ "-level") %}
     {% endif %}
