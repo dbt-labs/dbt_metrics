@@ -121,7 +121,7 @@ metrics:
       - country
 
     meta: 
-      dimensions: 
+      dimensions:  
         - type: model
           columns:
             - plan
