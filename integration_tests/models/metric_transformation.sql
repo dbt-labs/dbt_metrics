@@ -15,13 +15,13 @@ from
     metric_name="slack_joiners", 
     grain='month', 
     dimensions=['has_messaged'], 
-    secondary_calcs=[
-        {"type": "period_to_date", "aggregate": "sum", "period": "year", "alias": "ytd_sum"},
-        {"type": "period_to_date", "aggregate": "max", "period": "month"},
-        {"type": "period_over_period", "lag": 1, "how": "difference", "alias": "pop_1mth"},
-        {"type": "period_over_period", "lag": 1, "how": "ratio"},
-        {"type": "rolling", "window": 3, "aggregate": "average", "alias": "avg_3mth"},
-        {"type": "rolling", "window": 3, "aggregate": "sum"},
+    secondary_calculations=[
+      {"calculation": "period_over_period", "interval": 1, "comparison_strategy": "difference", "alias": "pop_1mth"},
+      {"calculation": "period_over_period", "interval": 1, "comparison_strategy": "ratio"},
+      {"calculation": "period_to_date", "aggregate": "sum", "period": "year", "alias": "ytd_sum"},
+      {"calculation": "period_to_date", "aggregate": "max", "period": "month"},
+      {"calculation": "rolling", "interval": 3, "aggregate": "average", "alias": "avg_3mth"},
+      {"calculation": "rolling", "interval": 3, "aggregate": "sum"},
     ]) 
 }}
 
