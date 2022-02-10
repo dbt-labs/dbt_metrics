@@ -3,7 +3,7 @@ name: Update table of contents
 # Controls when the workflow will run
 on:
   push:
-    branches-ignore: 'main'
+    branches-ignore: 'main' #protected branch
     paths: ['README.md']
 
 jobs:
