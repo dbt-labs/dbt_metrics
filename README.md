@@ -40,14 +40,14 @@ from {{ metrics.metric(
     grain='week',
     dimensions=['plan', 'country'],
     secondary_calculations=[
-        period_over_period(comparison_strategy="ratio", interval=1, alias="pop_1wk"),
-        period_over_period(comparison_strategy="difference", interval=1),
+        metrics.period_over_period(comparison_strategy="ratio", interval=1, alias="pop_1wk"),
+        metrics.period_over_period(comparison_strategy="difference", interval=1),
 
-        period_to_date(aggregate="average", period="month", alias="this_month_average"),
-        period_to_date(aggregate="sum", period="year"),
+        metrics.period_to_date(aggregate="average", period="month", alias="this_month_average"),
+        metrics.period_to_date(aggregate="sum", period="year"),
 
-        rolling(aggregate="average", interval=4, alias="avg_past_4wks"),
-        rolling(aggregate="min", interval=4)
+        metrics.rolling(aggregate="average", interval=4, alias="avg_past_4wks"),
+        metrics.rolling(aggregate="min", interval=4)
     ]
 ) }}
 ```
@@ -73,7 +73,7 @@ Column aliases are [automatically generated](#secondary-calculation-column-alias
 
 ## Period over Period ([source](/macros/secondary_calculations/secondary_calculation_period_over_period.sql))
 
-Constructor: `period_over_period(comparison_strategy, interval [, alias])`
+Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias])`
 
 - `comparison_strategy`: How to calculate the delta between the two periods. One of [`"ratio"`, `"difference"`]. Required
 - `interval`: The number of periods to look back. Required
@@ -81,7 +81,7 @@ Constructor: `period_over_period(comparison_strategy, interval [, alias])`
 
 ## Period to Date ([source](/macros/secondary_calculations/secondary_calculation_period_to_date.sql))
 
-Constructor: `period_to_date(aggregate, period [, alias])`
+Constructor: `metrics.period_to_date(aggregate, period [, alias])`
 
 - `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
 - `period`: The time grain to aggregate to. One of [`"day"`, `"week"`, `"month"`, `"quarter"`, `"year"`]. Must be at equal or lesser granularity than the metric's grain (see [Time Grains](#time-grains) below). Required
@@ -89,7 +89,7 @@ Constructor: `period_to_date(aggregate, period [, alias])`
 
 ## Rolling ([source](/macros/secondary_calculations/secondary_calculation_rolling.sql))
 
-Constructor: `rolling(aggregate, interval [, alias])`
+Constructor: `metrics.rolling(aggregate, interval [, alias])`
 
 - `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
 - `interval`: The number of periods to look back. Required
