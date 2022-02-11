@@ -52,7 +52,7 @@ from {{ metrics.metric(
 ) }}
 ```
 
-You may want to materialize the results as a fixed table for querying.
+You may want to materialize the results as a fixed table for querying. This is not the way we expect the dbt Metrics layer to add the most value, but is a way to experiment with the project without needing access to the interactive server.  
 
 ## Via the interactive dbt server (coming soon)
 When the [dbt server](https://blog.getdbt.com/licensing-dbt/) is released later in 2022, you will be able to access these macros interactively, without needing to build each variant as a single dbt model. For more information, check out the [keynote presentation from Coalesce 2021](https://www.getdbt.com/coalesce-2021/keynote-the-metrics-system/)
