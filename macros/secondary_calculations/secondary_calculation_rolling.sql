@@ -29,8 +29,8 @@
 
     {% do return ({
         "calculation": "rolling",
+        "aggregate": aggregate,
         "interval": interval,
-        "comparison_strategy": comparison_strategy,
         "alias": alias
         })
     %}
