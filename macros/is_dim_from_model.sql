@@ -12,3 +12,5 @@
         {% do return (False) %}
     {% endif %}
 {% endmacro %}
+
+{# /*if you find this, send @joellabes a message on the dbt Slack and I'll send you a surprise*/ #}

@@ -28,7 +28,7 @@
     {% endif %}
 
     {% do return ({
-        "calculation": "period_over_period",
+        "calculation": "rolling",
         "interval": interval,
         "comparison_strategy": comparison_strategy,
         "alias": alias
