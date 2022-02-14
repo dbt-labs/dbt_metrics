@@ -40,15 +40,20 @@
     {%- set _ = relevant_periods.append(calc_config.period) %}
 {%- endfor -%}
 
+{%- set truncated_timestamp %}
+{#- /*Postgres doesn't support lateral column aliasing, so we have to repeat the whole command 3x in the source_query block*/ -#}
+cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date)
+{%- endset %}
+
 with source_query as (
 
     select
         /* Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. */
         /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
-        cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date) as date_day,
+        {{ truncated_timestamp }} as date_day,
 
-        {% if start_date %} '{{ start_date }}' {% else %} min(date_day) over () {% endif %} as relevancy_start_date,
-        {% if end_date %} '{{ end_date }}' {% else %} max(date_day) over () {% endif %} as relevancy_end_date,
+        {% if start_date %} '{{ start_date }}' {% else %} min({{ truncated_timestamp }}) over () {% endif %} as relevancy_start_date,
+        {% if end_date %} '{{ end_date }}' {% else %} max({{ truncated_timestamp }}) over () {% endif %} as relevancy_end_date,
         
         {% for dim in dimensions %}
             {%- if metrics.is_dim_from_model(metric, dim) -%}
