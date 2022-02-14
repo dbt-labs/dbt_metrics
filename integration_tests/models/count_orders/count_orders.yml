@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: input_count_orders_by_year
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_year')
+          compare_columns:
+            - period
+            - count_orders

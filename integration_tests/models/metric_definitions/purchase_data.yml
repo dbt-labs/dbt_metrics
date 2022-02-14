@@ -1,0 +1,25 @@
+version: 2 
+metrics:
+    - name: count_orders
+      label: Count orders
+      model: ref('mock_purchase_data')
+
+      type: count
+      sql: "*"
+      timestamp: purchased_at
+      time_grains: [day, week, month, quarter, year]
+
+      dimensions: 
+        - payment_type
+    
+    - name: sum_order_revenue
+      label: Total order revenue
+      model: ref('mock_purchase_data')
+
+      type: sum
+      sql: "payment_total"
+      timestamp: purchased_at
+      time_grains: [day, week, month, quarter, year]
+
+      dimensions: 
+        - payment_type
