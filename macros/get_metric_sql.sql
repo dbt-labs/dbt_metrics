@@ -7,7 +7,7 @@
 */
 
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations) %}
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date) %}
 {%- if not execute %}
     {%- do return("not execute") %}
 {%- endif %}
@@ -40,12 +40,15 @@
     {%- set _ = relevant_periods.append(calc_config.period) %}
 {%- endfor -%}
 
+{%- set truncated_timestamp %}
+cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date)
+{%- endset %}
 with source_query as (
 
     select
         /* Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. */
         /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
-        cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date) as date_day,
+         {{ truncated_timestamp }} as date_day,
 
         {% for dim in dimensions %}
             {%- if metrics.is_dim_from_model(metric, dim) -%}
@@ -66,6 +69,12 @@ with source_query as (
 
     from {{ model }}
     where 1=1
+    {% if start_date %}
+        and date_day >= '{{ start_date }}'
+    {% endif %}
+    {% if end_date %}
+        and date_day <= '{{ end_date }}'
+    {% endif %}
     {%- for filter in metric.filters %}
         and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
     {%- endfor %}
@@ -85,6 +94,8 @@ with source_query as (
         date_day
 
      from {{ calendar_tbl }}
+     where date_day >= {% if start_date %} '{{ start_date }}' {% else %} ( select min({{ truncated_timestamp }}) from {{ model }} ) {% endif %}
+     and date_day <= {% if end_date %} '{{ end_date }}' {% else %} ( select max({{ truncated_timestamp }}) from {{ model }} ) {% endif %} 
 
  ),
 
