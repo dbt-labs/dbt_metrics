@@ -141,8 +141,8 @@ joined as (
         -- has to be done down here to allow dimensions coming from the calendar table
         {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
 
-        source_query.relevancy_start_date,
-        source_query.relevancy_end_date
+        min(source_query.relevancy_start_date) as relevancy_start_date,
+        min(source_query.relevancy_end_date) as relevancy_end_date
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
