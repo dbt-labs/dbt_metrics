@@ -40,16 +40,16 @@
     {%- set _ = relevant_periods.append(calc_config.period) %}
 {%- endfor -%}
 
-{%- set truncated_timestamp %}
-cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date)
-{%- endset %}
 with source_query as (
 
     select
         /* Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. */
         /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
-         {{ truncated_timestamp }} as date_day,
+        cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date) as date_day,
 
+        {% if start_date %} '{{ start_date }}' {% else %} min(date_day) over () {% endif %} as relevancy_start_date,
+        {% if end_date %} '{{ end_date }}' {% else %} max(date_day) over () {% endif %} as relevancy_end_date,
+        
         {% for dim in dimensions %}
             {%- if metrics.is_dim_from_model(metric, dim) -%}
                  {{ dim }},
@@ -94,9 +94,6 @@ with source_query as (
         date_day
 
      from {{ calendar_tbl }}
-     where date_day >= {% if start_date %} '{{ start_date }}' {% else %} ( select min({{ truncated_timestamp }}) from {{ model }} ) {% endif %}
-     and date_day <= {% if end_date %} '{{ end_date }}' {% else %} ( select max({{ truncated_timestamp }}) from {{ model }} ) {% endif %} 
-
  ),
 
 {%- for dim in dimensions -%}
@@ -137,7 +134,10 @@ joined as (
         {% endfor %}
 
         -- has to be done down here to allow dimensions coming from the calendar table
-        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }}
+        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
+
+        source_query.relevancy_start_date,
+        source_query.relevancy_end_date
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
