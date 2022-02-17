@@ -1,3 +1,5 @@
+-- depends on: {{ ref('seed_slack_users') }}
+
 select
 
   period,
