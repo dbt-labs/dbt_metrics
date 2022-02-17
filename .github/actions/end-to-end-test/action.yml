@@ -19,8 +19,9 @@ runs:
       run: |
         pip install --user --upgrade pip
         pip --version
-        pip install "git+https://github.com/dbt-labs/dbt-core.git@jerco/get-metric-contextmember#egg=dbt-core&subdirectory=core"
         pip install --pre ${{ inputs.database-adapter-package }}
+        pip uninstall dbt-core
+        pip install "git+https://github.com/dbt-labs/dbt-core.git@jerco/get-metric-contextmember#egg=dbt-core&subdirectory=core"
 
     - name: Setup dbt profile
       shell: bash
