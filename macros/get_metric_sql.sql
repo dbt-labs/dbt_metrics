@@ -136,7 +136,7 @@ joined as (
 
         -- has to be aggregated in this CTE to allow dimensions coming from the calendar table
         {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
-        {% if target.type == 'snowflake' %}boolor_agg {% else %} bool_or {% endif %} (source_query.date_day is not null) as has_data
+        {{ dbt_utils.bool_or('source_query.date_day is not null') }} as has_data
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
