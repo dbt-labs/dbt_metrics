@@ -6,6 +6,7 @@
    * [Installation Instructions](#installation-instructions)
    * [A note on refs](#warning-a-note-on-refs)
 * [Usage](#usage)
+* [Use cases](#use-cases)
    * [Inside of dbt Models](#inside-of-dbt-models)
    * [Via the interactive dbt server (coming soon)](#via-the-interactive-dbt-server-coming-soon)
 * [Secondary calculations](#secondary-calculations)
@@ -20,7 +21,7 @@
 * [Experimental behaviour](#-experimental-behaviour)
    * [Dimensions on calendar tables](#dimensions-on-calendar-tables)
 
-<!-- Added by: runner, at: Thu Feb 24 06:10:02 UTC 2022 -->
+<!-- Added by: runner, at: Fri Feb 25 04:07:27 UTC 2022 -->
 
 <!--te-->
 
