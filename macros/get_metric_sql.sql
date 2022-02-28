@@ -66,12 +66,6 @@ with source_query as (
 
     from {{ model }}
     where 1=1
-    {% if start_date %}
-        and date_day >= '{{ start_date }}'
-    {% endif %}
-    {% if end_date %}
-        and date_day <= '{{ end_date }}'
-    {% endif %}
     {%- for filter in metric.filters %}
         and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
     {%- endfor %}
