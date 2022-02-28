@@ -4,7 +4,7 @@
 * [dbt_metrics](#dbt_metrics)
 * [About](#about)
    * [Installation Instructions](#installation-instructions)
-   * [A note on refs](#warning-a-note-on-refs)
+   * [A note on refs](#️-a-note-on-refs)
 * [Usage](#usage)
 * [Use cases](#use-cases)
    * [Inside of dbt Models](#inside-of-dbt-models)
@@ -21,7 +21,7 @@
 * [Experimental behaviour](#-experimental-behaviour)
    * [Dimensions on calendar tables](#dimensions-on-calendar-tables)
 
-<!-- Added by: runner, at: Fri Feb 25 04:07:27 UTC 2022 -->
+<!-- Added by: runner, at: Mon Feb 28 20:38:53 UTC 2022 -->
 
 <!--te-->
 
