@@ -7,7 +7,7 @@
 */
 
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations) %}
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations,cartesion_join) %}
 {%- if not execute %}
     {%- do return("not execute") %}
 {%- endif %}
@@ -87,33 +87,58 @@ with source_query as (
      from {{ calendar_tbl }}
 
  ),
+{%- if cartesion_join = false %}
 
-{%- for dim in dimensions -%}
-    {%- if metrics.is_dim_from_model(metric, dim) %}
-          
-        spine__values__{{ dim }} as (
+    spine__values as (
 
-            select distinct {{ dim }}
-            from source_query
+    select distinct 
+    {%- for dim in dimensions -%}    
+        {%- if metrics.is_dim_from_model(metric, dim) %}
+            {{dim}}
+            {% if not loop.last %},{% endif %}
+        {% endif -%}
+    {%- endfor %}
+    from source_query
 
-        ),  
-    {% endif -%}
-
-
-{%- endfor %}
-
-spine as (
+    ),
+    spine as (
 
     select *
     from spine__time
-    {%- for dim in dimensions -%}
+    cross join spine__values
 
+    ),
+
+    {% else %}
+
+    {%- for dim in dimensions -%}
         {%- if metrics.is_dim_from_model(metric, dim) %}
-            cross join spine__values__{{ dim }}
-        {%- endif %}
+            
+            spine__values__{{ dim }} as (
+
+                select distinct {{ dim }}
+                from source_query
+
+            ),  
+        {% endif -%}
+
+
     {%- endfor %}
 
-),
+    spine as (
+
+        select *
+        from spine__time
+        {%- for dim in dimensions -%}
+
+            {%- if metrics.is_dim_from_model(metric, dim) %}
+                cross join spine__values__{{ dim }}
+            {%- endif %}
+        {%- endfor %}
+
+    ),
+
+{% endif -%}
 
 joined as (
     select 
