@@ -7,7 +7,7 @@
 */
 
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations,cartesion_join) %}
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date,cartesion_join) %}
 {%- if not execute %}
     {%- do return("not execute") %}
 {%- endif %}
@@ -46,7 +46,7 @@ with source_query as (
         /* Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. */
         /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
         cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date) as date_day,
-
+        
         {% for dim in dimensions %}
             {%- if metrics.is_dim_from_model(metric, dim) -%}
                  {{ dim }},
@@ -83,9 +83,7 @@ with source_query as (
             {{ dim }},
         {% endfor %}
         date_day
-
      from {{ calendar_tbl }}
-
  ),
 {%- if cartesion_join = false %}
 
@@ -150,8 +148,9 @@ joined as (
         spine.{{ dim }},
         {% endfor %}
 
-        -- has to be done down here to allow dimensions coming from the calendar table
-        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }}
+        -- has to be aggregated in this CTE to allow dimensions coming from the calendar table
+        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
+        {{ dbt_utils.bool_or('source_query.date_day is not null') }} as has_data
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
@@ -164,7 +163,14 @@ joined as (
     {#- /* Add 1 twice to account for 1) timeseries dim and 2) to be inclusive of the last dim */ #}
     group by {{ range(1, (dimensions | length) + (relevant_periods | length) + 1 + 1) | join (", ") }}
 
+),
 
+bounded as (
+    select 
+        *,
+        {% if start_date %} '{{ start_date }}' {% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
+        {% if end_date %} '{{ end_date }}' {% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
+    from joined 
 ),
 
 secondary_calculations as (
@@ -177,7 +183,7 @@ secondary_calculations as (
 
         {% endfor %}
 
-    from joined
+    from bounded
     
 ),
 
@@ -193,6 +199,8 @@ final as (
         {% endfor %}
 
     from secondary_calculations
+    where period >= lower_bound
+    and period <= upper_bound
     order by {{ range(1, (dimensions | length) + 1 + 1) | join (", ") }}
 )
 
