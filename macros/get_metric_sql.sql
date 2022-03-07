@@ -7,7 +7,7 @@
 */
 
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date,cartesion_join) %}
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, cartesion_join) %}
 {%- if not execute %}
     {%- do return("not execute") %}
 {%- endif %}
@@ -85,7 +85,8 @@ with source_query as (
         date_day
      from {{ calendar_tbl }}
  ),
-{%- if cartesion_join = false %}
+
+{%- if cartesion_join == false %}
 
     spine__values as (
 
@@ -107,7 +108,7 @@ with source_query as (
 
     ),
 
-    {% else %}
+{% else -%}
 
     {%- for dim in dimensions -%}
         {%- if metrics.is_dim_from_model(metric, dim) %}
@@ -137,6 +138,7 @@ with source_query as (
     ),
 
 {% endif -%}
+
 
 joined as (
     select 
