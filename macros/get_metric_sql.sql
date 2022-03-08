@@ -82,7 +82,9 @@ with source_query as (
         {% for dim in dimensions if not metrics.is_dim_from_model(metric, dim) %}
             {{ dim }},
         {% endfor %}
-        date_day
+        date_day,
+        --cast({% if start_date %}'{{ start_date }}'{% else %} null {% endif %} as date) as lower_bound
+        {% if start_date %} max(case when date_day <= cast('{{ start_date }}' as date) then date_{{ grain }} end) over () {% else %} cast('2999-12-31' as date) {% endif %} as new_bound_ugh
      from {{ calendar_tbl }}
  ),
 
@@ -125,7 +127,7 @@ joined as (
 
         -- has to be aggregated in this CTE to allow dimensions coming from the calendar table
         {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
-        {{ dbt_utils.bool_or('source_query.date_day is not null') }} as has_data
+        {% if start_date %} {{ dbt_utils.bool_or('spine.period >= spine.new_bound_ugh') }} {% else %} {{ dbt_utils.bool_or('source_query.date_day is not null') }} {% endif %} as has_data
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
@@ -143,7 +145,7 @@ joined as (
 bounded as (
     select 
         *,
-        {% if start_date %}cast('{{ start_date }}' as date){% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
+         min(case when has_data then period end) over () as lower_bound,
         {% if end_date %}cast('{{ end_date }}' as date){% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
     from joined 
 ),
