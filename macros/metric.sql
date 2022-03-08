@@ -1,4 +1,4 @@
-{% macro metric(metric_name, grain, dimensions=[], secondary_calculations=[]) -%}
+{% macro metric(metric_name, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None) -%}
     -- Need this here, since the actual ref is nested within loops/conditions:
     -- depends on: {{ ref('dbt_metrics_default_calendar') }}
     
@@ -12,7 +12,9 @@
         metric=metric,
         grain=grain,
         dimensions=dimensions,
-        secondary_calculations=secondary_calculations
+        secondary_calculations=secondary_calculations,
+        start_date=start_date,
+        end_date=end_date
     ) %}
     ({{ sql }}) metric_subq
 {%- endmacro %}
