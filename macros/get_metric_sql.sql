@@ -131,7 +131,7 @@ joined as (
     left outer join source_query on source_query.date_day = spine.date_day
     {% for dim in dimensions %}
         {%- if metrics.is_dim_from_model(metric, dim) %}
-            and {{ cast_column_for_join('source_query.'~ dim) }} = {{ cast_column_for_join('spine.'~ dim) }}
+            and {{ metrics.cast_column_for_join('source_query.'~ dim) }} = {{ metrics.cast_column_for_join('spine.'~ dim) }}
         {%- endif %}
     {% endfor %}
 
