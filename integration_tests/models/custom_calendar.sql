@@ -12,7 +12,12 @@ with days as (
 final as (
     select 
         cast(date_day as date) as date_day,
-        cast({{ dbt_utils.date_trunc('week', 'date_day') }} as date) as date_week,
+        {% if target.type == 'bigquery' %}
+            --BQ starts its weeks on Sunday. I don't actually care which day it runs on for auto testing purposes, just want it to be consistent with the other seeds
+            cast({{ dbt_utils.date_trunc('week(MONDAY)', 'date_day') }} as date) as date_week,
+        {% else %}
+            cast({{ dbt_utils.date_trunc('week', 'date_day') }} as date) as date_week,
+        {% endif %}
         cast({{ dbt_utils.date_trunc('month', 'date_day') }} as date) as date_month,
         cast({{ dbt_utils.date_trunc('quarter', 'date_day') }} as date) as date_quarter,
         cast({{ dbt_utils.date_trunc('year', 'date_day') }} as date) as date_year
