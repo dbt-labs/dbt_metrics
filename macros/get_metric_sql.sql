@@ -131,7 +131,7 @@ joined as (
     left outer join source_query on source_query.date_day = spine.date_day
     {% for dim in dimensions %}
         {%- if metrics.is_dim_from_model(metric, dim) %}
-            and coalesce(cast(source_query.{{ dim }} as {{ dbt_utils.type_string() }}), '_dbt_metrics_null_value_') = coalesce(cast(spine.{{ dim }} as {{ dbt_utils.type_string() }}), '_dbt_metrics_null_value_')
+            and {{ cast_column_for_join('source_query.'~ dim) }} = {{ cast_column_for_join('spine.'~ dim) }}
         {%- endif %}
     {% endfor %}
 
