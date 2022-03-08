@@ -5,6 +5,19 @@ models:
     tests:
       - dbt_utils.equality:
           compare_model: ref('expected_count_orders_by_year')
-          compare_columns:
-            - period
-            - count_orders
+    columns: 
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 1000
+              max_value: 1000
+  - name: input_count_orders_by_year_and_payment_type
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_year_and_payment_type')
+    columns: 
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 1000
+              max_value: 1000
