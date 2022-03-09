@@ -83,7 +83,6 @@ with source_query as (
             {{ dim }},
         {% endfor %}
         date_day,
-        --cast({% if start_date %}'{{ start_date }}'{% else %} null {% endif %} as date) as lower_bound
         {% if start_date %} max(case when date_day <= cast('{{ start_date }}' as date) then date_{{ grain }} end) over () {% else %} cast('2999-12-31' as date) {% endif %} as new_bound_ugh
      from {{ calendar_tbl }}
  ),
@@ -126,7 +125,24 @@ joined as (
         {% endfor %}
 
         -- has to be aggregated in this CTE to allow dimensions coming from the calendar table
-        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
+        {%- set ander = joiner(" and ") -%}
+
+        {%- set aggregate_string -%}
+            {%- if start_date or end_date -%}
+                case when 
+                    {%- if start_date %}
+                        {{- ander() }} spine.date_day >= cast('{{ start_date }}' as date)
+                    {%- endif %}
+                    {%- if end_date %}
+                        {{- ander() }} spine.date_day <= cast('{{ end_date }}' as date)
+                    {% endif -%}
+                then source_query.property_to_aggregate end
+            {%- else -%}
+                source_query.property_to_aggregate
+            {%- endif -%}
+
+        {%- endset -%}
+        {{- metrics.aggregate_primary_metric(metric.type, aggregate_string) }} as {{ metric.name }},
         {% if start_date %} {{ dbt_utils.bool_or('spine.period >= spine.new_bound_ugh') }} {% else %} {{ dbt_utils.bool_or('source_query.date_day is not null') }} {% endif %} as has_data
 
     from spine
