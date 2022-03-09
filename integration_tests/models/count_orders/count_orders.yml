@@ -12,8 +12,8 @@ models:
       - name: count_orders
         tests:
           - dbt_expectations.expect_column_sum_to_be_between:
-              min_value: 996
-              max_value: 996
+              min_value: 980
+              max_value: 980
               
   - name: input_count_orders_by_week
     tests:

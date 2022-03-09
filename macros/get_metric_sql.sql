@@ -82,8 +82,7 @@ with source_query as (
         {% for dim in dimensions if not metrics.is_dim_from_model(metric, dim) %}
             {{ dim }},
         {% endfor %}
-        date_day,
-        {% if start_date %} max(case when date_day <= cast('{{ start_date }}' as date) then date_{{ grain }} end) over () {% else %} cast('2999-12-31' as date) {% endif %} as new_bound_ugh
+        date_day
      from {{ calendar_tbl }}
  ),
 
@@ -125,25 +124,8 @@ joined as (
         {% endfor %}
 
         -- has to be aggregated in this CTE to allow dimensions coming from the calendar table
-        {%- set ander = joiner(" and ") -%}
-
-        {%- set aggregate_string -%}
-            {%- if start_date or end_date -%}
-                case when 
-                    {%- if start_date %}
-                        {{- ander() }} spine.date_day >= cast('{{ start_date }}' as date)
-                    {%- endif %}
-                    {%- if end_date %}
-                        {{- ander() }} spine.date_day <= cast('{{ end_date }}' as date)
-                    {% endif -%}
-                then source_query.property_to_aggregate end
-            {%- else -%}
-                source_query.property_to_aggregate
-            {%- endif -%}
-
-        {%- endset -%}
-        {{- metrics.aggregate_primary_metric(metric.type, aggregate_string) }} as {{ metric.name }},
-        {% if start_date %} {{ dbt_utils.bool_or('spine.period >= spine.new_bound_ugh') }} {% else %} {{ dbt_utils.bool_or('source_query.date_day is not null') }} {% endif %} as has_data
+        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
+        {{ dbt_utils.bool_or('source_query.date_day is not null') }} as has_data
 
     from spine
     left outer join source_query on source_query.date_day = spine.date_day
@@ -163,7 +145,7 @@ joined as (
 bounded as (
     select 
         *,
-         min(case when has_data then period end) over () as lower_bound,
+        {% if start_date %}cast('{{ start_date }}' as date){% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
         {% if end_date %}cast('{{ end_date }}' as date){% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
     from joined 
 ),
