@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: input_count_orders_by_week_bounded
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_week_bounded')
+    columns: 
+      - name: period
+        tests:
+          - unique
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 980
+              max_value: 980
+              
+  - name: input_count_orders_by_week
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_week')
+    columns: 
+      - name: period
+        tests:
+          - unique
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 1000
+              max_value: 1000
+
+  - name: input_count_orders_by_year
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_year')
+    columns: 
+      - name: period
+        tests:
+          - unique
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 1000
+              max_value: 1000
+              
+  - name: input_count_orders_by_year_and_payment_type
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_year_and_payment_type')
+      - dbt_utils.unique_combination_of_columns: 
+          combination_of_columns: 
+            - period
+            - payment_type
+    columns: 
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 1000
+              max_value: 1000

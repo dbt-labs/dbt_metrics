@@ -131,7 +131,9 @@ joined as (
     left outer join source_query on source_query.date_day = spine.date_day
     {% for dim in dimensions %}
         {%- if metrics.is_dim_from_model(metric, dim) %}
-            and source_query.{{ dim }} = spine.{{ dim }}
+            and (  source_query.{{ dim}} = spine.{{ dim }}
+                or source_query.{{ dim }} is null and spine.{{ dim }} is null
+            )
         {%- endif %}
     {% endfor %}
 
