@@ -5,6 +5,7 @@ models:
     tests:
       - dbt_utils.equality:
           compare_model: ref('expected_count_orders_by_week_bounded_midweek')
+
     columns: 
       - name: period
         tests:
@@ -28,7 +29,6 @@ models:
           - dbt_expectations.expect_column_sum_to_be_between:
               min_value: 999
               max_value: 999
-              
   - name: input_count_orders_by_week
     tests:
       - dbt_utils.equality:
