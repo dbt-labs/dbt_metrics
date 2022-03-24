@@ -24,5 +24,3 @@ from
       {"calculation": "rolling", "interval": 3, "aggregate": "sum"},
     ]) 
 }}
-
-where period >= '2021-01-01' and period < '2021-05-01'
