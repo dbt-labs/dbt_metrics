@@ -145,8 +145,8 @@ joined as (
 bounded as (
     select 
         *,
-        {% if start_date %}'{{ start_date }}'{% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
-        {% if end_date %}'{{ end_date }}'{% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
+        {% if start_date %} {{ start_date }} {% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
+        {% if end_date %} {{ end_date }} {% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
     from joined 
 ),
 
