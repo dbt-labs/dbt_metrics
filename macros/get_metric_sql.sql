@@ -89,8 +89,9 @@ spine__time as (
 
 spine__values as (
 
-    {#- /*On  
-    it's unnecessary to pull through the whole table */ #}
+    {#- /*This and the follwoing CTEs were changed on 5/20 in order to remove 
+    the cartesian join behaviour that resulted in impossible combinations of 
+    data. */ #}
     select distinct 
         {%- for dim in dimensions -%}
             {%- if metrics.is_dim_from_model(metric, dim) %}
