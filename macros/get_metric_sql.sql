@@ -87,9 +87,10 @@ spine__time as (
 
 ),
 
+{% if dimensions is defined and dimensions|length > 0 %}
 spine__values as (
 
-    {#- /*This and the follwoing CTEs were changed on 5/20 in order to remove 
+    {#- /*This and the following CTEs were changed on 5/20 in order to remove 
     the cartesian join behaviour that resulted in impossible combinations of 
     data. */ #}
     select distinct 
@@ -102,12 +103,16 @@ spine__values as (
     from source_query
 
 ),  
+{% endif -%}
+
 
 spine as (
 
     select *
     from spine__time
+    {% if dimensions is defined and dimensions|length > 0 %}
     cross join spine__values
+    {% endif -%}
 
 ),
 
