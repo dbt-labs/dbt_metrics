@@ -71,7 +71,7 @@ with source_query as (
     {%- endfor %}
 ),
 
- spine__time as (
+spine__time as (
      select 
         /* this could be the same as date_day if grain is day. That's OK! 
         They're used for different things: date_day for joining to the spine, period for aggregating.*/
@@ -84,32 +84,29 @@ with source_query as (
         {% endfor %}
         date_day
      from {{ calendar_tbl }}
- ),
 
-{%- for dim in dimensions -%}
-    {%- if metrics.is_dim_from_model(metric, dim) %}
-          
-        spine__values__{{ dim }} as (
+),
 
-            select distinct {{ dim }}
-            from source_query
+spine__values as (
 
-        ),  
-    {% endif -%}
+    {#- /*On  
+    it's unnecessary to pull through the whole table */ #}
+    select distinct 
+        {%- for dim in dimensions -%}
+            {%- if metrics.is_dim_from_model(metric, dim) %}
+                {{ dim }}
+                {% if not loop.last %},{% endif %}
+            {% endif -%}
+        {%- endfor %}
+    from source_query
 
-
-{%- endfor %}
+),  
 
 spine as (
 
     select *
     from spine__time
-    {%- for dim in dimensions -%}
-
-        {%- if metrics.is_dim_from_model(metric, dim) %}
-            cross join spine__values__{{ dim }}
-        {%- endif %}
-    {%- endfor %}
+    cross join spine__values
 
 ),
 
