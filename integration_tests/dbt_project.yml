@@ -20,6 +20,3 @@ clean-targets:
   - "target"
   - "dbt_packages"
   - "logs"
-
-vars:
-  dbt_metrics_calendar_model: custom_calendar
