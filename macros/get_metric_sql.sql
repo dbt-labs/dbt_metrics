@@ -22,7 +22,7 @@
 
 {#-/* TODO: This refs[0][0] stuff is totally ick */#}
 {%- set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
-{%- set calendar_tbl = metrics.get_metric_calendar(var('dbt_metrics_calendar_model', "ref('dbt_metrics_default_calendar')")) %}
+{%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "ref('dbt_metrics_default_calendar')")) %}
 
 {#- /* TODO: Do I need to validate that the requested grain is defined on the metric? */ #}
 {#- /* TODO: build a list of failures and return them all at once*/ #}
