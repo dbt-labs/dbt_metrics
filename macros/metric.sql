@@ -1,4 +1,6 @@
 {% macro metric(metric_name, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None) -%}
+    -- Need this here, since the actual ref is nested within loops/conditions:
+    -- depends on: {{ ref('dbt_metrics_default_calendar') }}
     
     {%- if not execute %}
         {%- do return("not execute") %}
