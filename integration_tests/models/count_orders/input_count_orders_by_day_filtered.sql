@@ -4,6 +4,6 @@ select * from {{
   metrics.metric(
     metric_name = 'count_orders',
     grain = 'day',
-    where = "purchased_at >= '2022-02-13"
+    where = ["purchased_at >= '2022-02-13'"]
   )
 }}
