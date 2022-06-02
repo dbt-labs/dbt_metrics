@@ -7,7 +7,7 @@
 */
 
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date) %}
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 {%- if not execute %}
     {%- do return("not execute") %}
 {%- endif %}
@@ -68,6 +68,9 @@ with source_query as (
     where 1=1
     {%- for filter in metric.filters %}
         and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
+    {%- endfor %}
+    {%- for filter in where %}
+        and filter
     {%- endfor %}
 ),
 
