@@ -70,7 +70,7 @@ with source_query as (
         and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
     {%- endfor %}
     {%- for filter in where %}
-        and filter
+        and {{ filter }}
     {%- endfor %}
 ),
 
