@@ -16,7 +16,7 @@ from
     grain='month', 
     dimensions=['has_messaged'], 
     start_date = '2021-01-01',
-    end_date = '2021-05-01',
+    end_date = '2021-04-01',
     secondary_calculations=[
       {"calculation": "period_over_period", "interval": 1, "comparison_strategy": "difference", "alias": "pop_1mth"},
       {"calculation": "period_over_period", "interval": 1, "comparison_strategy": "ratio"},
