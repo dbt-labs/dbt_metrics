@@ -14,6 +14,7 @@
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
 * [Customisation](#customisation)
+   * [Where Clauses](#where-clauses)
    * [Calendar](#calendar)
    * [Time Grains](#time-grains)
    * [Custom aggregations](#custom-aggregations)
@@ -21,7 +22,8 @@
 * [Experimental behaviour](#-experimental-behaviour)
    * [Dimensions on calendar tables](#dimensions-on-calendar-tables)
 
-<!-- Added by: runner, at: Tue Mar  8 00:53:06 UTC 2022 -->
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+<!-- Added by: runner, at: Thu Jun  2 20:25:12 UTC 2022 -->
 
 <!--te-->
 
@@ -53,7 +55,8 @@ from {{ metrics.metric(
         metrics.rolling(aggregate="min", interval=4)
     ],
     start_date='2020-01-01',
-    end_date="date_trunc('day', getdate())"
+    end_date="date_trunc('day', getdate())",
+    where=["some_column='filter_value'"]
 ) }}
 ```
 
@@ -113,6 +116,11 @@ Constructor: `metrics.rolling(aggregate, interval [, alias])`
 
 # Customisation
 Most behaviour in the package can be overridden or customised.
+
+## Where Clauses
+Sometimes you'll want to see the metric in the context of a particular filter but this filter isn't neccesarily part of the metric definition. In this case, you can use the `where` parameter of the metrics package. It takes a list of `sql` statements and adds them in as filters to the first CTE in the produced SQL. This reduces the load on the query planner to run full table scans and will hopefully improve performance.
+
+Additionally, this parameter can be used by BI Tools to as a way for filters in their UI to be passed through into the metric logic.
 
 ## Calendar 
 The package comes with a [basic calendar table](/models/dbt_metrics_default_calendar.sql), running between 2010-01-01 and 2029-12-31 inclusive. You can replace it with any custom calendar table which meets the following requirements:

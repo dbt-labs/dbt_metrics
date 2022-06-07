@@ -7,7 +7,7 @@
 */
 
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date) %}
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 {%- if not execute %}
     {%- do return("not execute") %}
 {%- endif %}
@@ -69,9 +69,12 @@ with source_query as (
     {%- for filter in metric.filters %}
         and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
     {%- endfor %}
+    {%- for filter in where %}
+        and {{ filter }}
+    {%- endfor %}
 ),
 
- spine__time as (
+spine__time as (
      select 
         /* this could be the same as date_day if grain is day. That's OK! 
         They're used for different things: date_day for joining to the spine, period for aggregating.*/
@@ -84,32 +87,35 @@ with source_query as (
         {% endfor %}
         date_day
      from {{ calendar_tbl }}
- ),
 
-{%- for dim in dimensions -%}
-    {%- if metrics.is_dim_from_model(metric, dim) %}
-          
-        spine__values__{{ dim }} as (
+),
 
-            select distinct {{ dim }}
-            from source_query
+{% if dimensions is defined and dimensions|length > 0 %}
+spine__values as (
 
-        ),  
-    {% endif -%}
+    {#- /*This and the following CTEs were changed on 5/20 in order to remove 
+    the cartesian join behaviour that resulted in impossible combinations of 
+    data. */ #}
+    select distinct 
+        {%- for dim in dimensions -%}
+            {%- if metrics.is_dim_from_model(metric, dim) %}
+                {{ dim }}
+                {% if not loop.last %},{% endif %}
+            {% endif -%}
+        {%- endfor %}
+    from source_query
 
+),  
+{% endif -%}
 
-{%- endfor %}
 
 spine as (
 
     select *
     from spine__time
-    {%- for dim in dimensions -%}
-
-        {%- if metrics.is_dim_from_model(metric, dim) %}
-            cross join spine__values__{{ dim }}
-        {%- endif %}
-    {%- endfor %}
+    {% if dimensions is defined and dimensions|length > 0 %}
+    cross join spine__values
+    {% endif -%}
 
 ),
 
