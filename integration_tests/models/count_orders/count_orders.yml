@@ -57,3 +57,25 @@ models:
           - dbt_expectations.expect_column_sum_to_be_between:
               min_value: 1000
               max_value: 1000
+
+  - name: input_count_orders_by_day_filtered
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_day_filtered')
+    columns: 
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 3
+              max_value: 3
+
+  - name: input_count_orders_by_day_double_filter
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref('expected_count_orders_by_day_double_filter')
+    columns: 
+      - name: count_orders
+        tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              min_value: 2
+              max_value: 2
