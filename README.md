@@ -55,7 +55,7 @@ from {{ metrics.metric(
         metrics.rolling(aggregate="min", interval=4)
     ],
     start_date='2022-01-01',
-    end_date="2022-12-31",
+    end_date='2022-12-31',
     where=["some_column='filter_value'"]
 ) }}
 ```
