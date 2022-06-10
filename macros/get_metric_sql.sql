@@ -20,8 +20,13 @@
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
 
-{#-/* TODO: This refs[0][0] stuff is totally ick */#}
-{%- set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
+{#-/* NEED TO FIGURE OUT SOME WAY TO PULL THE MODEL DATABSE INFO ???? */#}
+{# This sets the models variable as the list of models that this metric references #}
+{%- set models = (metric.refs[0] if execute else "") %}
+The base model is set as the first metric 
+{%- set base_model = (models[0] if execute else "") %}
+
+
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
 
 {#- /* TODO: Do I need to validate that the requested grain is defined on the metric? */ #}
