@@ -1,0 +1,1 @@
+select * from {{ref('fact_orders_source')}}

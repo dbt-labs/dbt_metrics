@@ -1,4 +1,4 @@
-select
+{# select
 
   period,
   has_messaged,
@@ -25,4 +25,4 @@ from
       {"calculation": "rolling", "interval": 3, "aggregate": "average", "alias": "avg_3mth"},
       {"calculation": "rolling", "interval": 3, "aggregate": "sum"},
     ]) 
-}}
+}} #}

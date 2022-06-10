@@ -1,0 +1,12 @@
+version: 2 
+metrics:
+  - name: revenue
+    model: ref('fact_orders')
+    label: Revenue ($)
+    timestamp: order_date
+    time_grains: [day, week]
+    type: sum
+    sql: order_total
+    dimensions:
+      - had_discount
+      - order_country
