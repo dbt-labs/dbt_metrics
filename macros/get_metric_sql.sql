@@ -23,7 +23,7 @@
 {#-/* NEED TO FIGURE OUT SOME WAY TO PULL THE MODEL DATABSE INFO ???? */#}
 {# This sets the models variable as the list of models that this metric references #}
 {%- set models = (metric.refs[0] if execute else "") %}
-The base model is set as the first metric 
+{# The base model is set as the first metric  #}
 {%- set base_model = (models[0] if execute else "") %}
 
 
@@ -69,7 +69,7 @@ with source_query as (
             {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric.name ~ "`") -%}  
         {%- endif %}
 
-    from {{ model }}
+    from {{ base_model }}
     where 1=1
     {%- for filter in metric.filters %}
         and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
