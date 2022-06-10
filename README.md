@@ -54,8 +54,8 @@ from {{ metrics.metric(
         metrics.rolling(aggregate="average", interval=4, alias="avg_past_4wks"),
         metrics.rolling(aggregate="min", interval=4)
     ],
-    start_date='2020-01-01',
-    end_date="date_trunc('day', getdate())",
+    start_date='2022-01-01',
+    end_date="2022-12-31",
     where=["some_column='filter_value'"]
 ) }}
 ```
