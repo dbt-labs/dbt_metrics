@@ -1,3 +1,7 @@
+
+    -- depends on: {{ metric('revenue')  }}
+
+
 select *
 from 
 {{ metrics.metric(metric('revenue'), 

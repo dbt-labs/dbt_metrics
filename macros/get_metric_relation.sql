@@ -1,6 +1,7 @@
 {% macro get_metric_relation(ref_name) %}
+    
     {% if execute %}
-        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name[0]) | first %}
+        {% set model_ref_node = graph.nodes.values() | selectattr('name', 'equalto', ref_name) | first %}
         {% set relation = api.Relation.create(
             database = model_ref_node.database,
             schema = model_ref_node.schema,

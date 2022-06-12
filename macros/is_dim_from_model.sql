@@ -6,7 +6,7 @@
             {% do return(True) %}
         {% endif %}
 
-        {% set model_dims = (metric['meta']['dimensions'] | selectattr('type', '==', 'model') | first)['columns'] %}
+        {% set model_dims = metric.dimensions %}
         {% do return (dim_name in model_dims) %}
     {% else %}
         {% do return (False) %}
