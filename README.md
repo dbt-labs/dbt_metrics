@@ -162,7 +162,7 @@ To do this, set the value of the `dbt_metrics_calendar_model` variable in your `
 config-version: 2
 [...]
 vars:
-    dbt_metrics_calendar_model: ref('my_custom_table')
+    dbt_metrics_calendar_model: my_custom_calendar
 ```
 
 ### Dimensions from calendar tables
