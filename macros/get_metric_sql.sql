@@ -151,8 +151,12 @@ joined as (
 bounded as (
     select 
         *,
-        {% if start_date %}cast('{{ start_date }}' as date){% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
-        {% if end_date %}cast('{{ end_date }}' as date){% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
+        {% if '(' in start_date %} /* assume any start_date that is defined and contains an opening parentheses is likely a function call and does not need to be quoted */ cast({{ start_date }} as date)
+        {% elif start_date %} cast('{{ start_date }}' as date)
+        {% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
+        {% if '(' in end_date %} /* assume any end_date that is defined and contains an opening parentheses is likely a function call and does not need to be quoted */ cast({{ end_date }} as date)
+        {% elif end_date %} cast('{{ end_date }}' as date)
+        {% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
     from joined 
 ),
 
