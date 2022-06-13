@@ -22,7 +22,10 @@
     
     {% elif aggregate == 'sum' %}
         {{ return(adapter.dispatch('metric_sum', 'metrics')(expression)) }}
-    
+
+    {% elif aggregate == 'expression' %}
+        {{ return(adapter.dispatch('metric_expression', 'metrics')(expression)) }}
+
     {% else %}
         {% do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) %}  
     {% endif %}
@@ -54,4 +57,8 @@
 
 {% macro default__metric_sum(expression) %}
     sum({{ expression }})
+{% endmacro %}
+
+{% macro default__metric_expression(expression) %}
+    {{ expression }}
 {% endmacro %}

@@ -1,4 +1,4 @@
-{%- set metric_relation = metric('slack_joiners') -%}
+{%- set metric_relation = metric('total_profit') -%}
 
 {{ log("Metric Base Value: " ~ metric_relation, info=true) }}
 {{ log("Metric Model: " ~ metric_relation.model, info=true) }}
