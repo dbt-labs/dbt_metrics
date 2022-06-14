@@ -4,3 +4,4 @@ dbt_modules/
 dbt_packages/
 logs/
 .DS_Store
+integration_tests/target
