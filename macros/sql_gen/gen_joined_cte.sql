@@ -17,10 +17,10 @@
         
     from {{metric.name}}__spine_time
     left outer join {{metric.name}}__aggregate
-        using(date_{{grain}} 
+        using (date_{{grain}},
                 {% for dim in dimensions %}
                     {%- if metrics.is_dim_from_model(metric, dim) -%}
-                        ,{{ dim }}
+                        {{ dim }}
                         {% if not loop.last %},{% endif %}
                     {% endif -%}
                 {%- endfor %})
