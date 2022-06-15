@@ -10,14 +10,12 @@
         select
         date_{{grain}},
         {% for dim in dimensions %}
-            {%- if metrics.is_dim_from_model(metric, dim) -%}
-                coalesce(
-                {% for metric_name in metric_list %}
-                    {{metric_name}}__final.{{ dim }}
-                    {% if not loop.last %},{% endif %}
-                {% endfor %}
-                ) as {{dim}},
-            {% endif -%}
+            coalesce(
+            {% for metric_name in metric_list %}
+                {{metric_name}}__final.{{ dim }}
+                {% if not loop.last %},{% endif %}
+            {% endfor %}
+            ) as {{dim}},
         {%- endfor %}
         {% for metric_name in metric_list %}
             {{metric_name}},
@@ -33,10 +31,8 @@
                     left outer join {{metric_name}}__final 
                         using ( date_{{grain}},
                             {% for dim in dimensions %}
-                                {%- if metrics.is_dim_from_model(metric, dim) -%}
-                                    {{ dim }}
-                                    {% if not loop.last %},{% endif %}
-                                {% endif -%}
+                                {{ dim }}
+                                {% if not loop.last %},{% endif %}
                             {%- endfor %}
                         )
                 {% endif %}

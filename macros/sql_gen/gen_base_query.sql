@@ -13,9 +13,7 @@
         {{calendar_tbl}}.date_{{ grain }} as date_{{grain}},
         -- ALL DIMENSIONS
         {% for dim in dimensions %}
-            {%- if metrics.is_dim_from_model(metric, dim) -%}
-                {{ dim }},
-            {% endif -%}
+            {{ dim }},
         {%- endfor %}
         {%- if metric.sql and metric.sql | replace('*', '') | trim != '' -%}
             {{ metric.sql }} as property_to_aggregate

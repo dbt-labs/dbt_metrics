@@ -7,10 +7,8 @@
 ,{{metric.name}}__dims as (
     select distinct
         {% for dim in dimensions %}
-            {%- if metrics.is_dim_from_model(metric, dim) -%}
-                {{ dim }}
-                {% if not loop.last %},{% endif %}
-            {% endif -%}
+            {{ dim }}
+            {% if not loop.last %},{% endif %}
         {%- endfor %}
     from {{metric.name}}__aggregate
 )

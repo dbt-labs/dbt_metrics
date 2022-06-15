@@ -20,7 +20,8 @@ final as (
         {% endif %}
         cast({{ dbt_utils.date_trunc('month', 'date_day') }} as date) as date_month,
         cast({{ dbt_utils.date_trunc('quarter', 'date_day') }} as date) as date_quarter,
-        cast({{ dbt_utils.date_trunc('year', 'date_day') }} as date) as date_year
+        cast({{ dbt_utils.date_trunc('year', 'date_day') }} as date) as date_year,
+        true as is_weekend
     from days
 )
 

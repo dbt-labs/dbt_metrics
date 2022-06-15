@@ -9,9 +9,7 @@
     select
         date_{{grain}},
         {% for dim in dimensions %}
-            {%- if metrics.is_dim_from_model(metric, dim) -%}
-                {{ dim }},
-            {% endif -%}
+            {{ dim }},
         {%- endfor %}
         ifnull({{metric.name}}, 0) as {{metric.name}}
         
@@ -19,10 +17,8 @@
     left outer join {{metric.name}}__aggregate
         using (date_{{grain}},
                 {% for dim in dimensions %}
-                    {%- if metrics.is_dim_from_model(metric, dim) -%}
-                        {{ dim }}
-                        {% if not loop.last %},{% endif %}
-                    {% endif -%}
+                    {{ dim }}
+                    {% if not loop.last %},{% endif %}
                 {%- endfor %})
 
 )

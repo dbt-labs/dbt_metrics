@@ -31,9 +31,7 @@
             dimensions. It is used throughout this macro, with slight differences to 
             account for comma syntax around loop last #}
             {% for dim in dimensions %}
-                {%- if metrics.is_dim_from_model(metric, dim) -%}
-                        {{ dim }},
-                {% endif -%}
+                {{ dim }},
             {%- endfor %}
             {# This line performs the relevant aggregation by calling the 
             aggregate_primary_metric macro. Take a look at that one if you're curious #}

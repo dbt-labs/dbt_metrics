@@ -7,7 +7,7 @@
 ,{{metric.name}}__spine_time as (
 
     select
-        date_{{grain}},
+        calendar.date_{{grain}},
 
         {# I don't believe the following section is needed because we don't need other
         time periods #}
@@ -16,10 +16,8 @@
         {% endfor %} #}
 
         {% for dim in dimensions %}
-            {%- if metrics.is_dim_from_model(metric, dim) -%}
-                {{ dim }}
-                {% if not loop.last %},{% endif %}
-            {% endif -%}
+            {{metric.name}}__dims.{{ dim }}
+            {% if not loop.last %},{% endif %}
         {%- endfor %}
     from calendar
     cross join {{metric.name}}__dims

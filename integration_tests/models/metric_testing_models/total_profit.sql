@@ -2,5 +2,5 @@ select *
 from 
 {{ metrics.metric(metric('total_profit'), 
     grain='day', 
-    dimensions=['had_discount','order_country']) 
+    dimensions=['had_discount','order_country','is_weekend']) 
 }}

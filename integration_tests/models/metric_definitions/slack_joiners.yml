@@ -12,13 +12,4 @@ metrics:
       dimensions: 
         - is_active_past_quarter
         - has_messaged
-
-      meta: 
-        dimensions: 
-          - type: model
-            columns:
-              - is_active_past_quarter
-              - has_messaged
-          - type: calendar
-            columns: 
-              - is_weekend
+        - is_weekend
