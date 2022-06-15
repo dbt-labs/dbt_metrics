@@ -1,7 +1,6 @@
 /*
     Core metric query generation logic.
     TODO:
-      - validate that the requested dim is actually an option (or fail at query execution instead of at compilation if they don't exist? is it a problem to expose columns that exist in the table but aren't "blessed" for the metric?)
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
@@ -20,9 +19,12 @@
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
 
+{% if metric.type != "expression" and metric.metrics | length > 0 %}
+    {%- do exceptions.raise_compiler_error("The metric was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
+{%- endif %}
 
 {# TODO Change so that the filter condition is whether metrics are present in manifest #}
-{%- if metric.type == "expression" %}
+{%- if metric.metrics | length > 0 %}
 
     {# First we get the list of nodes that this metric is dependent on. This is inclusive 
     of all parent metrics and SHOULD only contain parent metrics #}
