@@ -5,6 +5,6 @@
         {%- do relevant_periods.append(calc_config.period) %}
     {%- endfor -%}
 
-    {%- return(relevant_periods)-%}
+    {%- do return(relevant_periods)-%}
 
 {% endmacro %}

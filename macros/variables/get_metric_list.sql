@@ -1,4 +1,4 @@
-{%- macro get_relevent_periods(metric) %}
+{%- macro get_metric_list(metric) %}
 
     {%- if metric.metrics | length > 0 %}
 
@@ -25,6 +25,6 @@
 
     {%- endif %}
 
-    {% return(metric_list) %}
+    {% do return(metric_list) %}
 
 {% endmacro %}

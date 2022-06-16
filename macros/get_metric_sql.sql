@@ -41,9 +41,9 @@ TIME TO VALIDATE!!
 LETS SET SOME VARIABLES!
 ############ #}
 
-{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
 
+{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 {%- set metric_list = metrics.get_metric_list(metric) -%}
 {%- set dimensions=metrics.get_dimension_list(metric,dimensions) -%}
 
