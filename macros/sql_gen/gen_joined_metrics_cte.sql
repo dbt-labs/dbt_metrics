@@ -1,10 +1,9 @@
-{% macro gen_joined_metrics_cte(metric,grain,dimensions) %}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric,grain,dimensions)) }}
+{% macro gen_joined_metrics_cte(metric,grain,dimensions,metric_list) %}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric,grain,dimensions,metric_list)) }}
 {% endmacro %}
 
-{% macro default__gen_joined_metrics_cte(metric,grain,dimensions) %}
+{% macro default__gen_joined_metrics_cte(metric,grain,dimensions,metric_list) %}
 
-{%- if metric_list|length > 1 -%}
     ,joined_metrics as (
 
         select

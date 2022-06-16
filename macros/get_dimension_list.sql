@@ -1,4 +1,4 @@
-{% macro get_dimension_list(dimensions) %}
+{% macro get_dimension_list(metric,dimensions) %}
     
     {# Here we set the calendar as either being the default provided by the package
     or the variable provided in the project #}
@@ -17,5 +17,5 @@
     {%- endfor -%}
     
     {%- do return(dimension_list) -%}
-    
+
 {% endmacro %}

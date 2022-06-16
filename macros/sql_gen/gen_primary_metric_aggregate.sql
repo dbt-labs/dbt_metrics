@@ -1,10 +1,10 @@
 
 --TODO: Do we have a list of aggregations that we're supporting on day one? 
-{% macro aggregate_primary_metric(aggregate, expression) %}
-    {{ return(adapter.dispatch('aggregate_primary_metric', 'metrics')(aggregate, expression)) }}
+{% macro gen_primary_metric_aggregate(aggregate, expression) %}
+    {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(aggregate, expression)) }}
 {% endmacro %}
 
-{% macro default__aggregate_primary_metric(aggregate, expression) %}
+{% macro default__gen_primary_metric_aggregate(aggregate, expression) %}
     {% if aggregate == 'count' %}
         {{ return(adapter.dispatch('metric_count', 'metrics')(expression)) }}
     

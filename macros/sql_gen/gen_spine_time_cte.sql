@@ -1,19 +1,21 @@
-{% macro gen_spine_time_cte(metric,grain,dimensions) %}
-    {{ return(adapter.dispatch('gen_spine_time_cte', 'metrics')(metric,grain,dimensions)) }}
+{% macro gen_spine_time_cte(metric,grain,dimensions,secondary_calculations,relevant_periods) %}
+    {{ return(adapter.dispatch('gen_spine_time_cte', 'metrics')(metric,grain,dimensions,secondary_calculations,relevant_periods)) }}
 {% endmacro %}
 
-{% macro default__gen_spine_time_cte(metric,grain,dimensions) %}
+{% macro default__gen_spine_time_cte(metric,grain,dimensions,secondary_calculations,relevant_periods) %}
 
 ,{{metric.name}}__spine_time as (
 
     select
         calendar.date_{{grain}},
 
-        {# I don't believe the following section is needed because we don't need other
-        time periods #}
-        {# {% for period in relevant_periods %}
-            date_{{ period }},
-        {% endfor %} #}
+        {% if secondary_calculations | length > 0 %}
+            {% for period in relevant_periods %}
+                {% if period != grain%}
+                    calendar.date_{{ period }},
+                {% endif %}
+            {% endfor %}
+        {% endif %}
 
         {% for dim in dimensions %}
             {{metric.name}}__dims.{{ dim }}

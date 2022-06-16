@@ -5,6 +5,9 @@
       - allow passing in a seed with targets for a metric's value
 */
 
+{# ############
+TIME TO VALIDATE!!
+############ #}
 
 {%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 {%- if not execute %}
@@ -23,35 +26,26 @@
     {%- do exceptions.raise_compiler_error("The metric was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
 {%- endif %}
 
-{# TODO Change so that the filter condition is whether metrics are present in manifest #}
-{%- if metric.metrics | length > 0 %}
+{#- /* TODO: Do I need to validate that the requested grain is defined on the metric? */ #}
+{#- /* TODO: build a list of failures and return them all at once*/ #}
+{%- for calc_config in secondary_calculations if calc_config.aggregate %}
+    {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
+{%- endfor %}
 
-    {# First we get the list of nodes that this metric is dependent on. This is inclusive 
-    of all parent metrics and SHOULD only contain parent metrics #}
-    {%- set node_list = metric.depends_on.nodes -%}
-    {%- set metric_list = [] -%}
+{#- /* TODO: build a list of failures and return them all at once*/ #}
+{%- for calc_config in secondary_calculations if calc_config.period %}
+    {%- do metrics.validate_grain_order(grain, calc_config.period) %}
+{%- endfor %}
 
-    {# This part is suboptimal - we're looping through the dependent nodes and extracting
-    the model name from the idenitfier. Ideally we'd just use the metrics attribute but 
-    right now its a list of lists #}
-    {%- for node in node_list -%}  
-        {% set metric_name = node.split('.')[2] %}
-        {% do metric_list.append(metric_name) %}
-    {%- endfor -%}
+{# ############
+LETS SET SOME VARIABLES!
+############ #}
 
-{% else %}
+{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+{%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
 
-    {# For non-expression metrics, we just need the relation of the base model ie 
-    the model that its built. Then we append it to the metric list name so the same
-    variable used in expression metrics can be used below #}
-    {%- set metric_list = [] -%}
-    {%- set base_model = metric.model.split('\'')[1]  -%}
-    {%- set model = metrics.get_model_relation(base_model if execute else "") %}
-    {% do metric_list.append(metric.name) %}
-
-{%- endif %}
-
-{%- set dimensions=metrics.get_dimension_list(dimensions) -%}
+{%- set metric_list = metrics.get_metric_list(metric) -%}
+{%- set dimensions=metrics.get_dimension_list(metric,dimensions) -%}
 
 {# ############
 LET THE COMPOSITION BEGIN!
@@ -64,28 +58,33 @@ metrics there are #}
 {# Next we check if it is a composite metric or single metric by checking the length of the list#}
 {# This filter forms the basis of how we construct the SQL #}
 {%- if metric_list|length > 1 -%}
-    
+
     {# If composite, we begin by looping through each of the metric names that make
     up the composite metric. #}
     {%for metric_object in metric_list%}
         {%- set loop_metric = metrics.get_metric_relation(metric_object) -%}
-        {%- set base_model = loop_metric.model.split('\'')[1]  -%}
-        {%- set model = metrics.get_model_relation(base_model if execute else "") %}
-        {{ metrics.build_metric_sql(loop_metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl) }}
+        {%- set loop_base_model = loop_metric.model.split('\'')[1]  -%}
+        {%- set loop_model = metrics.get_model_relation(loop_base_model if execute else "") %}
+        {{ metrics.build_metric_sql(loop_metric,loop_model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods) }}
         {% if loop.last %}
-            {{ metrics.gen_joined_metrics_cte(metric, grain, dimensions) }}
-            {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,secondary_calculations) }}
-            {{ metrics.get_final_cte(metric,grain,secondary_calculations) }}
+            {{ metrics.gen_joined_metrics_cte(metric, grain, dimensions,metric_list) }}
+            {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations) }}
+            {{ metrics.gen_final_cte(metric,grain,secondary_calculations) }}
         {% endif %}
     {%- endfor -%}
     
     {# If it is NOT a composite metric, we run the baseline model #}
     {%- else -%}
-        {{ metrics.build_metric_sql(metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl) }}
-        {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,secondary_calculations) }}
-        {{ metrics.get_final_cte(metric,grain,secondary_calculations) }}
 
+        {# We only set these variables here because they're only needed if it isn't a 
+        composite metric #}
+        {%- set base_model = metric.model.split('\'')[1]  -%}
+        {%- set model = metrics.get_model_relation(base_model if execute else "") %}
+
+        {{ metrics.build_metric_sql(metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods) }}
+        {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations) }}
+        {{ metrics.gen_final_cte(metric,grain,secondary_calculations,metric_list) }}
+       
 {%- endif -%}
-
 
 {% endmacro %}
