@@ -1,50 +1,57 @@
-{% macro gen_final_cte(metric,grain,metric_list,dimensions) %}
-    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(metric,grain,metric_list,dimensions)) }}
+{% macro gen_final_cte(metric,grain,secondary_calculations) %}
+    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(metric,grain,secondary_calculations)) }}
 {% endmacro %}
 
-{% macro default__gen_final_cte(metric,grain,metric_list,dimensions) %}
+{% macro default__gen_final_cte(metric,grain,secondary_calculations) %}
 
-{%- if metric_list|length > 1 -%}
-    ,joined_metrics as (
+{%- if metric.metrics | length > 0 %}
 
-        select
-        date_{{grain}},
-        {% for dim in dimensions %}
-            coalesce(
-            {% for metric_name in metric_list %}
-                {{metric_name}}__final.{{ dim }}
-                {% if not loop.last %},{% endif %}
-            {% endfor %}
-            ) as {{dim}},
-        {%- endfor %}
-        {% for metric_name in metric_list %}
-            {{metric_name}},
-        {% endfor %}  
+    {% if secondary_calculations | length > 0 %}
 
-        ({{metric.sql | replace(".metric_value","")}}) as {{metric.name}}
+        ,final as (
 
-        from 
-            {% for metric_name in metric_list %}
-                {% if loop.first %}
-                    {{metric_name}}__final
-                {% else %}
-                    left outer join {{metric_name}}__final 
-                        using ( date_{{grain}},
-                            {% for dim in dimensions %}
-                                {{ dim }}
-                                {% if not loop.last %},{% endif %}
-                            {%- endfor %}
-                        )
-                {% endif %}
-            {% endfor %} 
-    )
+            select
+                *
+                {% for calc_config in secondary_calculations %}
+                    ,{{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
+                {% endfor %}
+            from secondary_calculations
+        )
+
+        select * from final 
+
+    {% else %}
 
     select * from joined_metrics
-   
-{%- else -%}
 
-    select * from {{metric.name}}__final
+    {% endif %}
 
-{%- endif -%}
+{% else %}
+
+    {% if secondary_calculations | length > 0 %}
+
+        -- single metric with secondary calculations
+        
+        ,final as (
+
+            select
+                *
+                {% for calc_config in secondary_calculations %}
+                    ,{{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
+                {% endfor %}
+            from secondary_calculations
+        )
+
+        select * from final 
+
+        {% else %}
+
+        -- single metric without secondary calculations
+
+        select * from {{metric.name}}__final 
+
+    {% endif %}
+
+{% endif %}
 
 {% endmacro %}

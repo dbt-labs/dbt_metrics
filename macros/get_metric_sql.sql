@@ -51,23 +51,7 @@
 
 {%- endif %}
 
-{# Here we set the calendar as either being the default provided by the package
-or the variable provided in the project #}
-{%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
-{% set calendar_dims = dbt_utils.get_filtered_columns_in_relation(from=ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar"))) %}
-
-{% set calendar_dimensions = [] %}
-{% for dim in calendar_dims %}
-    {% do calendar_dimensions.append(dim | lower) %}
-{% endfor %}
-
-{# Here we are going to ensure that the metrics provided are accurate and that they are present 
-in either the metric definition or the default/custom calendar table #}
-{%- set dimension_list = [] -%}
-{%- for dim in dimensions -%}
-    {%- do dimension_list.append(metrics.is_valid_dimension(metric,dim,calendar_dimensions)) -%}
-{%- endfor -%}
-{%- set dimensions=dimension_list -%}
+{%- set dimensions=metrics.get_dimension_list(dimensions) -%}
 
 {# ############
 LET THE COMPOSITION BEGIN!
@@ -78,24 +62,30 @@ metrics there are #}
 {{metrics.gen_calendar_cte(calendar_tbl,start_date,end_date)}}
 
 {# Next we check if it is a composite metric or single metric by checking the length of the list#}
+{# This filter forms the basis of how we construct the SQL #}
 {%- if metric_list|length > 1 -%}
     
-    {# If composite, we begin by creating a blank list of the cte names to use
-    later and then iterate through each metric to form the query that builds the
-    information we need. #}
+    {# If composite, we begin by looping through each of the metric names that make
+    up the composite metric. #}
     {%for metric_object in metric_list%}
         {%- set loop_metric = metrics.get_metric_relation(metric_object) -%}
         {%- set base_model = loop_metric.model.split('\'')[1]  -%}
         {%- set model = metrics.get_model_relation(base_model if execute else "") %}
-        {{metrics.build_metric_sql(loop_metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl)}}
+        {{ metrics.build_metric_sql(loop_metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl) }}
+        {% if loop.last %}
+            {{ metrics.gen_joined_metrics_cte(metric, grain, dimensions) }}
+            {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,secondary_calculations) }}
+            {{ metrics.get_final_cte(metric,grain,secondary_calculations) }}
+        {% endif %}
     {%- endfor -%}
     
     {# If it is NOT a composite metric, we run the baseline model #}
     {%- else -%}
-        {{metrics.build_metric_sql(metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl)}}
+        {{ metrics.build_metric_sql(metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl) }}
+        {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,secondary_calculations) }}
+        {{ metrics.get_final_cte(metric,grain,secondary_calculations) }}
 
 {%- endif -%}
 
-{{ metrics.gen_final_cte(metric, grain, metric_list, dimensions) }}
 
 {% endmacro %}

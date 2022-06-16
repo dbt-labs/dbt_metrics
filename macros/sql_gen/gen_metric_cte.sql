@@ -1,15 +1,15 @@
-{% macro gen_joined_cte(metric, grain, dimensions) %}
-    {{ return(adapter.dispatch('gen_joined_cte', 'metrics')(metric, grain, dimensions)) }}
+{% macro gen_metric_cte(metric, grain, dimensions) %}
+    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric, grain, dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_joined_cte(metric,grain,dimensions) %}
+{% macro default__gen_metric_cte(metric,grain,dimensions) %}
 
 ,{{metric.name}}__final as (
     
     select
-        date_{{grain}},
+        {{metric.name}}__spine_time.date_{{grain}},
         {% for dim in dimensions %}
-            {{ dim }},
+            {{metric.name}}__spine_time.{{ dim }},
         {%- endfor %}
         ifnull({{metric.name}}, 0) as {{metric.name}}
         

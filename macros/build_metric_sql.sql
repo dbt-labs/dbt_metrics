@@ -4,6 +4,6 @@
     {{metrics.gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl)}}
     {{metrics.gen_dimensions_cte(metric,dimensions)}}
     {{metrics.gen_spine_time_cte(metric,grain,dimensions)}}
-    {{metrics.gen_joined_cte(metric,grain,dimensions)}}
+    {{metrics.gen_metric_cte(metric,grain,dimensions)}}
 
 {% endmacro %}
