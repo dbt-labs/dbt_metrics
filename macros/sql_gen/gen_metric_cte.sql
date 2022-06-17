@@ -1,8 +1,8 @@
-{% macro gen_metric_cte(metric, grain, dimensions,secondary_calculations,relevant_periods,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric, grain, dimensions,secondary_calculations,relevant_periods,calendar_dimensions)) }}
+{% macro gen_metric_cte(metric, grain, dimensions,secondary_calculations,start_date, end_date,relevant_periods,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric, grain, dimensions,secondary_calculations,start_date, end_date,relevant_periods,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_metric_cte(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions) %}
+{% macro default__gen_metric_cte(metric,grain,dimensions,secondary_calculations,start_date, end_date,relevant_periods,calendar_dimensions) %}
 
 ,{{metric.name}}__final as (
     

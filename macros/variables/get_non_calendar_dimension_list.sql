@@ -14,7 +14,6 @@
             {%- do dimension_list.append(dim | lower) -%}
         {%- endif -%}
     {% endfor %}
-    {{ log("Metric Name: " ~ metric.name ~ ", Non Calendar Dimension List: " ~ dimension_list, info=true) }} #}
     {%- do return(dimension_list) -%}
 
 {% endmacro %}

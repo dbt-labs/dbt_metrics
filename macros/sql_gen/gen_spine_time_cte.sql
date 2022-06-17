@@ -28,6 +28,8 @@
 
     from calendar
     cross join {{metric.name}}__dims
+    group by {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
+
 )
 
 {% endmacro %}

@@ -2,7 +2,7 @@ select *
 from 
 {{ metrics.metric(metric('slack_joiners'), 
     grain='month', 
-    dimensions=['has_messaged','is_weekend'], 
+    dimensions=['has_messaged','is_active_past_quarter'], 
     start_date = '2021-01-01',
     end_date = '2021-04-01',
     secondary_calculations=[

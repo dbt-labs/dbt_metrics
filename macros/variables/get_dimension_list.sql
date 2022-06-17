@@ -12,7 +12,6 @@
     {# Here we are going to ensure that the metrics provided are accurate and that they are present 
     in either the metric definition or the default/custom calendar table #}
     {%- set dimension_list = metric.dimensions + calendar_dimensions -%}
-    {{ log("Metric Name: " ~ metric.name ~ ", Dimension List: " ~ dimension_list, info=true) }} #}
     {%- do return(dimension_list) -%}
 
 {% endmacro %}
