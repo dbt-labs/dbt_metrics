@@ -1,4 +1,4 @@
-{% macro get_dimension_list(metric,dimensions) %}
+{% macro get_valid_dimension_list(metric) %}
     
     {# Here we set the calendar as either being the default provided by the package
     or the variable provided in the project #}
@@ -11,11 +11,8 @@
 
     {# Here we are going to ensure that the metrics provided are accurate and that they are present 
     in either the metric definition or the default/custom calendar table #}
-    {%- set dimension_list = [] -%}
-    {%- for dim in dimensions -%}
-        {%- do dimension_list.append(metrics.is_valid_dimension(metric,dim,calendar_dimensions)) -%}
-    {%- endfor -%}
-    
+    {%- set dimension_list = metric.dimensions + calendar_dimensions -%}
+    {{ log("Metric Name: " ~ metric.name ~ ", Dimension List: " ~ dimension_list, info=true) }} #}
     {%- do return(dimension_list) -%}
 
 {% endmacro %}

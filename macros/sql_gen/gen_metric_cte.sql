@@ -1,8 +1,8 @@
-{% macro gen_metric_cte(metric, grain, dimensions,secondary_calculations,relevant_periods) %}
-    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric, grain, dimensions,secondary_calculations,relevant_periods)) }}
+{% macro gen_metric_cte(metric, grain, dimensions,secondary_calculations,relevant_periods,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric, grain, dimensions,secondary_calculations,relevant_periods,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_metric_cte(metric,grain,dimensions,secondary_calculations,relevant_periods) %}
+{% macro default__gen_metric_cte(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions) %}
 
 ,{{metric.name}}__final as (
     
@@ -15,6 +15,10 @@
             {% endfor %}
         {% endif %}
         
+        {% for calendar_dim in calendar_dimensions %}
+            {{metric.name}}__spine_time.{{ calendar_dim }},
+        {%- endfor %}
+
         {% for dim in dimensions %}
             {{metric.name}}__spine_time.{{ dim }},
         {%- endfor %}
@@ -23,6 +27,9 @@
     from {{metric.name}}__spine_time
     left outer join {{metric.name}}__aggregate
         using (date_{{grain}},
+                {% for calendar_dim in calendar_dimensions %}
+                    {{ calendar_dim }},
+                {%- endfor %}
                 {% for dim in dimensions %}
                     {{ dim }}
                     {% if not loop.last %},{% endif %}

@@ -21,7 +21,10 @@ final as (
         cast({{ dbt_utils.date_trunc('month', 'date_day') }} as date) as date_month,
         cast({{ dbt_utils.date_trunc('quarter', 'date_day') }} as date) as date_quarter,
         cast({{ dbt_utils.date_trunc('year', 'date_day') }} as date) as date_year,
-        true as is_weekend
+        case 
+            when dayname(to_date(date_day)) in ('Sat','Sun') then true
+            else false 
+        end as is_weekend
     from days
 )
 

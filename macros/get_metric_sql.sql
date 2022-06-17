@@ -4,12 +4,25 @@
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
+{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
+
+{# ############
+LETS SET SOME VARIABLES!
+############ #}
+
+{%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
+{%- set dimension_list = metrics.get_valid_dimension_list(metric) -%}
+{# We have to break out calendar dimensions as their own list of acceptable dimensions. 
+This is because of the date-spining. If we don't do this, it creates impossible combinations
+of calendar dimension + base dimensions #}
+{%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions,dimension_list) -%}
+{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+{%- set metric_list = metrics.get_metric_list(metric) -%}
 
 {# ############
 TIME TO VALIDATE!!
 ############ #}
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 {%- if not execute %}
     {%- do return("not execute") %}
 {%- endif %}
@@ -37,15 +50,11 @@ TIME TO VALIDATE!!
     {%- do metrics.validate_grain_order(grain, calc_config.period) %}
 {%- endfor %}
 
-{# ############
-LETS SET SOME VARIABLES!
-############ #}
-
-{%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
-
-{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
-{%- set metric_list = metrics.get_metric_list(metric) -%}
-{%- set dimensions=metrics.get_dimension_list(metric,dimensions) -%}
+{# This section will validate that the metric dimensions are contained within the appropriate 
+list of metrics #}
+{%- for dim in dimensions -%}
+    {% do metrics.is_valid_dimension(dim, dimension_list)  %}
+{%- endfor %}
 
 {# ############
 LET THE COMPOSITION BEGIN!
@@ -65,10 +74,10 @@ metrics there are #}
         {%- set loop_metric = metrics.get_metric_relation(metric_object) -%}
         {%- set loop_base_model = loop_metric.model.split('\'')[1]  -%}
         {%- set loop_model = metrics.get_model_relation(loop_base_model if execute else "") %}
-        {{ metrics.build_metric_sql(loop_metric,loop_model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods) }}
+        {{ metrics.build_metric_sql(loop_metric,loop_model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }}
         {% if loop.last %}
-            {{ metrics.gen_joined_metrics_cte(metric, grain, dimensions,metric_list) }}
-            {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations) }}
+            {{ metrics.gen_joined_metrics_cte(metric, grain, dimensions,metric_list,calendar_dimensions) }}
+            {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations,calendar_dimensions) }}
             {{ metrics.gen_final_cte(metric,grain,secondary_calculations) }}
         {% endif %}
     {%- endfor -%}
@@ -81,8 +90,8 @@ metrics there are #}
         {%- set base_model = metric.model.split('\'')[1]  -%}
         {%- set model = metrics.get_model_relation(base_model if execute else "") %}
 
-        {{ metrics.build_metric_sql(metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods) }}
-        {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations) }}
+        {{ metrics.build_metric_sql(metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }}
+        {{ metrics.gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations,calendar_dimensions) }}
         {{ metrics.gen_final_cte(metric,grain,secondary_calculations,metric_list) }}
        
 {%- endif -%}

@@ -1,8 +1,8 @@
-{% macro gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods) %}
-    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods)) }}
+{% macro gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods) %}
+{% macro default__gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
 
     ,{{metric.name}}__aggregate as (
         {# This is the most important CTE. Instead of joining all relevant information
@@ -27,7 +27,10 @@
             {% for dim in dimensions %}
                 {{ dim }},
             {%- endfor %}
-
+            {% for calendar_dim in calendar_dimensions %}
+                {{ calendar_dim }},
+            {%- endfor %}
+            
             {# This line performs the relevant aggregation by calling the 
             gen_primary_metric_aggregate macro. Take a look at that one if you're curious #}
             {{- metrics.gen_primary_metric_aggregate(metric.type, 'property_to_aggregate') }} as {{ metric.name }},

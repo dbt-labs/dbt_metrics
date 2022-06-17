@@ -1,8 +1,8 @@
-{% macro gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods) %}
-    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods)) }}
+{% macro gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods) %}
+{% macro default__gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
 
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
@@ -19,6 +19,9 @@
         -- ALL DIMENSIONS
         {% for dim in dimensions %}
             {{ dim }},
+        {%- endfor %}
+        {% for calendar_dim in calendar_dimensions %}
+            {{ calendar_dim }},
         {%- endfor %}
         {%- if metric.sql and metric.sql | replace('*', '') | trim != '' -%}
             {{ metric.sql }} as property_to_aggregate

@@ -1,12 +1,6 @@
-{% macro is_valid_dimension(metric, dim_name, calendar_dimensions) %}
+{% macro is_valid_dimension(dim_name, dimension_list) %}
     {% if execute %}
-
-        {% set model_dims = metric.dimensions %}
-
-        {% set total_dims = model_dims + calendar_dimensions %}
-        {%- if dim_name in total_dims -%}
-            {%- do return(dim_name) -%}
-        {% else %}
+        {%- if dim_name not in dimension_list -%}
             {%- do exceptions.raise_compiler_error(dim_name ~ " is not a valid dimension") %}
         {%- endif -%}
     {% endif %}
