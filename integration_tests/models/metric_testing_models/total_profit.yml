@@ -1,0 +1,6 @@
+version: 2 
+models: 
+  - name: total_profit
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('total_profit__expected')
