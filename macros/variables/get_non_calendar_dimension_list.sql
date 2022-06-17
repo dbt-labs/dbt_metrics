@@ -1,4 +1,4 @@
-{% macro get_calendar_dimension_list(dimensions,dimension_list) %}
+{% macro get_non_calendar_dimension_list(dimensions) %}
     
     {% set calendar_dims = dbt_utils.get_filtered_columns_in_relation(from=ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar"))) %}
     {% set calendar_dimensions = [] %}
@@ -8,13 +8,13 @@
 
     {# Here we set the calendar as either being the default provided by the package
     or the variable provided in the project #}
-    {% set approved_calendar_dimensions = [] %}
+    {% set dimension_list = [] %}
     {% for dim in dimensions %}
-        {%- if dim in calendar_dimensions -%}
-            {%- do approved_calendar_dimensions.append(dim | lower) -%}
+        {%- if dim not in calendar_dimensions -%}
+            {%- do dimension_list.append(dim | lower) -%}
         {%- endif -%}
     {% endfor %}
-    {{ log("Metric Name: " ~ metric.name ~ ", Calendar Dimension List: " ~ approved_calendar_dimensions, info=true) }} #}
-    {%- do return(approved_calendar_dimensions) -%}
+    {{ log("Metric Name: " ~ metric.name ~ ", Non Calendar Dimension List: " ~ dimension_list, info=true) }} #}
+    {%- do return(dimension_list) -%}
 
 {% endmacro %}

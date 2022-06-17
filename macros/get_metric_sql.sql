@@ -16,6 +16,11 @@ LETS SET SOME VARIABLES!
 This is because of the date-spining. If we don't do this, it creates impossible combinations
 of calendar dimension + base dimensions #}
 {%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions,dimension_list) -%}
+{# Additionally, we also have to restrict the dimensions coming in from the macro to 
+no longer include those we've designated as calendar dimensions. That way they 
+are correctly handled by the spining. We override the dimensions variable for 
+cleanliness#}
+{%- set dimensions = metrics.get_non_calendar_dimension_list(dimensions) -%}
 {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 {%- set metric_list = metrics.get_metric_list(metric) -%}
 
