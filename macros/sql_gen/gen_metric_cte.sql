@@ -28,6 +28,19 @@
                     {% if not loop.last %},{% endif %}
                 {%- endfor %})
 
+    {% if not start_date or not end_date%}
+        where (
+        {% if not start_date and not end_date %}
+            {{metric.name}}__spine_time.date_{{grain}} >= (select min(case when has_data then date_{{grain}} end) from {{metric.name}}__aggregate)
+            and {{metric.name}}__spine_time.date_{{grain}} <= (select max(case when has_data then date_{{grain}} end) from {{metric.name}}__aggregate)
+        {% elif not start_date and end_date %}
+            {{metric.name}}__spine_time.date_{{grain}} >= (select min(case when has_data then date_{{grain}} end) from {{metric.name}}__aggregate)
+        {% elif start_date and not end_date %}
+            {{metric.name}}__spine_time.date_{{grain}} <= (select max(case when has_data then date_{{grain}} end) from {{metric.name}}__aggregate)
+        {% endif %} 
+        )      
+    {% endif %} 
+
 )
 
 {% endmacro %}

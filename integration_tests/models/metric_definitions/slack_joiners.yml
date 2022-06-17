@@ -12,4 +12,3 @@ metrics:
       dimensions: 
         - is_active_past_quarter
         - has_messaged
-        - is_weekend
