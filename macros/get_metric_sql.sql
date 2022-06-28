@@ -7,6 +7,26 @@
 {%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 
 {# ############
+VALIDATION ROUND ONE - THE MACRO LEVEL!
+############ #}
+
+{%- if not execute %}
+    {%- do return("not execute") %}
+{%- endif %}
+
+{%- if not metric %}
+    {%- do exceptions.raise_compiler_error("No metric provided") %}
+{%- endif %}
+
+{%- if not grain %}
+    {%- do exceptions.raise_compiler_error("No date grain provided") %}
+{%- endif %}
+
+{% if metric.type != "expression" and metric.metrics | length > 0 %}
+    {%- do exceptions.raise_compiler_error("The metric was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
+{%- endif %}
+
+{# ############
 LETS SET SOME VARIABLES!
 ############ #}
 
@@ -25,24 +45,8 @@ cleanliness#}
 {%- set metric_list = metrics.get_metric_list(metric) -%}
 
 {# ############
-TIME TO VALIDATE!!
+VALIDATION ROUND TWO - CONFIG ELEMENTS!
 ############ #}
-
-{%- if not execute %}
-    {%- do return("not execute") %}
-{%- endif %}
-
-{%- if not metric %}
-    {%- do exceptions.raise_compiler_error("No metric provided") %}
-{%- endif %}
-
-{%- if not grain %}
-    {%- do exceptions.raise_compiler_error("No date grain provided") %}
-{%- endif %}
-
-{% if metric.type != "expression" and metric.metrics | length > 0 %}
-    {%- do exceptions.raise_compiler_error("The metric was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
-{%- endif %}
 
 {#- /* TODO: Do I need to validate that the requested grain is defined on the metric? */ #}
 {#- /* TODO: build a list of failures and return them all at once*/ #}

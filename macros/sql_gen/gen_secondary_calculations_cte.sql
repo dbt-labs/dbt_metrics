@@ -1,8 +1,8 @@
-{% macro gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'metrics')(metric,dimensions,grain,metric_list,secondary_calculations,calendar_dimensions)) }}
+{% macro gen_secondary_calculation_cte(metric,dimensions,grain,all_metrics,secondary_calculations,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'metrics')(metric,dimensions,grain,all_metrics,secondary_calculations,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_secondary_calculation_cte(metric,dimensions,grain,metric_list,secondary_calculations,calendar_dimensions) %}
+{% macro default__gen_secondary_calculation_cte(metric,dimensions,grain,all_metrics,secondary_calculations,calendar_dimensions) %}
 
 {# The logic for secondary calculations is past the point where having calendar + dim
 in a single list would create issues. So here we join them together. Plus it makes it
@@ -19,7 +19,7 @@ easier for not having to update the working secondary calc logic #}
         {% endfor %}
 
     from 
-        {% if metric_list|length > 1 %} 
+        {% if all_metrics|length > 1 %} 
             joined_metrics
         {% else %} 
             {{metric.name}}__final

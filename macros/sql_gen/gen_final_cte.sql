@@ -1,8 +1,8 @@
-{% macro gen_final_cte(metric,grain,dimensions,secondary_calculations,metric_list) %}
-    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(metric,grain,dimensions,secondary_calculations,metric_list)) }}
+{% macro gen_final_cte(metric,grain,dimensions,secondary_calculations) %}
+    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(metric,grain,dimensions,secondary_calculations)) }}
 {% endmacro %}
 
-{% macro default__gen_final_cte(metric,grain,dimensions,secondary_calculations,metric_list) %}
+{% macro default__gen_final_cte(metric,grain,dimensions,secondary_calculations) %}
 
 {%- if metric.metrics | length > 0 %}
 
