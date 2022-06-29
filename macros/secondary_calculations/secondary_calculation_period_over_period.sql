@@ -16,7 +16,10 @@
     
     {% elif calc_config.comparison_strategy == 'ratio' %}
         {% do return (adapter.dispatch('metric_comparison_strategy_ratio', 'metrics')(metric_name, calc_sql)) %}
-    
+
+    {% elif calc_config.comparison_strategy == 'prior' %}
+        {% do return (adapter.dispatch('metric_comparison_strategy_prior', 'metrics')(metric_name, calc_sql)) %}
+
     {% else %}
         {% do exceptions.raise_compiler_error("Bad comparison_strategy for period_over_period: " ~ calc_config.comparison_strategy ~ ". calc_config: " ~ calc_config) %}
     {% endif %}
@@ -29,6 +32,10 @@
 
 {% macro default__metric_comparison_strategy_ratio(metric_name, calc_sql) %}
     cast(coalesce({{ metric_name }}, 0) / nullif({{ calc_sql }}, 0) as {{ dbt_utils.type_float() }})
+{% endmacro %}
+
+{% macro default__metric_comparison_strategy_prior(metric_name, calc_sql) %}
+    {{ calc_sql }}
 {% endmacro %}
 
 {% macro period_over_period(comparison_strategy, interval, alias) %}

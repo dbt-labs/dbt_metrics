@@ -11,7 +11,8 @@
         {"input_object": metrics.period_over_period(interval=4, comparison_strategy='difference'), "expected_alias": 'difference_to_4_fortnight_ago'},
         {"input_object": metrics.period_over_period('ratio', 5), "expected_alias": 'ratio_to_5_fortnight_ago'},
         {"input_object": {"calculation": "period_over_period", "comparison_strategy": "difference", "interval": 6}, "expected_alias": "difference_to_6_fortnight_ago"},
-        
+        {"input_object": metrics.period_over_period('prior', 7), "expected_alias": 'metric_value_7_fortnight_ago'},
+
         {"input_object": metrics.period_to_date(alias='ptd_constructor_named_args_manual_alias', aggregate='average', period="day"), "expected_alias": 'ptd_constructor_named_args_manual_alias'},
         {"input_object": metrics.period_to_date('average', "week", 'ptd_constructor_positional_args_manual_alias'), "expected_alias": 'ptd_constructor_positional_args_manual_alias'},
         {"input_object": {"calculation": "period_to_date", "aggregate": "average", "period": "month", "alias": "ptd_object_manual_alias"}, "expected_alias": "ptd_object_manual_alias"},
