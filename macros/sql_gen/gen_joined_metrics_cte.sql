@@ -1,8 +1,13 @@
-{% macro gen_joined_metrics_cte(metric,grain,dimensions,metric_list,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric,grain,dimensions,metric_list,calendar_dimensions)) }}
+{% macro gen_joined_metrics_cte(leaf_set,expression_set,grain,dimensions,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,grain,dimensions,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_joined_metrics_cte(metric,grain,dimensions,metric_list,calendar_dimensions) %}
+{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,grain,dimensions,calendar_dimensions) %}
+
+{# 
+Add leaf metric list
+Add expression metric list
+ #}
 
     ,joined_metrics as (
 
@@ -11,7 +16,7 @@
 
         {% for calendar_dim in calendar_dimensions %}
             coalesce(
-            {% for metric_name in metric_list %}
+            {% for metric_name in leaf_set %}
                 {{metric_name}}__final.{{ calendar_dim }}
                 {% if not loop.last %},{% endif %}
             {% endfor %}
@@ -21,21 +26,26 @@
 
         {% for dim in dimensions %}
             coalesce(
-            {% for metric_name in metric_list %}
+            {% for metric_name in leaf_set %}
                 {{metric_name}}__final.{{ dim }}
                 {% if not loop.last %},{% endif %}
             {% endfor %}
             ) as {{dim}},
         {%- endfor %}
 
-        {% for metric_name in metric_list %}
+        {% for metric_name in leaf_set %}
             {{metric_name}},
         {% endfor %}  
 
-        ({{metric.sql | replace(".metric_value","")}}) as {{metric.name}}
+        {% for metric_name in expression_set %}
+            {%- set expression_metric = metrics.get_metric_relation(metric_name) -%}
+            {{expression_metric.sql | replace(".metric_value","")}} as {{expression_metric.name}}
+            {% if not loop.last %},{%endif%}
+        {% endfor %}  
 
         from 
-            {% for metric_name in metric_list %}
+            {# Loop through leaf metric list #}
+            {% for metric_name in leaf_set %}
                 {% if loop.first %}
                     {{metric_name}}__final
                 {% else %}

@@ -1,10 +1,10 @@
-{% macro gen_final_cte(metric,grain,dimensions,secondary_calculations) %}
-    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(metric,grain,dimensions,secondary_calculations)) }}
+{% macro gen_final_cte(base_set,grain,full_set,secondary_calculations) %}
+    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(base_set,grain,full_set,secondary_calculations)) }}
 {% endmacro %}
 
-{% macro default__gen_final_cte(metric,grain,dimensions,secondary_calculations) %}
+{% macro default__gen_final_cte(base_set,grain,full_set,secondary_calculations) %}
 
-{%- if metric.metrics | length > 0 %}
+{%- if full_set | length > 1 %}
 
     {% if secondary_calculations | length > 0 %}
 
@@ -42,7 +42,7 @@
 
         -- single metric without secondary calculations
 
-        select * from {{metric.name}}__final 
+        select * from {{base_set}}__final 
 
     {% endif %}
 

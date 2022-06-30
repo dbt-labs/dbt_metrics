@@ -1,22 +1,18 @@
-{% macro get_metric_parents(metric,metric_tree)%}
+{% macro get_metric_tree(metric,metric_tree)%}
     
     {# Now we see if the node already exists in the metric tree and return that if 
     it does so that we're not creating duplicates #}
-    {%- if metric_tree[metric.unique_id] is defined -%}
+    {%- if metric.name not in metric_tree|map(attribute="full_set") -%}
 
-        {% do return(metric_tree[node.unique_id]) -%}
+        {%- set full_set = metric_tree["full_set"] -%}
+        {%- do full_set.append(metric.name) -%}
+        {%- do metric_tree.update({'full_set':full_set}) -%}
 
     {%- endif -%}
-
-    {# {{ log("Inside Macro Depends on: " ~ node.depends_on, info=true) }} #}
-
 
     {# Here we create two sets, sets being the same as lists but they account for uniqueness. 
     One is the full set, which contains all of the parent metrics and the other is the leaf
     set, which we'll use to determine the leaf, or base metrics. #}
-    {%- set full_set = {} -%}
-    {# {%- set full_set = [] -%} #}
-    {%- set leaf_set = [] -%}
 
     {# We define parent nodes as being the parent nodes that begin with metric, which lets
     us filter out model nodes #}
@@ -33,31 +29,38 @@
                 {# Then we add the parent_id of the metric to the full set. If it already existed
                 then it won't make an impact but we want to make sure it is represented #}
                 {# {%- do full_set.append(parent_id) -%} #}
-                {%- do full_set.update({parent_id: parent_id}) -%}
-
+                {%- set full_set_plus = metric_tree["full_set"] -%}
+                {%- if parent_id in metric_tree|map(attribute="full_set") -%}
+                    {%- do full_set_plus.append(parent_id) -%}
+                {%- endif -%}
+                {%- do metric_tree.update({'full_set':full_set_plus}) -%}
                 {# The parent_id variable here is a mapping back to the provided manifest and doesn't 
                 allow for string parsing. So we create this variable to use instead #}
-                {%- set parent_metric_name = (parent_id | string).split('.')[2] -%}
+                {# {%- set parent_metric_name = (parent_id | string).split('.')[2] -%} #}
 
                 {# And here we re-run the current macro but fill in the parent_id so that we loop again
                 with that metric information. You may be wondering, why are you using parent_id? Doesn't 
                 the DAG always go from parent to child? Normally, yes! With this, no! We're reversing the 
                 DAG and going up to parents to find the leaf nodes that are really parent nodes. #}
-                {%- set new_parent = metrics.get_metric_relation(parent_metric_name) -%}
-                {# {%- do full_set.append(metrics.get_metric_parents(new_parent,metric_tree)) -%} #}
-                {{ log("Parent ID: " ~ new_parent, info=true) }}
+                {%- set new_parent = metrics.get_metric_relation(parent_id) -%}
+
+                {%- set metric_tree =  metrics.get_metric_tree(new_parent,metric_tree) -%}
 
             {%- endfor -%}
         
         {%- else -%}
 
-            {%- do leaf_set.append(metric.unique_id) -%}
+            {%- set leaf_set_plus = metric_tree["leaf_set"] -%}
+            {%- if parent_id in metric_tree|map(attribute="full_set") -%}
+                {%- do leaf_set_plus.append(metric.name) -%}
+            {%- endif -%}
+            {%- do metric_tree.update({'leaf_set':leaf_set_plus}) -%}
 
         {%- endif -%}
 
-    {# {%- do metric_tree.update({'full_set': full_set}) -%} #}
-    {# {%- do metric_tree.update({'leaf_set': leaf_set}) -%} #}
+        {%- set expression_set_plus = ( metric_tree["full_set"] | reject('in',metric_tree["leaf_set"]) | list) -%}
+        {%- do metric_tree.update({'expression_set':expression_set_plus}) -%}
 
-    {%- do return(full_set) -%}
+    {%- do return(metric_tree) -%}
 
 {% endmacro %}

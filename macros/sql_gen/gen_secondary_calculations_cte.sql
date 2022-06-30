@@ -1,8 +1,8 @@
-{% macro gen_secondary_calculation_cte(metric,dimensions,grain,all_metrics,secondary_calculations,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'metrics')(metric,dimensions,grain,all_metrics,secondary_calculations,calendar_dimensions)) }}
+{% macro gen_secondary_calculation_cte(base_set,dimensions,grain,full_set,secondary_calculations,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'metrics')(base_set,dimensions,grain,full_set,secondary_calculations,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_secondary_calculation_cte(metric,dimensions,grain,all_metrics,secondary_calculations,calendar_dimensions) %}
+{% macro default__gen_secondary_calculation_cte(base_set,dimensions,grain,full_set,secondary_calculations,calendar_dimensions) %}
 
 {# The logic for secondary calculations is past the point where having calendar + dim
 in a single list would create issues. So here we join them together. Plus it makes it
@@ -12,17 +12,35 @@ easier for not having to update the working secondary calc logic #}
 ,secondary_calculations as (
 
     select *
+        
+        {# Checking if base_set is a list - which you'd think would have its own test but no
+        Jinja doesn't have that built in so we have to hack it by checking if it is an 
+        iterable variable and NOT sring /mapping #}
+        {% if base_set is iterable and (base_set is not string and base_set is not mapping) %} 
 
-        {% for calc_config in secondary_calculations -%}
-            , {{ metrics.perform_secondary_calculation(metric.name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
+            {% for metric_name in base_set -%}
 
-        {% endfor %}
+                {% for calc_config in secondary_calculations -%}
+                    , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
+
+                {% endfor %}
+
+            {% endfor %}
+
+        {% else %}
+
+            {% for calc_config in secondary_calculations -%}
+                , {{ metrics.perform_secondary_calculation(base_set, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
+
+            {% endfor %}
+
+        {% endif %}
 
     from 
-        {% if all_metrics|length > 1 %} 
+        {% if full_set|length > 1 %} 
             joined_metrics
         {% else %} 
-            {{metric.name}}__final
+            {{base_set}}__final
         {% endif %}
 )
 

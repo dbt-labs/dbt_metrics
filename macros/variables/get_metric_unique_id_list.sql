@@ -12,7 +12,7 @@
         right now its a list of lists #}
         {%- for node in node_list -%}  
             {%- if node.split('.')[0] == 'metric' -%}
-                {% do metric_list.append(node) %} 
+                {% do metric_list.append(node.split('.')[2]) %} 
             {%- endif -%}
         {%- endfor -%}
 
