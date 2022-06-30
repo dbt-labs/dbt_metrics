@@ -3,7 +3,7 @@
     - Expect failure when missing arguments
 -#}
 
-{%- set test_cases =
+{# {%- set test_cases =
     [
         {"input_object": metrics.period_over_period(alias='pop_constructor_named_args_manual_alias', comparison_strategy='difference', interval=1), "expected_alias": 'pop_constructor_named_args_manual_alias'},
         {"input_object": metrics.period_over_period('ratio', 2, 'pop_constructor_positional_args_manual_alias'), "expected_alias": 'pop_constructor_positional_args_manual_alias'},
@@ -40,4 +40,4 @@ with reality_vs_expectations as (
 
 select * 
 from reality_vs_expectations
-where generated_alias != expected_alias
+where generated_alias != expected_alias #}

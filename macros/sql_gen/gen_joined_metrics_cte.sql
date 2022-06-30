@@ -34,11 +34,13 @@ Add expression metric list
         {%- endfor %}
 
         {% for metric_name in leaf_set %}
-            {{metric_name}},
+            {{metric_name}}
+            {% if not loop.last %},{%endif%}
         {% endfor %}  
 
         {% for metric_name in expression_set %}
             {%- set expression_metric = metrics.get_metric_relation(metric_name) -%}
+            {% if loop.first %},{%endif%}
             {{expression_metric.sql | replace(".metric_value","")}} as {{expression_metric.name}}
             {% if not loop.last %},{%endif%}
         {% endfor %}  
