@@ -4,9 +4,9 @@
 * [dbt_metrics](#dbt_metrics)
 * [About](#about)
    * [Installation Instructions](#installation-instructions)
-   * [A note on refs](#️-a-note-on-refs)
 * [Usage](#usage)
-* [Use cases](#use-cases)
+* [Use cases and examples](#use-cases-and-examples)
+   * [Jaffle Shop Metrics](#jaffle-shop-metrics)
    * [Inside of dbt Models](#inside-of-dbt-models)
    * [Via the interactive dbt server (coming soon)](#via-the-interactive-dbt-server-coming-soon)
 * [Secondary calculations](#secondary-calculations)
@@ -16,14 +16,13 @@
 * [Customisation](#customisation)
    * [Where Clauses](#where-clauses)
    * [Calendar](#calendar)
+      * [Dimensions from calendar tables](#dimensions-from-calendar-tables)
    * [Time Grains](#time-grains)
    * [Custom aggregations](#custom-aggregations)
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
-* [Experimental behaviour](#-experimental-behaviour)
-   * [Dimensions on calendar tables](#dimensions-on-calendar-tables)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Fri Jun 17 01:22:04 UTC 2022 -->
+<!-- Added by: runner, at: Thu Jun 30 19:09:35 UTC 2022 -->
 
 <!--te-->
 
