@@ -1,8 +1,8 @@
-{% macro gen_joined_metrics_cte(leaf_set,expression_set,grain,dimensions,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,grain,dimensions,calendar_dimensions)) }}
+{% macro gen_joined_metrics_cte(leaf_set,expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods) %}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods)) }}
 {% endmacro %}
 
-{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,grain,dimensions,calendar_dimensions) %}
+{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods) %}
 
 {# 
 Add leaf metric list
@@ -22,6 +22,17 @@ Add expression metric list
             {% endfor %}
             ) as {{calendar_dim}},
         {%- endfor %}
+
+        {% if secondary_calculations | length > 0 %}
+            {% for period in relevant_periods %}
+                coalesce(
+                {% for metric_name in leaf_set %}
+                    {{metric_name}}__final.date_{{ period }}
+                    {% if not loop.last %},{% endif %}
+                {% endfor %}
+                ) as date_{{period}},
+            {% endfor %}
+        {% endif %}
 
 
         {% for dim in dimensions %}

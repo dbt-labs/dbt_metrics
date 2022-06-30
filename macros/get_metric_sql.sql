@@ -149,22 +149,22 @@ metrics there are #}
         {{ metrics.build_metric_sql(loop_metric,loop_model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }}
     {% endfor %}
 
-    {{ metrics.gen_joined_metrics_cte(metric_tree["leaf_set"],metric_tree["expression_set"], grain, dimensions,calendar_dimensions) }}
+    {{ metrics.gen_joined_metrics_cte(metric_tree["leaf_set"],metric_tree["expression_set"], grain, dimensions,calendar_dimensions,secondary_calculations,relevant_periods) }}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"],dimensions,grain,metric_tree["full_set"],secondary_calculations,calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"],grain,metric_tree["full_set"],secondary_calculations) }}
     
     {# If it is NOT a composite metric, we run the baseline model #}
-    {%- else -%}
+{%- else -%}
 
-        {# We only set these variables here because they're only needed if it isn't a 
-        composite metric #}
-        {%- set base_model = single_metric.model.split('\'')[1]  -%}
-        {%- set model = metrics.get_model_relation(base_model if execute else "") %}
+    {# We only set these variables here because they're only needed if it isn't a 
+    composite metric #}
+    {%- set base_model = single_metric.model.split('\'')[1]  -%}
+    {%- set model = metrics.get_model_relation(base_model if execute else "") %}
 
-        {{ metrics.build_metric_sql(single_metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }}
-        {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"],dimensions,grain,metric_tree["full_set"],secondary_calculations,calendar_dimensions) }}
-        {{ metrics.gen_final_cte(metric_tree["base_set"],grain,metric_tree["full_set"],secondary_calculations) }}
-       
+    {{ metrics.build_metric_sql(single_metric,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }}
+    {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"],dimensions,grain,metric_tree["full_set"],secondary_calculations,calendar_dimensions) }}
+    {{ metrics.gen_final_cte(metric_tree["base_set"],grain,metric_tree["full_set"],secondary_calculations) }}
+    
 {%- endif -%}
 
 {% endmacro %}
