@@ -47,6 +47,7 @@ from {{ metrics.metric(
     secondary_calculations=[
         metrics.period_over_period(comparison_strategy="ratio", interval=1, alias="pop_1wk"),
         metrics.period_over_period(comparison_strategy="difference", interval=1),
+        metrics.period_over_period(comparison_strategy="prior", interval=1),
 
         metrics.period_to_date(aggregate="average", period="month", alias="this_month_average"),
         metrics.period_to_date(aggregate="sum", period="year"),
@@ -93,7 +94,7 @@ Column aliases are [automatically generated](#secondary-calculation-column-alias
 
 Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias])`
 
-- `comparison_strategy`: How to calculate the delta between the two periods. One of [`"ratio"`, `"difference"`]. Required
+- `comparison_strategy`: How to calculate the delta between the two periods. One of [`"ratio"`, `"difference"`, `"prior"`]. Required
 - `interval`: The number of periods to look back. Required
 - `alias`: The column alias for the resulting calculation. Optional
 

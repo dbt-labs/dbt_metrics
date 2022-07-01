@@ -11,8 +11,12 @@
     
     {%- set calc_type = calc_config.calculation %}
     {%- if calc_type == 'period_over_period' %}
-        {%- do return(calc_config.comparison_strategy ~ "_to_" ~ calc_config.interval ~ "_" ~ grain ~ "_ago") %}
-   
+        {% if calc_config.comparison_strategy == 'prior' %}
+            {%- do return("metric_value_" ~ calc_config.interval ~ "_" ~ grain ~ "_ago") %}
+        {% else %}
+            {%- do return(calc_config.comparison_strategy ~ "_to_" ~ calc_config.interval ~ "_" ~ grain ~ "_ago") %}
+        {% endif %}
+
     {%- elif calc_type == 'rolling' %}
         {%- do return("rolling_" ~ calc_config.aggregate ~ "_" ~ calc_config.interval ~ "_" ~ grain) %}
     
