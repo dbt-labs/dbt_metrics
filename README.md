@@ -124,6 +124,22 @@ Constructor: `metrics.rolling(aggregate, interval [, alias])`
 # Customisation
 Most behaviour in the package can be overridden or customised.
 
+## Multiple Metrics
+There may be instances where you want to return multiple metrics within a single macro. This is possible by providing a list of metrics instead of a single metric. See example below:
+
+```sql
+  select *
+  from 
+  {{ metrics.metric(
+      [metric('base_sum_metric'), metric('base_average_metric')], 
+      grain='day', 
+      dimensions=['had_discount']
+  }}
+```
+
+**Note**: The metrics must share the `time_grain` selected in the macro AND the `dimensions` selected in the macro. If these are not shared between the 2+ metrics, this behaviour will fail. Additionally, secondary calculations can be used for multiple metrics but each secondary calculation will be applied against each metric and returned in a field that matches the following pattern: `metric_name_secondary_calculation_alias`.
+
+
 ## Where Clauses
 Sometimes you'll want to see the metric in the context of a particular filter but this filter isn't neccesarily part of the metric definition. In this case, you can use the `where` parameter of the metrics package. It takes a list of `sql` statements and adds them in as filters to the first CTE in the produced SQL. This reduces the load on the query planner to run full table scans and will hopefully improve performance.
 
