@@ -5,8 +5,8 @@ from
     grain='day', 
     dimensions=['had_discount'], 
     secondary_calculations=[
-      {"calculation": "rolling", "interval": 3, "aggregate": "average", "alias": "avg_3mth"},
-      {"calculation": "rolling", "interval": 3, "aggregate": "sum"}
+      {"calculation": "rolling", "interval": 3, "aggregate": "min", "alias": "min_3mth"},
+      {"calculation": "rolling", "interval": 3, "aggregate": "max", "alias": "max_3mth"}
     ] 
     )
 }}

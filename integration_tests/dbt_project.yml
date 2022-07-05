@@ -24,3 +24,10 @@ clean-targets:
 vars:
   dbt_metrics_calendar_model: custom_calendar
   testing: fact_orders
+
+seeds:
+  dbt_metrics_integration_tests: # you must include the project name
+    expected:
+      multiple_metrics__period_over_period_expected:
+        +column_types:
+          base_average_metric: number(38,6)
