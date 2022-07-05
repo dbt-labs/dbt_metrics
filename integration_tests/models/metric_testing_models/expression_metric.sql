@@ -1,6 +1,6 @@
 select *
 from 
-{{ metrics.metric(metric('total_profit'), 
+{{ metrics.metric(metric('expression_metric'), 
     grain='day', 
     dimensions=['had_discount','order_country','is_weekend'],
     start_date = '2022-01-01',

@@ -1,4 +1,4 @@
-{% macro get_metric_tree(metric,metric_tree)%}
+{% macro get_metric_tree(metric,metric_tree,metric_count=1000)%}
     
     {# Now we see if the node already exists in the metric tree and return that if 
     it does so that we're not creating duplicates #}
@@ -9,6 +9,9 @@
         {%- do metric_tree.update({'full_set':full_set}) -%}
 
     {%- endif -%}
+
+    {%- do metric_tree["ordered_expression_set"].update({metric.name:metric_count}) -%}
+    {%- set metric_count = metric_count - 1 -%}
 
     {# Here we create two sets, sets being the same as lists but they account for uniqueness. 
     One is the full set, which contains all of the parent metrics and the other is the leaf
@@ -44,7 +47,7 @@
                 DAG and going up to parents to find the leaf nodes that are really parent nodes. #}
                 {%- set new_parent = metrics.get_metric_relation(parent_id) -%}
 
-                {%- set metric_tree =  metrics.get_metric_tree(new_parent,metric_tree) -%}
+                {%- set metric_tree =  metrics.get_metric_tree(new_parent,metric_tree,metric_count) -%}
 
             {%- endfor -%}
         

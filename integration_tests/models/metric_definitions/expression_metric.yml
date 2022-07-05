@@ -1,12 +1,12 @@
 version: 2 
 
 metrics:
-  - name: total_profit
+  - name: expression_metric
     label: Profit ($)
     timestamp: order_date
     time_grains: [day, week]
     type: expression
-    sql: "{{metric('sum_order_total')}} - {{metric('sum_discount_total')}}"
+    sql: "{{metric('base_sum_metric')}} - {{metric('base_average_metric')}}"
     dimensions:
       - had_discount
       - order_country

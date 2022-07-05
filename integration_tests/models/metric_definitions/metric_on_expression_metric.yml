@@ -1,11 +1,11 @@
 version: 2 
 metrics:
-  - name: total_profit_minus_taxes
+  - name: metric_on_expression_metric
     label: Profit Minus Our Civic Duty
     timestamp: order_date
     time_grains: [day, week]
     type: expression
-    sql: "{{metric('total_profit')}} - 5"
+    sql: "{{metric('expression_metric')}} - 5"
     dimensions:
       - had_discount
       - order_country

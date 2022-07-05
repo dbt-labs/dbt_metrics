@@ -49,7 +49,7 @@ LETS SET SOME VARIABLES!
 
 {# We are creating the metric tree here - this includes all the leafs (first level parents)
 , the expression metrics, and the full combination of them both #}
-{%- set metric_tree = {'full_set':[],'leaf_set':[],'expression_set':[],'base_set':[]} -%}
+{%- set metric_tree = {'full_set':[],'leaf_set':[],'expression_set':[],'base_set':[],'ordered_expression_set':{}} -%}
 
 {% if metric_list is iterable and (metric_list is not string and metric_list is not mapping) %} 
     {% set base_set_list = []%}
@@ -64,7 +64,18 @@ LETS SET SOME VARIABLES!
     {%- set metric_tree = metrics.get_metric_tree(single_metric ,metric_tree) -%}
 {% endif %}
 
+{# This section overrides the expression set by ordering the metrics on their depth so they 
+can be correctly referenced in the downstream sql query #}
+{% set ordered_expression_list = []%}
+{% for item in metric_tree['ordered_expression_set']|dictsort(false, 'value') %}
+    {% if item[0] in metric_tree["expression_set"]%}
+        {% do ordered_expression_list.append(item[0])%}
+    {% endif %}
+{% endfor %}
+{%- do metric_tree.update({'expression_set':ordered_expression_list}) -%}
 
+{# Here we set the calendar table as a variable, which ensures the default overwritten if they include
+a custom calendar #}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
 
 {# Here we are creating the dimension list which has the list of all dimensions that 

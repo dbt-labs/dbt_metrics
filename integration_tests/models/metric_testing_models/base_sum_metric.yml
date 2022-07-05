@@ -1,0 +1,6 @@
+version: 2 
+models: 
+  - name: base_sum_metric
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('base_sum_metric__expected')
