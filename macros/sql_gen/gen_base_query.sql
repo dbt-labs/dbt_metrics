@@ -9,7 +9,7 @@
     select 
         {# This section looks at the sql aspect of the metric and ensures that 
         the value input into the macro is accurate #}
-        to_date({{metric.timestamp}}) as metric_date_day, -- timestamp field
+        cast({{metric.timestamp}} as date) as metric_date_day, -- timestamp field
         {{calendar_tbl}}.date_{{ grain }} as date_{{grain}},
         {% if secondary_calculations | length > 0 %}
             {% for period in relevant_periods %}
@@ -31,7 +31,7 @@
             {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric.name ~ "`") -%}  
         {%- endif %}
     from {{ model }}
-    left join {{calendar_tbl}} on to_date({{metric.timestamp}}) = date_day
+    left join {{calendar_tbl}} on cast({{metric.timestamp}} as date) = date_day
     where 1=1
     
     -- metric start/end dates also applied here to limit incoming data
