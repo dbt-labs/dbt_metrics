@@ -1,8 +1,0 @@
-version: 2
-
-seeds:
-  - name: multiple_metrics__period_over_period_expected
-    config:
-      column_types: {BASE_AVERAGE_METRIC: 'number(38,6)'
-                    ,BASE_AVERAGE_METRIC_POP_1MTH: 'number(38,6)'
-                    ,BASE_AVERAGE_METRIC_RATIO_TO_1_DAY_AGO: 'number(38,10)'}
