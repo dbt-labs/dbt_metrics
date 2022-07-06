@@ -1,4 +1,4 @@
-﻿DATE_MONTH,DATE_YEAR,HAS_MESSAGED,IS_ACTIVE_PAST_QUARTER,BASE_COUNT_METRIC,POP_1MTH,RATIO_TO_1_MONTH_AGO,YTD_SUM,MAX_FOR_MONTH,AVG_3MTH,ROLLING_SUM_3_MONTH
+﻿date_month,date_year,has_messaged,is_active_past_quarter,base_count_metric,pop_1mth,ratio_to_1_month_ago,ytd_sum,max_for_month,avg_3mth,rolling_sum_3_month
 2021-01-01,2021-01-01,TRUE,FALSE,0,0,,0,0,0.000,0
 2021-02-01,2021-01-01,TRUE,FALSE,1,1,,1,1,0.500,1
 2021-03-01,2021-01-01,TRUE,FALSE,0,-1,0,1,0,0.333,1

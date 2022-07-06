@@ -64,6 +64,32 @@ LETS SET SOME VARIABLES!
     {%- set metric_tree = metrics.get_metric_tree(single_metric ,metric_tree) -%}
 {% endif %}
 
+{# Now we will iterate over the metric tree and make it a unique list to account for duplicates #}
+{% set full_set = [] %}
+{% set leaf_set = [] %}
+{% set expression_set = [] %}
+{% set base_set = [] %}
+
+{% for metric in metric_tree['full_set']|unique%}
+    {% do full_set.append(metric)%}
+{% endfor %}
+{%- do metric_tree.update({'full_set':full_set}) -%}
+
+{% for metric in metric_tree['leaf_set']|unique%}
+    {% do leaf_set.append(metric)%}
+{% endfor %}
+{%- do metric_tree.update({'leaf_set':leaf_set}) -%}
+
+
+{% for metric in metric_tree['expression_set']|unique%}
+    {% do expression_set.append(metric)%}
+{% endfor %}
+{%- do metric_tree.update({'expression_set':expression_set}) -%}
+
+{% for metric in metric_tree['leaf_set']|unique%}
+    {%- do metric_tree['ordered_expression_set'].pop(metric) -%}
+{% endfor %}
+
 {# This section overrides the expression set by ordering the metrics on their depth so they 
 can be correctly referenced in the downstream sql query #}
 {% set ordered_expression_list = []%}
@@ -160,7 +186,7 @@ metrics there are #}
         {{ metrics.build_metric_sql(loop_metric,loop_model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }}
     {% endfor %}
 
-    {{ metrics.gen_joined_metrics_cte(metric_tree["leaf_set"],metric_tree["expression_set"], grain, dimensions,calendar_dimensions,secondary_calculations,relevant_periods) }}
+    {{ metrics.gen_joined_metrics_cte(metric_tree["leaf_set"],metric_tree["expression_set"],metric_tree["ordered_expression_set"], grain, dimensions,calendar_dimensions,secondary_calculations,relevant_periods) }}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"],dimensions,grain,metric_tree["full_set"],secondary_calculations,calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"],grain,metric_tree["full_set"],secondary_calculations) }}
     

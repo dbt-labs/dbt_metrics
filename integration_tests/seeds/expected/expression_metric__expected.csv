@@ -1,4 +1,4 @@
-﻿DATE_DAY,IS_WEEKEND,HAD_DISCOUNT,ORDER_COUNTRY,BASE_SUM_METRIC,BASE_AVERAGE_METRIC,EXPRESSION_METRIC
+﻿date_day,is_weekend,had_discount,order_country,base_sum_metric,base_average_metric,expression_metric
 2022-01-01,TRUE,TRUE,Kazakhstan,0,0.000000,0.000000
 2022-01-02,TRUE,TRUE,Kazakhstan,0,0.000000,0.000000
 2022-01-03,TRUE,TRUE,Kazakhstan,0,0.000000,0.000000
