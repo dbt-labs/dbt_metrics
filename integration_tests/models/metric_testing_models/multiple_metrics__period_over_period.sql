@@ -14,12 +14,12 @@ with metric as (
 )
 
 select 
-  "DATE_DAY"
-  ,"HAD_DISCOUNT"
-  ,"BASE_SUM_METRIC"
-  ,"BASE_AVERAGE_METRIC"::float as "BASE_AVERAGE_METRIC"
-  ,"BASE_SUM_METRIC_POP_1MTH"
-  ,"BASE_SUM_METRIC_RATIO_TO_1_DAY_AGO"::float as "BASE_SUM_METRIC_RATIO_TO_1_DAY_AGO"
-  ,"BASE_AVERAGE_METRIC_POP_1MTH"::float as "BASE_AVERAGE_METRIC_POP_1MTH"
-  ,"BASE_AVERAGE_METRIC_RATIO_TO_1_DAY_AGO"::float as "BASE_AVERAGE_METRIC_RATIO_TO_1_DAY_AGO" 
+  date_day
+  ,had_discount
+  ,base_sum_metric
+  ,base_average_metric::float as base_average_metric
+  ,base_sum_metric_pop_1mth
+  ,base_sum_metric_ratio_to_1_day_ago::float as base_sum_metric_ratio_to_1_day_ago
+  ,base_average_metric_pop_1mth::float as base_average_metric_pop_1mth
+  ,base_average_metric_ratio_to_1_day_ago::float as base_average_metric_ratio_to_1_day_ago
 from metric 
