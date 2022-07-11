@@ -12,6 +12,16 @@ VARIABLE SETTING ROUND 1: List Vs Single Metric!
 
 {% if metric_list is not iterable %}
     {% set single_metric = metric_list %}
+    {% set is_multi_metric = false %}
+
+{% elif metric_list | length == 1 %}
+    {% set single_metric = metric_list[0] %}
+    {% set is_multi_metric = false %}
+
+{% else %}
+
+    {% set is_multi_metric = true %}
+
 {% endif %}
 
 
@@ -31,7 +41,11 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
 
-{% if metric_list is iterable and (metric_list is not string and metric_list is not mapping) %} 
+{# #### TODO: CREATE MACRO FOR ERROR MESSAGE
+        - reshape so we can loop in all circumstances 
+  #}
+
+{% if not is_multi_metric %}
     {% for metric in metric_list %}
         {% if metric.type != "expression" and metric.metrics | length > 0 %}
             {%- do exceptions.raise_compiler_error("The metric " ~ metric.name ~ " was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
@@ -171,6 +185,8 @@ LET THE COMPOSITION BEGIN!
 {# First we add the calendar table - we only need to do this once no matter how many
 metrics there are #}
 {{metrics.gen_calendar_cte(calendar_tbl,start_date,end_date)}}
+
+{# TODO - Have everything in one loop #}
 
 {# Next we check if it is a composite metric or single metric by checking the length of the list#}
 {# This filter forms the basis of how we construct the SQL #}
