@@ -46,7 +46,7 @@ packages:
 Access metrics [like any other macro](https://docs.getdbt.com/docs/building-a-dbt-project/jinja-macros#using-a-macro-from-a-package): 
 ```sql
 select * 
-from {{ metrics.metric(
+from {{ metrics.calculate(
     metric('new_customers'),
     grain='week',
     dimensions=['plan', 'country'],
@@ -135,7 +135,7 @@ There may be instances where you want to return multiple metrics within a single
 ```sql
   select *
   from 
-  {{ metrics.metric(
+  {{ metrics.calculate(
       [metric('base_sum_metric'), metric('base_average_metric')], 
       grain='day', 
       dimensions=['had_discount']
