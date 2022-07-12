@@ -1,13 +1,13 @@
 version: 2 
 metrics:
-    - name: slack_joiners
+    - name: base_count_metric
       label: Members of Community Slack
       model: ref('seed_slack_users')
 
       type: count
       sql: "*"
       timestamp: joined_at
-      time_grains: [day, week, month] #does it make sense to have num weekly active members over a month?
+      time_grains: [day, week, month] 
 
       dimensions: 
         - is_active_past_quarter

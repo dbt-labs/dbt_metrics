@@ -1,0 +1,6 @@
+version: 2 
+models: 
+  - name: base_average_metric
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('base_average_metric__expected')

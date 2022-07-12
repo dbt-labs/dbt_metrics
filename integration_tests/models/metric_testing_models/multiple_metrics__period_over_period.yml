@@ -1,0 +1,14 @@
+version: 2 
+models: 
+  - name: multiple_metrics__period_over_period
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('multiple_metrics__period_over_period_expected')
+          compare_columns:
+            - DATE_DAY
+            - HAD_DISCOUNT
+            - BASE_SUM_METRIC
+            - BASE_AVERAGE_METRIC
+            - BASE_SUM_METRIC_POP_1MTH
+            - BASE_SUM_METRIC_RATIO_TO_1_DAY_AGO
+            - BASE_AVERAGE_METRIC_POP_1MTH

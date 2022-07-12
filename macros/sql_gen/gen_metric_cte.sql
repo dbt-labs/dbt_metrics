@@ -22,7 +22,7 @@
         {% for dim in dimensions %}
             {{metric.name}}__spine_time.{{ dim }},
         {%- endfor %}
-        ifnull({{metric.name}}, 0) as {{metric.name}}
+        coalesce({{metric.name}}, 0) as {{metric.name}}
         
     from {{metric.name}}__spine_time
     left outer join {{metric.name}}__aggregate

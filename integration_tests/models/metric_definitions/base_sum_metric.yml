@@ -1,12 +1,12 @@
 version: 2 
 metrics:
-  - name: sum_discount_total
+  - name: base_sum_metric
     model: ref('fact_orders')
-    label: Total Discount ($)
+    label: Order Total ($)
     timestamp: order_date
     time_grains: [day, week]
     type: sum
-    sql: discount_total
+    sql: order_total
     dimensions:
       - had_discount
       - order_country

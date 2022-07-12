@@ -1,0 +1,6 @@
+version: 2 
+models: 
+  - name: multiple_metrics__base_metrics
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('multiple_metrics__base_metrics_expected')

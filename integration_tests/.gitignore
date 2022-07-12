@@ -2,3 +2,5 @@
 target/
 dbt_packages/
 logs/
+examples/
+model_testing/
