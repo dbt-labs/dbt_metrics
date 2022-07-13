@@ -1,3 +1,6 @@
+pytest
+pytest-dotenv
+dbt-tests-adapter
 git+https://github.com/dbt-labs/dbt-redshift.git
 git+https://github.com/dbt-labs/dbt-snowflake.git
 git+https://github.com/dbt-labs/dbt-bigquery.git
