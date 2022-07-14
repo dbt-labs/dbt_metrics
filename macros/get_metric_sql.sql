@@ -39,17 +39,11 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
 {# #### TODO: CREATE MACRO FOR ERROR MESSAGE
         - reshape so we can loop in all circumstances #}
 
-{# {% if metric_list is iterable and (metric_list is not string and metric_list is not mapping) %} #}
 {% for metric in metric_list %}
     {% if metric.type != "expression" and metric.metrics | length > 0 %}
         {%- do exceptions.raise_compiler_error("The metric " ~ metric.name ~ " was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
     {%- endif %}
 {% endfor %}
-{# {% else %}
-    {% if single_metric.type != "expression" and single_metric.metrics | length > 0 %}
-        {%- do exceptions.raise_compiler_error("The metric " ~ single_metric.name ~ " was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
-    {%- endif %} #}
-{# {%- endif %} #}
 
 {# ############
 LETS SET SOME VARIABLES!
@@ -65,7 +59,6 @@ a custom calendar #}
 
 {# Here we are creating the dimension list which has the list of all dimensions that 
 are a part of the metric. This has additional logic for multiple metrics #}
-{# {% if is_multiple_metrics %}  #}
     {# TODO #48 get valid common dimension name to clarify what is #}
 {%- set dimension_list = [] -%}
 {% for metric in metric_list %}
@@ -80,10 +73,6 @@ are a part of the metric. This has additional logic for multiple metrics #}
         {%- do dimension_list.append(dim) -%}
     {% endfor %}
 {%endfor%}
-
-{# {% else %}
-    {%- set dimension_list = metrics.get_valid_dimension_list(metric_list) -%} #}
-{# {% endif %} #}
 
 {# We have to break out calendar dimensions as their own list of acceptable dimensions. 
 This is because of the date-spining. If we don't do this, it creates impossible combinations
@@ -103,19 +92,11 @@ VALIDATION ROUND TWO - CONFIG ELEMENTS!
 
 {#- /* TODO: #49 Do I need to validate that the requested grain is defined on the metric? */ #}
 {#- /* TODO: build a list of failures and return them all at once*/ #}
-{# {% if is_multiple_metrics %}  #}
 {% for metric in metric_list %}
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
         {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
     {%- endfor %}
 {%endfor%}
-
-{# {% else %}
-    {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {%- do metrics.validate_aggregate_coherence(single_metric.type, calc_config.aggregate) %}
-    {%- endfor %} #}
-{# {% endif %} #}
-
 
 {#- /* TODO: build a list of failures and return them all at once*/ #}
 {%- for calc_config in secondary_calculations if calc_config.period %}
@@ -134,8 +115,6 @@ list of metrics #}
 {# ############
 LET THE COMPOSITION BEGIN!
 ############ #}
-
-{{ log("Metric Tree: " ~ metric_tree, info=true) }}
 
 {# First we add the calendar table - we only need to do this once no matter how many
 metrics there are #}
@@ -166,8 +145,6 @@ metrics there are #}
 
     {# We only set these variables here because they're only needed if it isn't a 
     composite metric #}
-    {# {%- set base_model = metric_list.model.split('\'')[1]  -%}
-    {%- set model = metrics.get_model_relation(base_model if execute else "") %} #}
 
     {% for metric_name in metric_tree["full_set"]%}
         {%- set single_metric = metric(metric_name) -%}
@@ -175,7 +152,6 @@ metrics there are #}
         {%- set single_model = metrics.get_model_relation(single_base_model if execute else "") %}
         {{ metrics.build_metric_sql(single_metric,single_model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }}
     {% endfor %}
-    {# {{ metrics.build_metric_sql(metric_list,model,grain,dimensions,secondary_calculations,start_date,end_date,where,calendar_tbl,relevant_periods,calendar_dimensions) }} #}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"],dimensions,grain,metric_tree["full_set"],secondary_calculations,calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"],grain,metric_tree["full_set"],secondary_calculations) }}
     
