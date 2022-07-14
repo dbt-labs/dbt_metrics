@@ -14,12 +14,6 @@ VARIABLE SETTING ROUND 1: List Vs Single Metric!
     {% set metric_list = [metric_list] %}
 {% endif %}
 
-{% if metric_list | length > 1 %}
-    {% set is_multiple_metrics = true %}
-{% else %}
-    {% set is_multiple_metrics = false %}
-{% endif %}
-
 {# ############
 VALIDATION ROUND ONE - THE MACRO LEVEL!
 ############ #}
@@ -35,9 +29,6 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
 {%- if not grain %}
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
-
-{# #### TODO: CREATE MACRO FOR ERROR MESSAGE
-        - reshape so we can loop in all circumstances #}
 
 {% for metric in metric_list %}
     {% if metric.type != "expression" and metric.metrics | length > 0 %}
