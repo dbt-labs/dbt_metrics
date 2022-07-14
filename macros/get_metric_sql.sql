@@ -31,6 +31,12 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
 {%- endif %}
 
 {% for metric in metric_list %}
+    {% if grain not in metric.time_grains%}
+        {%- do exceptions.raise_compiler_error("The metric " ~ metric.name ~ " does not have the provided time grain " ~ grain ~ "defined in the metric definition.") %}
+    {% endif %}
+{% endfor %}
+
+{% for metric in metric_list %}
     {% if metric.type != "expression" and metric.metrics | length > 0 %}
         {%- do exceptions.raise_compiler_error("The metric " ~ metric.name ~ " is not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
     {%- endif %}
