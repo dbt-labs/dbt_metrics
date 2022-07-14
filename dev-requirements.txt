@@ -1,4 +1,4 @@
 git+https://github.com/dbt-labs/dbt-redshift.git
 git+https://github.com/dbt-labs/dbt-snowflake.git
 git+https://github.com/dbt-labs/dbt-bigquery.git
-git+https://github.com/dbt-labs/dbt-core.git==1.2.0rc1
+git+https://github.com/dbt-labs/dbt-core.git@0db634d
