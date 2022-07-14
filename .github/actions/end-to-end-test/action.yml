@@ -33,5 +33,5 @@ runs:
       run: |
         cd ${{ inputs.dbt-project }}
         dbt deps --target ${{ inputs.dbt-target }}
-        dbt seed --target ${{ inputs.dbt-target }}
+        dbt seed --target ${{ inputs.dbt-target }} --full-refresh
         dbt build --target ${{ inputs.dbt-target }} --full-refresh
