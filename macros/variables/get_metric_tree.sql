@@ -1,69 +1,78 @@
-{% macro get_metric_tree(metric,metric_tree,metric_count=1000)%}
-    
-    {# Now we see if the node already exists in the metric tree and return that if 
-    it does so that we're not creating duplicates #}
-    {%- if metric.name not in metric_tree|map(attribute="full_set") -%}
+{% macro get_metric_tree(metric_list)%}
 
-        {%- set full_set = metric_tree["full_set"] -%}
-        {%- do full_set.append(metric.name) -%}
-        {%- do metric_tree.update({'full_set':full_set}) -%}
+{# We are creating the metric tree here - this includes all the leafs (first level parents)
+, the expression metrics, and the full combination of them both #}
 
-    {%- endif -%}
+{# This line creates the metric tree dictionary and the full_set key. 
+Full Set contains ALL metrics that are referenced, which includes metrics in the macro
+AND all parent/expression metrics. #}
+{%- set metric_tree = {'full_set':[]} %}
+{# The parent set is a list of parent metrics that are NOT expression metrics. IE if 
+metric C is built off of metric A and B, A and B would be the parent metrics because they 
+are both upstream of Metric C AND not expression metrics themselves. #}
+{%- do metric_tree.update({'parent_set':[]}) -%}
+{# The expression set is a list of expression metrics. This includes all expression metrics referenced
+in the macro itself OR upstream of the metrics referenced in the macro #}
+{%- do metric_tree.update({'expression_set':[]}) -%}
+{# The base set is the list of metrics that are provided into the macro #}
+{%- do metric_tree.update({'base_set':[]}) -%}
+{# The ordered expression set is the list of expression metrics that are ordered based on their
+node depth. So if Metric C were downstream of Metric A and B, which were also expression metrics,
+Metric C would have the value of 999 (max depth) and A and B would have 998, representing that they
+are one depth upstream #}
+{%- do metric_tree.update({'ordered_expression_set':{}}) -%}
 
-    {%- do metric_tree["ordered_expression_set"].update({metric.name:metric_count}) -%}
-    {%- set metric_count = metric_count - 1 -%}
+{# {% if metric_list is iterable and (metric_list is not string and metric_list is not mapping) %}  #}
+{% set base_set_list = []%}
+{% for metric in metric_list %}
+    {%- do base_set_list.append(metric.name) -%}
+    {# TODO #47 its not really GETTING the metric tree as much as operating. re-name that  #}
+    {%- set metric_tree = metrics.update_metric_tree(metric ,metric_tree) -%}
+{% endfor %}
+{%- do metric_tree.update({'base_set':base_set_list}) -%}
 
-    {# Here we create two sets, sets being the same as lists but they account for uniqueness. 
-    One is the full set, which contains all of the parent metrics and the other is the leaf
-    set, which we'll use to determine the leaf, or base metrics. #}
+{# {% else %}
+    {%- do metric_tree.update({'base_set':metric_list.name}) -%}
+    {%- set metric_tree = metrics.update_metric_tree(metric_list ,metric_tree) -%}
+{% endif %} #}
 
-    {# We define parent nodes as being the parent nodes that begin with metric, which lets
-    us filter out model nodes #}
-    {%- set parent_metrics = metrics.get_metric_unique_id_list(metric) -%}
+{# Now we will iterate over the metric tree and make it a unique list to account for duplicates #}
+{% set full_set = [] %}
+{% set parent_set = [] %}
+{% set expression_set = [] %}
+{% set base_set = [] %}
 
-    {# We set an if condition based on if parent nodes. If there are none, then this metric
-    is a leaf node and any recursive loop should end #}
-        {%- if parent_metrics | length > 0 -%}
+{# TODO See if this unique filtering logic can live in the operate on metric tree macro #}
+{# TODO rename to metric_name for all of the unique filters #}
+{% for metric_name in metric_tree['full_set']|unique%}
+    {% do full_set.append(metric_name)%}
+{% endfor %}
+{%- do metric_tree.update({'full_set':full_set}) -%}
 
-            {# Now we finally recurse through the nodes. We begin by filtering the overall list we
-            recurse through by limiting it to depending on metric nodes and not ALL nodes #}
-            {%- for parent_id in parent_metrics -%}
+{% for metric_name in metric_tree['parent_set']|unique%}
+    {% do parent_set.append(metric_name)%}
+{% endfor %}
+{%- do metric_tree.update({'parent_set':parent_set}) -%}
 
-                {# Then we add the parent_id of the metric to the full set. If it already existed
-                then it won't make an impact but we want to make sure it is represented #}
-                {# {%- do full_set.append(parent_id) -%} #}
-                {%- set full_set_plus = metric_tree["full_set"] -%}
-                {%- if parent_id in metric_tree|map(attribute="full_set") -%}
-                    {%- do full_set_plus.append(parent_id) -%}
-                {%- endif -%}
-                {%- do metric_tree.update({'full_set':full_set_plus}) -%}
-                {# The parent_id variable here is a mapping back to the provided manifest and doesn't 
-                allow for string parsing. So we create this variable to use instead #}
-                {# {%- set parent_metric_name = (parent_id | string).split('.')[2] -%} #}
+{% for metric_name in metric_tree['expression_set']|unique%}
+    {% do expression_set.append(metric_name)%}
+{% endfor %}
+{%- do metric_tree.update({'expression_set':expression_set}) -%}
 
-                {# And here we re-run the current macro but fill in the parent_id so that we loop again
-                with that metric information. You may be wondering, why are you using parent_id? Doesn't 
-                the DAG always go from parent to child? Normally, yes! With this, no! We're reversing the 
-                DAG and going up to parents to find the leaf nodes that are really parent nodes. #}
-                {%- set new_parent = metrics.get_metric_relation(parent_id) -%}
+{% for metric in metric_tree['parent_set']|unique%}
+    {%- do metric_tree['ordered_expression_set'].pop(metric) -%}
+{% endfor %}
 
-                {%- set metric_tree =  metrics.get_metric_tree(new_parent,metric_tree,metric_count) -%}
+{# This section overrides the expression set by ordering the metrics on their depth so they 
+can be correctly referenced in the downstream sql query #}
+{% set ordered_expression_list = []%}
+{% for item in metric_tree['ordered_expression_set']|dictsort(false, 'value') %}
+    {% if item[0] in metric_tree["expression_set"]%}
+        {% do ordered_expression_list.append(item[0])%}
+    {% endif %}
+{% endfor %}
+{%- do metric_tree.update({'expression_set':ordered_expression_list}) -%}
 
-            {%- endfor -%}
-        
-        {%- else -%}
-
-            {%- set leaf_set_plus = metric_tree["leaf_set"] -%}
-            {%- if parent_id in metric_tree|map(attribute="full_set") -%}
-                {%- do leaf_set_plus.append(metric.name) -%}
-            {%- endif -%}
-            {%- do metric_tree.update({'leaf_set':leaf_set_plus}) -%}
-
-        {%- endif -%}
-
-        {%- set expression_set_plus = ( metric_tree["full_set"] | reject('in',metric_tree["leaf_set"]) | list) -%}
-        {%- do metric_tree.update({'expression_set':expression_set_plus}) -%}
-
-    {%- do return(metric_tree) -%}
+{%- do return(metric_tree) -%}
 
 {% endmacro %}

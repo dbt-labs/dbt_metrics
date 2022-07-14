@@ -40,7 +40,7 @@ easier for not having to update the working secondary calc logic #}
         {% if full_set|length > 1 %} 
             joined_metrics
         {% else %} 
-            {{base_set}}__final
+            {{base_set[0]}}__final
         {% endif %}
 )
 

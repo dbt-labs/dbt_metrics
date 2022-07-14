@@ -7,6 +7,7 @@
 {# This section is a hacky workaround to account for postgres changes #}
 {% set cte_numbers = []%}
 {% set unique_cte_numbers = []%}
+{# the cte numbers are more representative of node depth #}
 {% if expression_set | length > 0 %}
     {% for metric in ordered_expression_set%}
         {% do cte_numbers.append(ordered_expression_set[metric]) %}
@@ -14,7 +15,6 @@
     {% for cte_num in cte_numbers|unique%}
         {% do unique_cte_numbers.append(cte_num) %}
     {% endfor %}
-    {% set last_cte_number = unique_cte_numbers[0] %}
 {% endif %}
 
 
@@ -116,7 +116,8 @@
             {% endfor %}
         from first_join_metrics
         {% if expression_set | length > 0 %}
-            left join "{{last_cte_number}}__join_metrics"
+        {# TODO check sort logic #}
+            left join "999__join_metrics"
                 using ( date_{{grain}},
                     {% for calendar_dim in calendar_dimensions %}
                         {{ calendar_dim }},
