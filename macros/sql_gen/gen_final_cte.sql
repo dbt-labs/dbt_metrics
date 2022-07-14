@@ -42,7 +42,7 @@
 
         -- single metric without secondary calculations
 
-        select * from {{base_set}}__final 
+        select * from {{base_set[0]}}__final 
 
     {% endif %}
 
