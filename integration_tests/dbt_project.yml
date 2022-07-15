@@ -23,3 +23,4 @@ clean-targets:
 
 vars:
   dbt_metrics_calendar_model: custom_calendar
+  testing: fact_orders

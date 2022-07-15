@@ -1,0 +1,7 @@
+﻿date_month,has_messaged,is_active_past_quarter,base_count_metric
+2021-01-01,TRUE,TRUE,1
+2021-02-01,TRUE,FALSE,1
+2021-03-01,TRUE,FALSE,0
+2021-02-01,TRUE,TRUE,0
+2021-03-01,TRUE,TRUE,0
+2021-01-01,TRUE,FALSE,0

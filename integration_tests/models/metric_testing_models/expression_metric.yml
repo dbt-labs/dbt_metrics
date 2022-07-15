@@ -1,0 +1,6 @@
+version: 2 
+models: 
+  - name: expression_metric
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('expression_metric__expected')

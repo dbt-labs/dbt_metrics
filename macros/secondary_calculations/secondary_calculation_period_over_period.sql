@@ -1,4 +1,4 @@
-{% macro default__secondary_calculation_period_over_period(metric_name, dimensions, calc_config) %}
+{% macro default__secondary_calculation_period_over_period(metric_name, grain, dimensions, calc_config) %}
     {% set calc_sql %}
         lag(
             {{- metric_name }}, {{ calc_config.interval -}}
@@ -6,7 +6,7 @@
             {% if dimensions -%}
                 partition by {{ dimensions | join(", ") }} 
             {% endif -%}
-            order by period
+            order by date_{{grain}}
         )
     {% endset %}
     

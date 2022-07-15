@@ -1,0 +1,6 @@
+version: 2 
+models: 
+  - name: base_count_metric__no_end_date
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('base_count_metric__no_end_date_expected')

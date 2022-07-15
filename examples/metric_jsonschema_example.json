@@ -1,0 +1,25 @@
+{
+    "title": "dbt_metric_file",
+    "type": "object",
+    "required": ["name","label","timestamp","time_grains","type","sql"],
+    "additionalProperties": false,
+    "properties": {
+        "name": { "type": "string"},
+        "label": { "type": "string"},
+        "timestamp": { "type": "string"},
+        "time_grains": { 
+            "type": "array",
+            "items":{
+                "type":"string"
+            }
+        },
+        "type": { "type": "string"},
+        "sql": { "type": "string"},
+        "dimensions": { 
+            "type": "array",
+            "items":{
+                "type":"string"
+            }
+        }
+    }
+}

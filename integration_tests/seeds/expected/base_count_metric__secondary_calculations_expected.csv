@@ -1,0 +1,13 @@
+﻿date_month,date_year,has_messaged,is_active_past_quarter,base_count_metric,base_count_metric_pop_1mth,base_count_metric_ratio_to_1_month_ago,base_count_metric_ytd_sum,base_count_metric_max_for_month,base_count_metric_avg_3mth,base_count_metric_rolling_sum_3_month
+2021-01-01,2021-01-01,TRUE,FALSE,0,0,,0,0,0.000,0
+2021-02-01,2021-01-01,TRUE,FALSE,1,1,,1,1,0.500,1
+2021-03-01,2021-01-01,TRUE,FALSE,0,-1,0,1,0,0.333,1
+2021-04-01,2021-01-01,TRUE,FALSE,0,0,,1,0,0.333,1
+2021-01-01,2021-01-01,TRUE,TRUE,1,1,,1,1,1.000,1
+2021-02-01,2021-01-01,TRUE,TRUE,0,-1,0,1,0,0.500,1
+2021-03-01,2021-01-01,TRUE,TRUE,0,0,,1,0,0.333,1
+2021-04-01,2021-01-01,TRUE,TRUE,0,0,,1,0,0.000,0
+2021-01-01,2021-01-01,FALSE,FALSE,0,0,,0,0,0.000,0
+2021-02-01,2021-01-01,FALSE,FALSE,0,0,,0,0,0.000,0
+2021-03-01,2021-01-01,FALSE,FALSE,0,0,,0,0,0.000,0
+2021-04-01,2021-01-01,FALSE,FALSE,1,1,,1,1,0.333,1

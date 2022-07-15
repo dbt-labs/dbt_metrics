@@ -1,9 +1,0 @@
-﻿period,has_messaged,slack_joiners,ytd_sum,max_for_month,pop_1mth,ratio_to_1_month_ago,avg_3mth,rolling_sum_3_month
-2021-01-01,FALSE,0,0,0,0,,0.000,0
-2021-01-01,TRUE,1,1,1,1,,0.333,1
-2021-02-01,FALSE,0,0,0,0,,0.000,0
-2021-02-01,TRUE,1,2,1,0,1,0.666,2
-2021-03-01,FALSE,0,0,0,0,,0.000,0
-2021-03-01,TRUE,0,2,0,-1,0,0.666,2
-2021-04-01,FALSE,2,2,2,2,,0.666,2
-2021-04-01,TRUE,0,2,0,0,,0.333,1

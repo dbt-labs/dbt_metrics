@@ -1,192 +1,130 @@
 /*
     Core metric query generation logic.
     TODO:
-      - validate that the requested dim is actually an option (or fail at query execution instead of at compilation if they don't exist? is it a problem to expose columns that exist in the table but aren't "blessed" for the metric?)
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
+{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 
+{# ############
+VARIABLE SETTING ROUND 1: List Vs Single Metric!
+############ #}
 
-{%- macro get_metric_sql(metric, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
+{% if metric_list is not iterable %}
+    {% set metric_list = [metric_list] %}
+{% endif %}
+
+{# We are creating the metric tree here - this includes all the leafs (first level parents)
+, the expression metrics, and the full combination of them both #}
+{%- set metric_tree = metrics.get_metric_tree(metric_list) %}
+
+{# ############
+VALIDATION ROUND ONE - THE MACRO LEVEL!
+############ #}
+
 {%- if not execute %}
-    {%- do return("not execute") %}
+    {%- do return("Did not execute") %}
 {%- endif %}
 
-{%- if not metric %}
-    {%- do exceptions.raise_compiler_error("No metric provided") %}
+{%- if not metric_list %}
+    {%- do exceptions.raise_compiler_error("No metric or metrics provided") %}
 {%- endif %}
 
 {%- if not grain %}
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
 
-{#-/* TODO: This refs[0][0] stuff is totally ick */#}
-{%- set model = metrics.get_metric_relation(metric.refs[0] if execute else "") %}
+{% do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set'])%}
+
+{% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
+
+{# ############
+LETS SET SOME VARIABLES AND VALIDATE!
+############ #}
+
+{# Here we set the calendar table as a variable, which ensures the default overwritten if they include
+a custom calendar #}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
 
-{#- /* TODO: Do I need to validate that the requested grain is defined on the metric? */ #}
+{# Here we are creating a list of all valid dimensions, as well as providing compilation
+errors if there are any provided dimensions that don't work. #}
+{% set common_valid_dimension_list = metrics.get_common_valid_dimension_list(dimensions, metric_tree['full_set']) %}
+
+{# We have to break out calendar dimensions as their own list of acceptable dimensions. 
+This is because of the date-spining. If we don't do this, it creates impossible combinations
+of calendar dimension + base dimensions #}
+{%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions, common_valid_dimension_list) -%}
+
+{# Additionally, we also have to restrict the dimensions coming in from the macro to 
+no longer include those we've designated as calendar dimensions. That way they 
+are correctly handled by the spining. We override the dimensions variable for 
+cleanliness #}
+{%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions) -%}
+
+{# Finally we set the relevant periods, which is a list of all time grains that need to be contained
+within the final dataset in order to accomplish base + secondary calc functionality. #}
+{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+
+{# ############
+VALIDATION ROUND TWO - CONFIG ELEMENTS!
+############ #}
+
+{#- /* TODO: #49 Do I need to validate that the requested grain is defined on the metric? */ #}
 {#- /* TODO: build a list of failures and return them all at once*/ #}
-{%- for calc_config in secondary_calculations if calc_config.aggregate %}
-    {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
-{%- endfor %}
+{% for metric in metric_list %}
+    {%- for calc_config in secondary_calculations if calc_config.aggregate %}
+        {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
+    {%- endfor %}
+{%endfor%}
 
 {#- /* TODO: build a list of failures and return them all at once*/ #}
 {%- for calc_config in secondary_calculations if calc_config.period %}
     {%- do metrics.validate_grain_order(grain, calc_config.period) %}
 {%- endfor %}
 
-{%- set relevant_periods = [] %}
-{%- for calc_config in secondary_calculations if calc_config.period and calc_config.period not in relevant_periods %}
-    {%- set _ = relevant_periods.append(calc_config.period) %}
-{%- endfor -%}
+{# ############
+LET THE COMPOSITION BEGIN!
+############ #}
 
-with source_query as (
+{# First we add the calendar table - we only need to do this once no matter how many
+metrics there are #}
+{{metrics.gen_calendar_cte(calendar_tbl, start_date, end_date)}}
 
-    select
-        /* Always trunc to the day, then use dimensions on calendar table to achieve the _actual_ desired aggregates. */
-        /* Need to cast as a date otherwise we get values like 2021-01-01 and 2021-01-01T00:00:00+00:00 that don't join :( */
-        cast({{ dbt_utils.date_trunc('day', 'cast(' ~ metric.timestamp ~ ' as date)') }} as date) as date_day,
-        
-        {% for dim in dimensions %}
-            {%- if metrics.is_dim_from_model(metric, dim) -%}
-                 {{ dim }},
-            {% endif -%}
+{# TODO - Have everything in one loop #}
 
-        {%- endfor %}
+{# Next we check if it is a composite metric or single metric by checking the length of the list#}
+{# This filter forms the basis of how we construct the SQL #}
+{%- if metric_tree["full_set"]|length > 1 -%}
 
-        {#- /*When metric.sql is undefined or '*' for a count, 
-            it's unnecessary to pull through the whole table */ #}
-        {%- if metric.sql and metric.sql | replace('*', '') | trim != '' -%}
-            {{ metric.sql }} as property_to_aggregate
-        {%- elif metric.type == 'count' -%}
-            1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
-        {%- else -%}
-            {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric.name ~ "`") -%}  
-        {%- endif %}
+    {# If composite, we begin by looping through each of the metric names that make
+    up the composite metric. #}
 
-    from {{ model }}
-    where 1=1
-    {%- for filter in metric.filters %}
-        and {{ filter.field }} {{ filter.operator }} {{ filter.value }}
-    {%- endfor %}
-    {%- for filter in where %}
-        and {{ filter }}
-    {%- endfor %}
-),
-
-spine__time as (
-     select 
-        /* this could be the same as date_day if grain is day. That's OK! 
-        They're used for different things: date_day for joining to the spine, period for aggregating.*/
-        date_{{ grain }} as period, 
-        {% for period in relevant_periods %}
-            date_{{ period }},
-        {% endfor %}
-        {% for dim in dimensions if not metrics.is_dim_from_model(metric, dim) %}
-            {{ dim }},
-        {% endfor %}
-        date_day
-     from {{ calendar_tbl }}
-
-),
-
-{% if dimensions is defined and dimensions|length > 0 %}
-spine__values as (
-
-    {#- /*This and the following CTEs were changed on 5/20 in order to remove 
-    the cartesian join behaviour that resulted in impossible combinations of 
-    data. */ #}
-    select distinct 
-        {%- for dim in dimensions -%}
-            {%- if metrics.is_dim_from_model(metric, dim) %}
-                {{ dim }}
-                {% if not loop.last %},{% endif %}
-            {% endif -%}
-        {%- endfor %}
-    from source_query
-
-),  
-{% endif -%}
-
-
-spine as (
-
-    select *
-    from spine__time
-    {% if dimensions is defined and dimensions|length > 0 %}
-    cross join spine__values
-    {% endif -%}
-
-),
-
-joined as (
-    select 
-        spine.period,
-        {% for period in relevant_periods %}
-        spine.date_{{ period }},
-        {% endfor %}
-        {% for dim in dimensions %}
-        spine.{{ dim }},
-        {% endfor %}
-
-        -- has to be aggregated in this CTE to allow dimensions coming from the calendar table
-        {{- metrics.aggregate_primary_metric(metric.type, 'source_query.property_to_aggregate') }} as {{ metric.name }},
-        {{ dbt_utils.bool_or('source_query.date_day is not null') }} as has_data
-
-    from spine
-    left outer join source_query on source_query.date_day = spine.date_day
-    {% for dim in dimensions %}
-        {%- if metrics.is_dim_from_model(metric, dim) %}
-            and (  source_query.{{ dim}} = spine.{{ dim }}
-                or source_query.{{ dim }} is null and spine.{{ dim }} is null
-            )
-        {%- endif %}
+    {% for metric_name in metric_tree["parent_set"]%}
+        {%- set loop_metric = metrics.get_metric_relation(metric_name) -%}
+        {%- set loop_base_model = loop_metric.model.split('\'')[1]  -%}
+        {%- set loop_model = metrics.get_model_relation(loop_base_model if execute else "") %}
+        {{ metrics.build_metric_sql(loop_metric, loop_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,where,calendar_tbl, relevant_periods, calendar_dimensions) }}
     {% endfor %}
 
-    {#- /* Add 1 twice to account for 1) timeseries dim and 2) to be inclusive of the last dim */ #}
-    group by {{ range(1, (dimensions | length) + (relevant_periods | length) + 1 + 1) | join (", ") }}
-
-),
-
-bounded as (
-    select 
-        *,
-        {% if start_date %}cast('{{ start_date }}' as date){% else %} min(case when has_data then period end) over () {% endif %} as lower_bound,
-        {% if end_date %}cast('{{ end_date }}' as date){% else %} max(case when has_data then period end) over () {% endif %} as upper_bound
-    from joined 
-),
-
-secondary_calculations as (
-
-    select *
-        
-        {% for calc_config in secondary_calculations -%}
-
-            , {{ metrics.perform_secondary_calculation(metric.name, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
-
-        {% endfor %}
-
-    from bounded
+    {{ metrics.gen_joined_metrics_cte(metric_tree["parent_set"], metric_tree["expression_set"], metric_tree["ordered_expression_set"], grain, non_calendar_dimensions, calendar_dimensions, secondary_calculations, relevant_periods) }}
+    {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
+    {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations) }}
     
-),
+    {# If it is NOT a composite metric, we run the baseline model #}
+{%- else -%}
 
-final as (
-    select
-        period
-        {% for dim in dimensions %}
-        , {{ dim }}
-        {% endfor %}
-        , coalesce({{ metric.name }}, 0) as {{ metric.name }}
-        {% for calc_config in secondary_calculations %}
-        , {{ metrics.generate_secondary_calculation_alias(calc_config, grain) }}
-        {% endfor %}
+    {# We only set these variables here because they're only needed if it isn't a 
+    composite metric #}
 
-    from secondary_calculations
-    where period >= lower_bound
-    and period <= upper_bound
-    order by {{ range(1, (dimensions | length) + 1 + 1) | join (", ") }}
-)
-
-select * from final
+    {% for metric_name in metric_tree["full_set"]%}
+        {%- set single_metric = metric(metric_name) -%}
+        {%- set single_base_model = single_metric.model.split('\'')[1]  -%}
+        {%- set single_model = metrics.get_model_relation(single_base_model if execute else "") %}
+        {{ metrics.build_metric_sql(single_metric, single_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date, where, calendar_tbl, relevant_periods, calendar_dimensions) }}
+    {% endfor %}
+    {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
+    {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations) }}
+    
+{%- endif -%}
 
 {% endmacro %}
