@@ -1,7 +1,7 @@
 {% macro validate_expression_metrics(full_set) %}
 
     {# We loop through the full set here to ensure that metrics that aren't listed 
-    as expression are note dependent on another metric.  #}
+    as expression are not dependent on another metric.  #}
 
     {% for metric_name in full_set %}
         {% set metric_relation = metric(metric_name)%}
