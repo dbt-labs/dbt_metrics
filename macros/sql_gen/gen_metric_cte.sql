@@ -26,13 +26,12 @@
         
     from {{metric.name}}__spine_time
     left outer join {{metric.name}}__aggregate
-        using (date_{{grain}},
+        using (date_{{grain}}
                 {% for calendar_dim in calendar_dimensions %}
-                    {{ calendar_dim }},
+                    ,{{ calendar_dim }}
                 {%- endfor %}
                 {% for dim in dimensions %}
-                    {{ dim }}
-                    {% if not loop.last %},{% endif %}
+                    ,{{ dim }}
                 {%- endfor %})
 
     {% if not start_date or not end_date%}
