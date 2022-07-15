@@ -34,7 +34,7 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
 
-{% do metrics.validate_grain(grain, metric_tree['full_set'])%}
+{% do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set'])%}
 
 {% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
 
