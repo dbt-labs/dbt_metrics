@@ -14,6 +14,10 @@ VARIABLE SETTING ROUND 1: List Vs Single Metric!
     {% set metric_list = [metric_list] %}
 {% endif %}
 
+{# We are creating the metric tree here - this includes all the leafs (first level parents)
+, the expression metrics, and the full combination of them both #}
+{%- set metric_tree = metrics.get_metric_tree(metric_list) %}
+
 {# ############
 VALIDATION ROUND ONE - THE MACRO LEVEL!
 ############ #}
@@ -30,19 +34,13 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
 
-{% for metric in metric_list %}
-    {% if metric.type != "expression" and metric.metrics | length > 0 %}
-        {%- do exceptions.raise_compiler_error("The metric " ~ metric.name ~ " was not an expression and dependent on another metric. This is not currently supported - if this metric depends on another metric, please change the type to expression.") %}
-    {%- endif %}
-{% endfor %}
+{% do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set'])%}
+
+{% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
 
 {# ############
 LETS SET SOME VARIABLES!
 ############ #}
-
-{# We are creating the metric tree here - this includes all the leafs (first level parents)
-, the expression metrics, and the full combination of them both #}
-{%- set metric_tree = metrics.get_metric_tree(metric_list) %}
 
 {# Here we set the calendar table as a variable, which ensures the default overwritten if they include
 a custom calendar #}
