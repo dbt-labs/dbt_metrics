@@ -1,33 +1,34 @@
-{% macro gen_spine_time_cte(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_spine_time_cte', 'metrics')(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions)) }}
+{% macro gen_spine_time_cte(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions,dimensions_provided) %}
+    {{ return(adapter.dispatch('gen_spine_time_cte', 'metrics')(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions,dimensions_provided)) }}
 {% endmacro %}
 
-{% macro default__gen_spine_time_cte(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions) %}
+{% macro default__gen_spine_time_cte(metric,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions,dimensions_provided) %}
 
 ,{{metric.name}}__spine_time as (
 
     select
-        calendar.date_{{grain}},
+        calendar.date_{{grain}}
 
         {% if secondary_calculations | length > 0 %}
             {% for period in relevant_periods %}
                 {% if period != grain%}
-                    calendar.date_{{ period }},
+                    ,calendar.date_{{ period }}
                 {% endif %}
             {% endfor %}
         {% endif %}
 
         {% for calendar_dim in calendar_dimensions %}
-            {{ calendar_dim }},
+            ,{{ calendar_dim }}
         {%- endfor %}
 
         {% for dim in dimensions %}
-            {{metric.name}}__dims.{{ dim }}
-            {% if not loop.last %},{% endif %}
+            ,{{metric.name}}__dims.{{ dim }}
         {%- endfor %}
 
     from calendar
-    cross join {{metric.name}}__dims
+    {% if dimensions_provided %}
+        cross join {{metric.name}}__dims
+    {% endif %}
     group by {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
 
 )
