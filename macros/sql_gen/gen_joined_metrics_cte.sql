@@ -54,7 +54,7 @@
         {%- endfor %}
 
         {% for metric_name in leaf_set %}
-            {{metric_name}}
+            nullif({{metric_name}},0) as {{metric_name}}
             {% if not loop.last %},{%endif%}
         {% endfor %}  
 
@@ -107,12 +107,30 @@
     joined_metrics as (
 
         select 
-            first_join_metrics.*
-            {% for metric in ordered_expression_set%}
-                {% if loop.first %},{%endif%}
-                {{metric}}
-                {% if not loop.last %},{%endif%}
+            first_join_metrics.date_{{grain}}
+
+            {% if secondary_calculations | length > 0 %}
+                {% for period in relevant_periods %}
+                    ,first_join_metrics.date_{{ period }}
+                {% endfor %}
+            {% endif %}
+
+            {% for calendar_dim in calendar_dimensions %}
+                ,first_join_metrics.{{ calendar_dim }}
+            {%- endfor %}
+
+            {% for dim in dimensions %}
+                ,first_join_metrics.{{ dim }}
             {% endfor %}
+
+            {% for metric_name in leaf_set %}
+                ,coalesce({{metric_name}},0) as {{metric_name}}
+            {% endfor %}  
+
+            {% for metric in ordered_expression_set%}
+                ,{{metric}}
+            {% endfor %}
+
         from first_join_metrics
         {% if expression_set | length > 0 %}
         {# TODO check sort logic #}
@@ -183,7 +201,7 @@
         {%- endfor %}
 
         {% for metric_name in leaf_set %}
-            {{metric_name}}
+            nullif({{metric_name}},0) as {{metric_name}}
             {% if not loop.last %},{%endif%}
         {% endfor %}  
 
@@ -236,12 +254,31 @@
     joined_metrics as (
 
         select 
-            first_join_metrics.*
-            {% for metric in ordered_expression_set%}
-                {% if loop.first %},{%endif%}
-                {{metric}}
-                {% if not loop.last %},{%endif%}
+
+            first_join_metrics.date_{{grain}}
+
+            {% if secondary_calculations | length > 0 %}
+                {% for period in relevant_periods %}
+                    ,first_join_metrics.date_{{ period }}
+                {% endfor %}
+            {% endif %}
+
+            {% for calendar_dim in calendar_dimensions %}
+                ,first_join_metrics.{{ calendar_dim }}
+            {%- endfor %}
+
+            {% for dim in dimensions %}
+                ,first_join_metrics.{{ dim }}
             {% endfor %}
+
+            {% for metric_name in leaf_set %}
+                ,coalesce({{metric_name}},0) as {{metric_name}}
+            {% endfor %}  
+
+            {% for metric in ordered_expression_set%}
+                ,{{metric}}
+            {% endfor %}
+
         from first_join_metrics
         {% if expression_set | length > 0 %}
         {# TODO check sort logic #}
