@@ -1,4 +1,3 @@
-with metric as (
   select *
   from 
   {{ metrics.calculate(
@@ -11,15 +10,3 @@ with metric as (
       ] 
       )
   }}
-)
-
-select 
-  date_day
-  ,had_discount
-  ,base_sum_metric
-  ,cast(base_average_metric as float) as base_average_metric
-  ,base_sum_metric_pop_1mth
-  ,cast(base_sum_metric_ratio_to_1_day_ago as float) as base_sum_metric_ratio_to_1_day_ago
-  ,cast(base_average_metric_pop_1mth as float) as base_average_metric_pop_1mth
-  ,cast(base_average_metric_ratio_to_1_day_ago as float) as base_average_metric_ratio_to_1_day_ago
-from metric 

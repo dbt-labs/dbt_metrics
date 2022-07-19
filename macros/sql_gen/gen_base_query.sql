@@ -83,7 +83,7 @@
         calendar_tbl.date_{{ grain }} as date_{{grain}},
         {% if secondary_calculations | length > 0 %}
             {% for period in relevant_periods %}
-                {{calendar_tbl}}.date_{{ period }},
+                calendar_tbl.date_{{ period }},
             {% endfor %}
         {% endif %}
         -- ALL DIMENSIONS
