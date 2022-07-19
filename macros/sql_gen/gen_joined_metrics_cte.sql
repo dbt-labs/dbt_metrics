@@ -120,7 +120,7 @@
             {% endfor %}
 
             {% for metric_name in leaf_set %}
-                ,coalesce({{metric_name}},0) as {{metric_name}}
+                ,coalesce(first_join_metrics.{{metric_name}},0) as {{metric_name}}
             {% endfor %}  
 
             {% for metric in ordered_expression_set%}
