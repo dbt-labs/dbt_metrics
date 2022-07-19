@@ -32,16 +32,14 @@
             ) as {{calendar_dim}},
         {%- endfor %}
 
-        {% if secondary_calculations | length > 0 %}
-            {% for period in relevant_periods %}
-                coalesce(
-                {% for metric_name in leaf_set %}
-                    {{metric_name}}__final.date_{{ period }}
-                    {% if not loop.last %},{% endif %}
-                {% endfor %}
-                ) as date_{{period}},
+        {% for period in relevant_periods %}
+            coalesce(
+            {% for metric_name in leaf_set %}
+                {{metric_name}}__final.date_{{ period }}
+                {% if not loop.last %},{% endif %}
             {% endfor %}
-        {% endif %}
+            ) as date_{{period}},
+        {% endfor %}
 
 
         {% for dim in dimensions %}
@@ -80,13 +78,13 @@
 
     {% for cte_number in cte_numbers|unique|sort%}
         {% set previous_cte_number = cte_number - 1%}
-        "{{cte_number}}__join_metrics" as (
+        join_metrics__{{cte_number}} as (
 
             select 
             {% if loop.first %}
                 first_join_metrics.*
             {% else %}
-                "{{previous_cte_number}}__join_metrics".*
+                join_metrics__{{previous_cte_number}}.*
             {%endif%}
                 {% for metric in ordered_expression_set%}
                     {% if ordered_expression_set[metric] == cte_number%}
@@ -97,7 +95,7 @@
             {% if loop.first %}
                 from first_join_metrics
             {% else %}
-                from "{{previous_cte_number}}__join_metrics"
+                from join_metrics__{{previous_cte_number}}
             {%endif%}
 
 
@@ -109,11 +107,9 @@
         select 
             first_join_metrics.date_{{grain}}
 
-            {% if secondary_calculations | length > 0 %}
-                {% for period in relevant_periods %}
-                    ,first_join_metrics.date_{{ period }}
-                {% endfor %}
-            {% endif %}
+            {% for period in relevant_periods %}
+                ,first_join_metrics.date_{{ period }}
+            {% endfor %}
 
             {% for calendar_dim in calendar_dimensions %}
                 ,first_join_metrics.{{ calendar_dim }}
@@ -134,7 +130,7 @@
         from first_join_metrics
         {% if expression_set | length > 0 %}
         {# TODO check sort logic #}
-            left join "999__join_metrics"
+            left join join_metrics__999
                 using ( date_{{grain}}
                     {% for calendar_dim in calendar_dimensions %}
                         ,{{ calendar_dim }}
@@ -179,16 +175,14 @@
             ) as {{calendar_dim}},
         {%- endfor %}
 
-        {% if secondary_calculations | length > 0 %}
-            {% for period in relevant_periods %}
-                coalesce(
-                {% for metric_name in leaf_set %}
-                    {{metric_name}}__final.date_{{ period }}
-                    {% if not loop.last %},{% endif %}
-                {% endfor %}
-                ) as date_{{period}},
+        {% for period in relevant_periods %}
+            coalesce(
+            {% for metric_name in leaf_set %}
+                {{metric_name}}__final.date_{{ period }}
+                {% if not loop.last %},{% endif %}
             {% endfor %}
-        {% endif %}
+            ) as date_{{period}},
+        {% endfor %}
 
 
         {% for dim in dimensions %}
@@ -257,11 +251,9 @@
 
             first_join_metrics.date_{{grain}}
 
-            {% if secondary_calculations | length > 0 %}
-                {% for period in relevant_periods %}
-                    ,first_join_metrics.date_{{ period }}
-                {% endfor %}
-            {% endif %}
+            {% for period in relevant_periods %}
+                ,first_join_metrics.date_{{ period }}
+            {% endfor %}
 
             {% for calendar_dim in calendar_dimensions %}
                 ,first_join_metrics.{{ calendar_dim }}
