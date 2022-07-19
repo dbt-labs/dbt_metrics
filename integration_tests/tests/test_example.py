@@ -2,7 +2,7 @@ import pytest
 from dbt.tests.util import run_dbt
 
 # our file contents
-from integration_tests.tests.fixtures import (
+from tests.fixtures import (
     seed_slack_users_csv,
     fact_orders_source_csv,
     fact_orders_sql,
