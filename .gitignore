@@ -8,3 +8,6 @@ integration_tests/target
 model_testing/
 test.env
 env/
+.venv
+venv/
+.env
