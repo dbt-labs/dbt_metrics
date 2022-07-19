@@ -10,16 +10,36 @@ user_id,joined_at,is_active_past_quarter,has_messaged
 # seeds/fact_orders_source.csv
 fact_orders_source_csv = """
 order_id,order_country,order_total,had_discount,customer_id,order_date
-1,Russia,10,false,643,04/28/2022
-2,Mauritius,10,false,84,01/20/2022
-3,Peru,2,false,802,05/13/2022
-4,Kazakhstan,5,true,803,01/06/2022
-5,Portugal,10,false,6,03/08/2022
-6,China,5,false,966,01/21/2022
-7,Germany,10,true,971,04/22/2022
-8,Greenland,8,true,789,05/15/2022
-9,Bangladesh,20,false,997,03/03/2022
-10,Sweden,10,false,92,03/13/2022
+1,Russia,1,false,1,04/28/2022
+2,Mauritius,1,false,2,01/20/2022
+3,Peru,1,false,1,05/13/2022
+4,Kazakhstan,1,true,3,01/06/2022
+5,Portugal,1,false,4,03/08/2022
+6,China,1,false,5,01/21/2022
+7,Germany,1,true,2,04/22/2022
+8,Greenland,1,true,1,05/15/2022
+9,Bangladesh,1,false,2,03/03/2022
+10,Sweden,1,false,3,03/13/2022
+""".lstrip()
+
+# seeds/dim_customers_source.csv
+dim_customers_source_csv = """
+customer_id,first_name,last_name,email,gender,is_new_customer
+1,Geodude,Hills,bhills0@altervista.org,Male,FALSE
+2,Mew,Coxhead,mcoxhead1@symantec.com,Genderfluid,TRUE
+3,Mewtwo,Redish,aredish2@last.fm,Genderqueer,FALSE
+4,Charizard,Basant,lbasant3@dedecms.com,Female,TRUE
+5,Snorlax,Pokemon,the_email@dedecms.com,Male,TRUE
+""".lstrip()
+
+# seeds/mock_purchase_data.csv
+mock_purchase_data_csv = """
+purchased_at,payment_type,payment_total
+2021-02-14 17:52:36,maestro,10
+2021-02-15 04:16:50,jcb,10
+2021-02-15 11:30:45,solo,10
+2021-02-16 13:08:18,americanexpress,10
+2021-02-17 05:41:34,americanexpress,10
 """.lstrip()
 
 # models/fact_orders.sql
@@ -29,6 +49,37 @@ select
     ,round(order_total - (order_total/2)) as discount_total
 from {{ref('fact_orders_source')}}
 """
+
+# models/dim_customers.sql
+dim_customers_sql = """
+select * from {{ref('dim_customers_source')}}
+"""
+
+# models/combined__orders_customers.sql
+combined__orders_customers_sql = """
+with orders as (
+
+    select * from {{ ref('fact_orders') }}
+
+)
+,
+customers as (
+
+    select * from {{ ref('dim_customers') }}
+
+)
+,
+final as (
+
+    select *
+    from orders
+    left join customers using (customer_id)
+
+)
+
+select * from final
+"""
+
 
 # models/fact_orders.yml
 fact_orders_yml = """
@@ -50,3 +101,27 @@ models:
         description: TBD
 """
 
+# models/dim_customers.yml
+dim_customers_yml = """
+version: 2 
+models: 
+  - name: dim_customers
+    columns:
+      - name: customer_id
+        description: TBD
+
+      - name: first_name
+        description: TBD
+
+      - name: last_name
+        description: TBD
+
+      - name: email
+        description: TBD
+
+      - name: gender
+        description: TBD
+        
+      - name: is_new_customer
+        description: TBD
+"""
