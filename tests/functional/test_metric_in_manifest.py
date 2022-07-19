@@ -3,7 +3,7 @@ from dbt.tests.util import run_dbt, get_manifest
 from dbt.exceptions import ParsingException
 
 # our file contents
-from integration_tests.tests.fixtures import (
+from tests.functional.fixtures import (
     seed_slack_users_csv,
     fact_orders_source_csv,
     fact_orders_sql,
