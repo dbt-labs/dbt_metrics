@@ -21,6 +21,11 @@ clean-targets:
   - "dbt_packages"
   - "logs"
 
+models:
+  dbt_metrics_integration_tests:
+    metric_testing_models:
+      +materialized: table
+
 vars:
   dbt_metrics_calendar_model: custom_calendar
   testing: fact_orders
