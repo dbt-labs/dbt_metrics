@@ -125,3 +125,9 @@ models:
       - name: is_new_customer
         description: TBD
 """
+
+# packages.yml
+packages_yml = """
+  - package: calogica/dbt_expectations
+    version: [">=0.5.0", "<0.6.0"]
+"""

@@ -1,12 +1,14 @@
+from struct import pack
+import os
 import pytest
-from dbt.tests.util import run_dbt, get_manifest
-from dbt.exceptions import ParsingException
+from dbt.tests.util import run_dbt
 
 # our file contents
-from integration_tests.tests.fixtures import (
+from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
-    fact_orders_yml
+    fact_orders_yml,
+    packages_yml
 )
 
 # models/base_average_metric.sql
@@ -44,13 +46,13 @@ metrics:
 # seeds/base_average_metric__expected.csv
 base_average_metric__expected_csv = """
 date_month,had_discount,base_average_metric
-2022-01-01,TRUE,1.000000
-2022-01-01,FALSE,1.000000
-2022-02-01,FALSE,1.000000
-2022-02-01,TRUE,1.000000
+2022-01-01,TRUE,1
+2022-01-01,FALSE,1
+2022-02-01,FALSE,1
+2022-02-01,TRUE,1
 """.lstrip()
 
-class TestAverageMetric:
+class TestBaseAverageMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -60,13 +62,16 @@ class TestAverageMetric:
           "models": {"+materialized": "view"}
         }
 
-    # everything that goes in the "models" directory
+    # install current repo as package
     @pytest.fixture(scope="class")
-    def models(self):
+    def packages(self):
         return {
-            "base_average_metric.yml": metrics__base_average_metric_yml,
-            "fact_orders.sql": fact_orders_sql,
+            "packages": [
+                # {"local": os.getcwd()},
+                {"dbt-labs/dbt_utils":[">=0.8.1","<0.9.0"]}
+                ]
         }
+
 
     # everything that goes in the "seeds" directory
     @pytest.fixture(scope="class")
@@ -76,10 +81,20 @@ class TestAverageMetric:
             "base_average_metric__expected.csv": base_average_metric__expected_csv,
         }
 
-    def test_metric_in_manifest(
-        self,
-        project,
-    ):
+    # everything that goes in the "models" directory
+    @pytest.fixture(scope="class")
+    def models(self):
+        return {
+            "fact_orders.sql": fact_orders_sql,
+            "fact_orders.yml": fact_orders_yml,
+            "base_average_metric.sql": metrics__base_average_metric_sql,
+            "base_average_metric.yml": metrics__base_average_metric_yml
+        }
+
+    def test_build_completion(self,project,):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
         # seed seeds
         results = run_dbt(["seed"])
         assert len(results) == 2
@@ -89,9 +104,9 @@ class TestAverageMetric:
         assert len(results) == 2
 
         # test tests
-        results = run_dbt(["test"], expect_pass = True) # expect passing test
+        results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # validate that the results include one pass and one failure
-        result_statuses = sorted(r.status for r in results)
-        assert result_statuses == ["pass"]
+        # # validate that the results include pass
+        # result_statuses = sorted(r.status for r in results)
+        # assert result_statuses == ["pass"]
