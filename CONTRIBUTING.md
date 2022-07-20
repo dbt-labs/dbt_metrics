@@ -90,6 +90,71 @@ If you are a member of the `dbt-labs` GitHub organization, you will have push ac
 
 When you create a Pull Request (below), integration tests will automatically run. When you add new functionality or change existing functionality, please also add new tests to ensure that the project remains resilient.
 
+
+## Testing locally
+
+### Initial setup
+
+Postgres offers the easiest way to test most functionality today. To run the Postgres integration tests, you'll have to do one extra step of setting up the test database:
+
+```shell
+docker-compose up -d database
+```
+
+### Virtual environment
+
+If you are using a shell other than `zsh` or `bash`, you will need to [adjust the `activate` commands](https://docs.python.org/3/library/venv.html) below accordingly.
+
+<details>
+  <summary>Platform-specific instructions for venv activation</summary>
+
+| **Platform** | **Shell**       | **Command to activate virtual environment** |
+|--------------|-----------------|---------------------------------------------|
+| POSIX        | bash/zsh        | `$ source env/bin/activate`                 |
+|              | fish            | `$ source env/bin/activate.fish`            |
+|              | csh/tcsh        | `$ source env/bin/activate.csh`             |
+|              | PowerShell Core | `$ env/bin/Activate.ps1`                    |
+| Windows      | cmd.exe         | `C:\> env\Scripts\activate.bat`             |
+|              | PowerShell      | `PS C:\> env\Scripts\Activate.ps1`          |
+
+</details>
+
+```shell
+python -m venv env
+source env/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install --pre -r dev-requirements.txt
+source env/bin/activate
+```
+
+You can run integration tests "locally" by configuring a `test.env` file with appropriate environment variables.
+
+```
+cp test.env.example test.env
+$EDITOR test.env
+```
+
+WARNING: The `test.env` file you create is `.gitignore`'d, but please be _extra_ careful to never check in credentials or other sensitive information when developing.
+
+### Test commands
+
+There are many options for invoking `pytest` and choosing which tests to execute. See [here](https://docs.pytest.org/usage.html) for the `pytest` documentation. Some common options are included below.
+
+#### Run all the tests
+```shell
+python3 -m pytest
+```
+
+#### Run tests in a module
+```shell
+python3 -m pytest tests/functional/example/test_example_failing_test.py
+```
+
+#### Run tests in a directory
+```shell
+python3 -m pytest tests/functional
+```
+
 ## Submitting a Pull Request
 
 A `dbt_metrics` maintainer will review your PR. They may suggest code revision for style or clarity, or request that you add unit or integration test(s). These are good things! We believe that, with a little bit of help, anyone can contribute high-quality code.
