@@ -90,7 +90,6 @@ If you are a member of the `dbt-labs` GitHub organization, you will have push ac
 
 When you create a Pull Request (below), integration tests will automatically run. When you add new functionality or change existing functionality, please also add new tests to ensure that the project remains resilient.
 
-
 ## Testing locally
 
 ### Initial setup
