@@ -7,3 +7,5 @@ logs/
 integration_tests/target
 model_testing/
 test.env
+env/
+__pycache__/
