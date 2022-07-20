@@ -8,4 +8,7 @@ integration_tests/target
 model_testing/
 test.env
 env/
-__pycache__/
+.venv
+venv/
+.env
+__pycache__
