@@ -10,26 +10,26 @@ user_id,joined_at,is_active_past_quarter,has_messaged
 # seeds/fact_orders_source.csv
 fact_orders_source_csv = """
 order_id,order_country,order_total,had_discount,customer_id,order_date
-1,Russia,1,false,1,04/28/2022
+1,Russia,1,false,1,01/28/2022
 2,Mauritius,1,false,2,01/20/2022
-3,Peru,1,false,1,05/13/2022
+3,Peru,1,false,1,01/13/2022
 4,Kazakhstan,1,true,3,01/06/2022
-5,Portugal,1,false,4,03/08/2022
+5,Portugal,1,false,4,01/08/2022
 6,China,1,false,5,01/21/2022
-7,Germany,1,true,2,04/22/2022
-8,Greenland,1,true,1,05/15/2022
-9,Bangladesh,1,false,2,03/03/2022
-10,Sweden,1,false,3,03/13/2022
+7,Germany,1,true,2,01/22/2022
+8,Greenland,1,true,1,02/15/2022
+9,Bangladesh,1,false,2,02/03/2022
+10,Sweden,1,false,3,02/13/2022
 """.lstrip()
 
 # seeds/dim_customers_source.csv
 dim_customers_source_csv = """
-customer_id,first_name,last_name,email,gender,is_new_customer
-1,Geodude,Hills,bhills0@altervista.org,Male,FALSE
-2,Mew,Coxhead,mcoxhead1@symantec.com,Genderfluid,TRUE
-3,Mewtwo,Redish,aredish2@last.fm,Genderqueer,FALSE
-4,Charizard,Basant,lbasant3@dedecms.com,Female,TRUE
-5,Snorlax,Pokemon,the_email@dedecms.com,Male,TRUE
+customer_id,first_name,last_name,email,gender,is_new_customer,date_added
+1,Geodude,Hills,bhills0@altervista.org,Male,FALSE,2022-01-01
+2,Mew,Coxhead,mcoxhead1@symantec.com,Genderfluid,TRUE,2022-01-06
+3,Mewtwo,Redish,aredish2@last.fm,Genderqueer,FALSE,2022-01-13
+4,Charizard,Basant,lbasant3@dedecms.com,Female,TRUE,2022-02-01
+5,Snorlax,Pokemon,the_email@dedecms.com,Male,TRUE,2022-02-03
 """.lstrip()
 
 # seeds/mock_purchase_data.csv

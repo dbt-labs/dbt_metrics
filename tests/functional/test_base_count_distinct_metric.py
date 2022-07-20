@@ -7,52 +7,51 @@ from dbt.tests.util import run_dbt
 from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
-    fact_orders_yml,
-    packages_yml
+    fact_orders_yml
 )
 
-# models/base_average_metric.sql
-metrics__base_average_metric_sql = """
+# models/base_count_distinct_metric.sql
+metrics__base_count_distinct_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('base_average_metric'), 
-    grain='month', 
-    dimensions=['had_discount']) 
+{{ metrics.calculate(metric('base_count_distinct_metric'), 
+    grain='month'
+    ) 
 }}
 """
 
-# models/base_average_metric.yml
-metrics__base_average_metric_yml = """
+# models/base_count_distinct_metric.yml
+metrics__base_count_distinct_metric_yml = """
 version: 2 
 models:
-  - name: base_average_metric
+  - name: base_count_distinct_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('base_average_metric__expected')
+          compare_model: ref('base_count_distinct_metric__expected')
 
 metrics:
-  - name: base_average_metric
+  - name: base_count_distinct_metric
     model: ref('fact_orders')
-    label: Total Discount ($)
+    label: Count Distinct
     timestamp: order_date
     time_grains: [day, week, month]
-    type: average
-    sql: discount_total
+    type: count_distinct
+    sql: customer_id
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/base_average_metric__expected.csv
-base_average_metric__expected_csv = """
-date_month,had_discount,base_average_metric
-2022-01-01,TRUE,1.00000000000000000000
-2022-01-01,FALSE,1.00000000000000000000
-2022-02-01,FALSE,1.00000000000000000000
-2022-02-01,TRUE,1.00000000000000000000
+# seeds/base_count_distinct_metric__expected.csv
+base_count_distinct_metric__expected_csv = """
+date_month,had_discount,base_count_distinct_metric
+2022-01-01,TRUE,2
+2022-01-01,FALSE,4
+2022-02-01,FALSE,2
+2022-02-01,TRUE,1
 """.lstrip()
 
-class TestBaseAverageMetric:
+class TestBaseCountDistinctMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -77,7 +76,7 @@ class TestBaseAverageMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "base_average_metric__expected.csv": base_average_metric__expected_csv,
+            "base_count_distinct_metric__expected.csv": base_count_distinct_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -86,8 +85,8 @@ class TestBaseAverageMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "base_average_metric.sql": metrics__base_average_metric_sql,
-            "base_average_metric.yml": metrics__base_average_metric_yml
+            "base_count_distinct_metric.sql": metrics__base_count_distinct_metric_sql,
+            "base_count_distinct_metric.yml": metrics__base_count_distinct_metric_yml
         }
 
     def test_build_completion(self,project,):

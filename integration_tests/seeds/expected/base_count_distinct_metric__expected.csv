@@ -1,0 +1,5 @@
+date_month,had_discount,base_count_distinct_metric
+2022-01-01,TRUE,2
+2022-01-01,FALSE,4
+2022-02-01,FALSE,2
+2022-02-01,TRUE,1
