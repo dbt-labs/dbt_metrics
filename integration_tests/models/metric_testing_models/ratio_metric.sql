@@ -1,9 +1,6 @@
 select *
 from 
-{{ metrics.calculate(
-    metric('ratio_metric'), 
-    grain='day', 
-    dimensions=['had_discount','order_country','is_weekend'],
-    start_date = '2022-01-01',
-    end_date = '2022-01-10') 
+{{ metrics.calculate(metric('ratio_metric'), 
+    grain='month'
+    )
 }}

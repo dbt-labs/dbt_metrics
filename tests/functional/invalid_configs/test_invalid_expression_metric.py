@@ -10,45 +10,35 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/month_grain_metric.sql
-month_grain_metric_sql = """
+# models/invalid_expression_metric.sql
+invalid_expression_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('month_grain_metric'), 
+{{ metrics.calculate(metric('invalid_expression_metric'), 
     grain='month'
     )
 }}
 """
 
-# models/month_grain_metric.yml
-month_grain_metric_yml = """
+# models/invalid_expression_metric.yml
+invalid_expression_metric_yml = """
 version: 2 
 models:
-  - name: month_grain_metric
-    tests: 
-      - dbt_utils.equality:
-          compare_model: ref('month_grain__expected')
+  - name: invalid_expression_metric
+
 metrics:
-  - name: month_grain_metric
-    model: ref('fact_orders')
+  - name: invalid_expression_metric
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: count
+    type: expression
     sql: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/month_grain__expected.csv
-month_grain__expected_csv = """
-date_month,month_grain_metric
-2022-02-01,3
-2022-01-01,7
-""".lstrip()
-
-class TestmonthGrain:
+class TestInvalidExpressionMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -72,9 +62,8 @@ class TestmonthGrain:
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
-            "fact_orders_source.csv": fact_orders_source_csv,
-            "month_grain__expected.csv": month_grain__expected_csv,
-        }
+            "fact_orders_source.csv": fact_orders_source_csv
+            }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
@@ -82,8 +71,8 @@ class TestmonthGrain:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "month_grain_metric.sql": month_grain_metric_sql,
-            "month_grain_metric.yml": month_grain_metric_yml
+            "invalid_expression_metric.sql": invalid_expression_metric_sql,
+            "invalid_expression_metric.yml": invalid_expression_metric_yml
         }
 
     def test_build_completion(self,project,):
@@ -92,16 +81,8 @@ class TestmonthGrain:
 
         # seed seeds
         results = run_dbt(["seed"])
-        assert len(results) == 2
-
-        # initial run
-        results = run_dbt(["run"])
-        assert len(results) == 3
-
-        # test tests
-        results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # # # validate that the results include pass
-        result_statuses = sorted(r.status for r in results)
-        assert result_statuses == ["pass"]
+        # Here we expect the run to fail because the incorrect
+        # time grain won't allow it to compile
+        results = run_dbt(["run"], expect_pass = False)
