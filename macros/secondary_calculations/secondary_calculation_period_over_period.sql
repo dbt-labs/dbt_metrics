@@ -28,7 +28,7 @@
 {% endmacro %}
 
 {% macro default__metric_comparison_strategy_ratio(metric_name, calc_sql) %}
-    cast(coalesce({{ metric_name }}, 0) / nullif({{ calc_sql }}, 0) as {{ dbt_utils.type_float() }})
+    cast(coalesce({{ metric_name }}, 0) as {{ dbt_utils.type_float() }}) / nullif({{ calc_sql }}, 0) 
 {% endmacro %}
 
 {% macro period_over_period(comparison_strategy, interval, alias) %}
