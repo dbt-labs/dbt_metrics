@@ -8,50 +8,86 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
-    packages_yml
 )
 
-# models/base_average_metric.sql
-metrics__base_average_metric_sql = """
+# models/day_grain_metric.sql
+day_grain_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('base_average_metric'), 
-    grain='month', 
-    dimensions=['had_discount']) 
+{{ metrics.calculate(metric('day_grain_metric'), 
+    grain='day'
+    )
 }}
 """
 
-# models/base_average_metric.yml
-metrics__base_average_metric_yml = """
+# models/day_grain_metric.yml
+day_grain_metric_yml = """
 version: 2 
 models:
-  - name: base_average_metric
+  - name: day_grain_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('base_average_metric__expected')
+          compare_model: ref('day_grain__expected')
 metrics:
-  - name: base_average_metric
+  - name: day_grain_metric
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: average
-    sql: discount_total
+    type: count
+    sql: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/base_average_metric__expected.csv
-base_average_metric__expected_csv = """
-date_month,had_discount,base_average_metric
-2022-01-01,TRUE,1.00000000000000000000
-2022-01-01,FALSE,1.00000000000000000000
-2022-02-01,FALSE,1.00000000000000000000
-2022-02-01,TRUE,1.00000000000000000000
+# seeds/day_grain__expected.csv
+day_grain__expected_csv = """
+date_day,day_grain_metric
+2022-02-15,1
+2022-02-14,0
+2022-02-13,1
+2022-02-12,0
+2022-02-11,0
+2022-02-10,0
+2022-02-09,0
+2022-02-08,0
+2022-02-07,0
+2022-02-06,0
+2022-02-05,0
+2022-02-04,0
+2022-02-03,1
+2022-02-02,0
+2022-02-01,0
+2022-01-31,0
+2022-01-30,0
+2022-01-29,0
+2022-01-28,1
+2022-01-27,0
+2022-01-26,0
+2022-01-25,0
+2022-01-24,0
+2022-01-23,0
+2022-01-22,1
+2022-01-21,1
+2022-01-20,1
+2022-01-19,0
+2022-01-18,0
+2022-01-17,0
+2022-01-16,0
+2022-01-15,0
+2022-01-14,0
+2022-01-13,1
+2022-01-12,0
+2022-01-11,0
+2022-01-10,0
+2022-01-09,0
+2022-01-08,1
+2022-01-07,0
+2022-01-06,1
 """.lstrip()
 
-class TestBaseAverageMetric:
+class TestDayGrain:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -76,7 +112,7 @@ class TestBaseAverageMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "base_average_metric__expected.csv": base_average_metric__expected_csv,
+            "day_grain__expected.csv": day_grain__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -85,8 +121,8 @@ class TestBaseAverageMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "base_average_metric.sql": metrics__base_average_metric_sql,
-            "base_average_metric.yml": metrics__base_average_metric_yml
+            "day_grain_metric.sql": day_grain_metric_sql,
+            "day_grain_metric.yml": day_grain_metric_yml
         }
 
     def test_build_completion(self,project,):
