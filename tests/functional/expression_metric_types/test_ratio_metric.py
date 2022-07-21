@@ -75,8 +75,8 @@ metrics:
 # seeds/ratio_metric__expected.csv
 ratio_metric__expected_csv = """
 date_month,base_sum_metric,base_average_metric,ratio_metric
-2022-02-01,2,1.00000000000000000000,2.00000000000000000000
-2022-01-01,8,1.00000000000000000000,8.00000000000000000000
+2022-02-01,6,1.3333333333333333,4.5
+2022-01-01,8,1.0,8.0
 """.lstrip()
 
 class TestRatioMetric:
@@ -136,5 +136,5 @@ class TestRatioMetric:
         assert len(results) == 1
 
         # # # # validate that the results include pass
-        # result_statuses = sorted(r.status for r in results)
-        # assert result_statuses == ["pass"]
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]

@@ -45,7 +45,7 @@ metrics:
 base_sum_metric__expected_csv = """
 date_month,base_sum_metric
 2022-01-01,8
-2022-02-01,2
+2022-02-01,6
 """.lstrip()
 
 class TestBaseSumMetric:

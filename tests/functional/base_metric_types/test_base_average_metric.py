@@ -45,7 +45,7 @@ metrics:
 base_average_metric__expected_csv = """
 date_month,base_average_metric
 2022-01-01,1.00000000000000000000
-2022-02-01,1.00000000000000000000
+2022-02-01,1.3333333333333333
 """.lstrip()
 
 class TestBaseAverageMetric:

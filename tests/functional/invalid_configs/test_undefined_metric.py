@@ -1,3 +1,4 @@
+from configparser import ParsingError
 from struct import pack
 import os
 import pytest
@@ -11,35 +12,36 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/invalid_expression_metric.sql
-invalid_expression_metric_sql = """
+# models/undefined_metric.sql
+undefined_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_expression_metric'), 
+{{ metrics.calculate(metric('undefined_metric'), 
     grain='month'
     )
 }}
 """
 
-# models/invalid_expression_metric.yml
-invalid_expression_metric_yml = """
+# models/undefined_metric.yml
+undefined_metric_yml = """
 version: 2 
 models:
-  - name: invalid_expression_metric
+  - name: undefined_metric
 
 metrics:
-  - name: invalid_expression_metric
+  - name: not_undefined_metric
+    model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: expression
+    type: count
     sql: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-class TestInvalidExpressionMetric:
+class TestUndefinedMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -72,18 +74,14 @@ class TestInvalidExpressionMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "invalid_expression_metric.sql": invalid_expression_metric_sql,
-            "invalid_expression_metric.yml": invalid_expression_metric_yml
+            "undefined_metric.sql": undefined_metric_sql,
+            "undefined_metric.yml": undefined_metric_yml
         }
 
-    def test_build_completion(self,project,):
-        # running deps to install package
+    def test_undefined_metric(self,project,):
         results = run_dbt(["deps"])
-
-        # seed seeds
-        results = run_dbt(["seed"])
-        assert len(results) == 1
-
-        # Here we expect the run to fail because the incorrect
-        # config won't allow it to compile
-        results = run_dbt(["run"], expect_pass = False)
+        # Here we expect the run to fail because the macro is calling 
+        # an undefined metric
+        with pytest.raises(CompilationException):
+            run_dbt(["seed"])
+            run_dbt(["run"])

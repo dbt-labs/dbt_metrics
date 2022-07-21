@@ -10,45 +10,48 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/base_max_metric.sql
-base_max_metric_sql = """
+# models/single_dimension_base_sum_metric.sql
+single_dimension_base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('base_max_metric'), 
-    grain='month'
+{{ metrics.calculate(metric('single_dimension_base_sum_metric'), 
+    grain='month',
+    dimensions=['had_discount']
     )
 }}
 """
 
-# models/base_max_metric.yml
-base_max_metric_yml = """
+# models/single_dimension_base_sum_metric.yml
+single_dimension_base_sum_metric_yml = """
 version: 2 
 models:
-  - name: base_max_metric
+  - name: single_dimension_base_sum_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('base_max_metric__expected')
+          compare_model: ref('single_dimension_base_sum_metric__expected')
 metrics:
-  - name: base_max_metric
+  - name: single_dimension_base_sum_metric
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: max
+    type: sum
     sql: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/base_max_metric__expected.csv
-base_max_metric__expected_csv = """
-date_month,base_max_metric
-2022-01-01,2
-2022-02-01,4
+# seeds/single_dimension_base_sum_metric__expected.csv
+single_dimension_base_sum_metric__expected_csv = """
+date_month,had_discount,single_dimension_base_sum_metric
+2022-01-01,TRUE,2
+2022-01-01,FALSE,6
+2022-02-01,TRUE,4
+2022-02-01,FALSE,2
 """.lstrip()
 
-class TestBaseMaxMetric:
+class TestSingleDimensionBaseSumMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -73,7 +76,7 @@ class TestBaseMaxMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "base_max_metric__expected.csv": base_max_metric__expected_csv,
+            "single_dimension_base_sum_metric__expected.csv": single_dimension_base_sum_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -82,8 +85,8 @@ class TestBaseMaxMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "base_max_metric.sql": base_max_metric_sql,
-            "base_max_metric.yml": base_max_metric_yml
+            "single_dimension_base_sum_metric.sql": single_dimension_base_sum_metric_sql,
+            "single_dimension_base_sum_metric.yml": single_dimension_base_sum_metric_yml
         }
 
     def test_build_completion(self,project,):

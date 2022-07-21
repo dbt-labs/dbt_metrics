@@ -45,7 +45,7 @@ metrics:
 base_min_metric__expected_csv = """
 date_month,base_min_metric
 2022-01-01,1
-2022-02-01,0
+2022-02-01,1
 """.lstrip()
 
 class TestBaseMinMetric:

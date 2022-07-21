@@ -1,3 +1,4 @@
+from configparser import ParsingError
 from struct import pack
 import os
 import pytest
@@ -11,35 +12,36 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/invalid_expression_metric.sql
-invalid_expression_metric_sql = """
+# models/invalid_metric_name.sql
+invalid_metric_name_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_expression_metric'), 
+{{ metrics.calculate(metric('invalid metric name'), 
     grain='month'
     )
 }}
 """
 
-# models/invalid_expression_metric.yml
-invalid_expression_metric_yml = """
+# models/invalid_metric_name.yml
+invalid_metric_name_yml = """
 version: 2 
 models:
-  - name: invalid_expression_metric
+  - name: invalid_metric_name
 
 metrics:
-  - name: invalid_expression_metric
+  - name: invalid metric name
+    model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: expression
+    type: count
     sql: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-class TestInvalidExpressionMetric:
+class TestInvalidMetricName:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -72,18 +74,12 @@ class TestInvalidExpressionMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "invalid_expression_metric.sql": invalid_expression_metric_sql,
-            "invalid_expression_metric.yml": invalid_expression_metric_yml
+            "invalid_metric_name.sql": invalid_metric_name_sql,
+            "invalid_metric_name.yml": invalid_metric_name_yml
         }
 
-    def test_build_completion(self,project,):
-        # running deps to install package
-        results = run_dbt(["deps"])
-
-        # seed seeds
-        results = run_dbt(["seed"])
-        assert len(results) == 1
-
-        # Here we expect the run to fail because the incorrect
-        # config won't allow it to compile
-        results = run_dbt(["run"], expect_pass = False)
+    def test_model_name(self,project,):
+        # initial run
+        with pytest.raises(ParsingException):
+            run_dbt(["deps"])
+            run_dbt(["run"])
