@@ -10,22 +10,27 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/single_dimension_expression_metric.sql
-single_dimension_expression_metric_sql = """
+# models/multi_dimension_base_sum_metric.sql
+multi_dimension_base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('single_dimension_expression_metric'), 
+{{ metrics.calculate(metric('multi_dimension_base_sum_metric'), 
     grain='month',
-    dimensions=['had_discount']
+    dimensions=['had_discount','order_country']
     )
 }}
 """
 
-# models/base_sum_metric.yml
-base_sum_metric_yml = """
+# models/multi_dimension_base_sum_metric.yml
+multi_dimension_base_sum_metric_yml = """
 version: 2 
+models:
+  - name: multi_dimension_base_sum_metric
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('multi_dimension_base_sum_metric__expected')
 metrics:
-  - name: base_sum_metric
+  - name: multi_dimension_base_sum_metric
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
@@ -37,36 +42,20 @@ metrics:
       - order_country
 """
 
-# models/single_dimension_expression_metric.yml
-single_dimension_expression_metric_yml = """
-version: 2 
-models:
-  - name: single_dimension_expression_metric
-    tests: 
-      - dbt_utils.equality:
-          compare_model: ref('single_dimension_expression_metric__expected')
-metrics:
-  - name: single_dimension_expression_metric
-    label: Expression ($)
-    timestamp: order_date
-    time_grains: [day, week, month]
-    type: expression
-    sql: "{{metric('base_sum_metric')}} + 1"
-    dimensions:
-      - had_discount
-      - order_country
-"""
-
-# seeds/single_dimension_expression_metric__expected.csv
-single_dimension_expression_metric__expected_csv = """
-date_month,had_discount,base_sum_metric,single_dimension_expression_metric
-2022-01-01,TRUE,2,3
-2022-01-01,FALSE,6,7
-2022-02-01,TRUE,4,5
-2022-02-01,FALSE,2,3
+# seeds/multi_dimension_base_sum_metric__expected.csv
+multi_dimension_base_sum_metric__expected_csv = """
+date_month,had_discount,order_country,multi_dimension_base_sum_metric
+2022-01-01,TRUE,France,1
+2022-01-01,TRUE,Japan,1
+2022-01-01,FALSE,France,4
+2022-01-01,FALSE,Japan,2
+2022-02-01,TRUE,France,4
+2022-02-01,FALSE,France,0
+2022-02-01,FALSE,Japan,2
+2022-02-01,TRUE,Japan,0
 """.lstrip()
 
-class TestSingleDimensionExpressionMetric:
+class TestSingleDimensionBaseSumMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -91,18 +80,17 @@ class TestSingleDimensionExpressionMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "single_dimension_expression_metric__expected.csv": single_dimension_expression_metric__expected_csv,
+            "multi_dimension_base_sum_metric__expected.csv": multi_dimension_base_sum_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
     def models(self):
         return {
-            "fact_orders.yml": fact_orders_yml,
-            "base_sum_metric.yml": base_sum_metric_yml,
-            "single_dimension_expression_metric.yml": single_dimension_expression_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "single_dimension_expression_metric.sql": single_dimension_expression_metric_sql
+            "fact_orders.yml": fact_orders_yml,
+            "multi_dimension_base_sum_metric.sql": multi_dimension_base_sum_metric_sql,
+            "multi_dimension_base_sum_metric.yml": multi_dimension_base_sum_metric_yml
         }
 
     def test_build_completion(self,project,):
@@ -121,6 +109,6 @@ class TestSingleDimensionExpressionMetric:
         results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # # # # validate that the results include pass
+        # # # validate that the results include pass
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["pass"]

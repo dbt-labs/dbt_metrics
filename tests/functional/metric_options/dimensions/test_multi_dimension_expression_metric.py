@@ -10,13 +10,13 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/single_dimension_expression_metric.sql
-single_dimension_expression_metric_sql = """
+# models/multi_dimension_expression_metric.sql
+multi_dimension_expression_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('single_dimension_expression_metric'), 
+{{ metrics.calculate(metric('multi_dimension_expression_metric'), 
     grain='month',
-    dimensions=['had_discount']
+    dimensions=['had_discount','order_country']
     )
 }}
 """
@@ -37,16 +37,16 @@ metrics:
       - order_country
 """
 
-# models/single_dimension_expression_metric.yml
-single_dimension_expression_metric_yml = """
+# models/multi_dimension_expression_metric.yml
+multi_dimension_expression_metric_yml = """
 version: 2 
 models:
-  - name: single_dimension_expression_metric
+  - name: multi_dimension_expression_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('single_dimension_expression_metric__expected')
+          compare_model: ref('multi_dimension_expression_metric__expected')
 metrics:
-  - name: single_dimension_expression_metric
+  - name: multi_dimension_expression_metric
     label: Expression ($)
     timestamp: order_date
     time_grains: [day, week, month]
@@ -57,13 +57,17 @@ metrics:
       - order_country
 """
 
-# seeds/single_dimension_expression_metric__expected.csv
-single_dimension_expression_metric__expected_csv = """
-date_month,had_discount,base_sum_metric,single_dimension_expression_metric
-2022-01-01,TRUE,2,3
-2022-01-01,FALSE,6,7
-2022-02-01,TRUE,4,5
-2022-02-01,FALSE,2,3
+# seeds/multi_dimension_expression_metric__expected.csv
+multi_dimension_expression_metric__expected_csv = """
+date_month,had_discount,order_country,base_sum_metric,multi_dimension_expression_metric
+2022-01-01,TRUE,France,1,2
+2022-01-01,TRUE,Japan,1,2
+2022-01-01,FALSE,France,4,5
+2022-01-01,FALSE,Japan,2,3
+2022-02-01,TRUE,France,4,5
+2022-02-01,FALSE,France,0,
+2022-02-01,FALSE,Japan,2,3
+2022-02-01,TRUE,Japan,0,
 """.lstrip()
 
 class TestSingleDimensionExpressionMetric:
@@ -91,7 +95,7 @@ class TestSingleDimensionExpressionMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "single_dimension_expression_metric__expected.csv": single_dimension_expression_metric__expected_csv,
+            "multi_dimension_expression_metric__expected.csv": multi_dimension_expression_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -100,9 +104,9 @@ class TestSingleDimensionExpressionMetric:
         return {
             "fact_orders.yml": fact_orders_yml,
             "base_sum_metric.yml": base_sum_metric_yml,
-            "single_dimension_expression_metric.yml": single_dimension_expression_metric_yml,
+            "multi_dimension_expression_metric.yml": multi_dimension_expression_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "single_dimension_expression_metric.sql": single_dimension_expression_metric_sql
+            "multi_dimension_expression_metric.sql": multi_dimension_expression_metric_sql
         }
 
     def test_build_completion(self,project,):
