@@ -21,6 +21,18 @@ from
 }}
 """
 
+# models/multiple_metrics.sql
+multiple_metrics_sql = """
+select *
+from 
+{{ metrics.calculate(
+    [metric('base_sum_metric'), metric('base_count_metric')],
+    grain='month',
+    dimensions=['invalid_dimension_name']
+    )
+}}
+"""
+
 # models/invalid_dimension.yml
 invalid_dimension_yml = """
 version: 2 
@@ -40,7 +52,39 @@ metrics:
       - order_country
 """
 
-class TestInvalidTimeGrain:
+# models/multiple_metrics.yml
+multiple_metrics_yml = """
+version: 2 
+models:
+  - name: multiple_metrics
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('multiple_metrics__expected')
+metrics:
+  - name: base_count_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    type: count
+    sql: order_total
+    dimensions:
+      - had_discount
+      - order_country
+
+  - name: base_sum_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    type: sum
+    sql: order_total
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+class TestInvalidDimension:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -74,7 +118,9 @@ class TestInvalidTimeGrain:
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
             "invalid_dimension.sql": invalid_dimension_sql,
-            "invalid_dimension.yml": invalid_dimension_yml
+            "invalid_dimension.yml": invalid_dimension_yml,
+            "multiple_metrics.yml": multiple_metrics_yml,
+            "multiple_metrics.sql": multiple_metrics_sql
         }
 
     def test_build_completion(self,project,):
