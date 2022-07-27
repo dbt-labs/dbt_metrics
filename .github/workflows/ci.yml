@@ -48,7 +48,7 @@ jobs:
 
       - uses: ./.github/actions/end-to-end-test
         with:
-          dbt-target: postgres
+          dbt_target: postgres
           database-adapter-package: dbt-postgres
 
   snowflake:
@@ -72,7 +72,7 @@ jobs:
           SNOWFLAKE_TEST_DATABASE: ${{ secrets.SNOWFLAKE_TEST_DATABASE }}
           SNOWFLAKE_TEST_WAREHOUSE: ${{ secrets.SNOWFLAKE_TEST_WAREHOUSE }}
         with:
-          dbt-target: snowflake
+          dbt_target: snowflake
           database-adapter-package: dbt-snowflake
 
   redshift:
@@ -95,7 +95,7 @@ jobs:
           REDSHIFT_TEST_DBNAME: ${{ secrets.REDSHIFT_TEST_DBNAME }}
           REDSHIFT_TEST_PORT: ${{ secrets.REDSHIFT_TEST_PORT }}
         with:
-          dbt-target: redshift
+          dbt_target: redshift
           database-adapter-package: dbt-redshift
 
   bigquery:
@@ -125,5 +125,5 @@ jobs:
           BIGQUERY_SERVICE_KEY_PATH: ${{ steps.keyfile.outputs.path }}
           BIGQUERY_TEST_DATABASE: ${{ secrets.BIGQUERY_TEST_DATABASE }}
         with:
-          dbt-target: bigquery
+          dbt_target: bigquery
           database-adapter-package: dbt-bigquery

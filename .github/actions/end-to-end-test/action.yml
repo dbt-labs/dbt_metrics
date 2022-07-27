@@ -5,7 +5,7 @@ inputs:
     description: "Location of test project"
     required: false
     default: "integration_tests"
-  dbt-target:
+  dbt_target:
     description: "Name of target to use when running dbt"
     required: true
   database-adapter-package:
@@ -32,6 +32,6 @@ runs:
       shell: bash
       run: |
         cd ${{ inputs.dbt-project }}
-        dbt deps --target ${{ inputs.dbt-target }}
-        dbt seed --target ${{ inputs.dbt-target }} --full-refresh
-        dbt build --target ${{ inputs.dbt-target }} --full-refresh
+        dbt deps --target ${{ inputs.dbt_target }}
+        dbt seed --target ${{ inputs.dbt_target }} --full-refresh
+        dbt build --target ${{ inputs.dbt_target }} --full-refresh
