@@ -45,7 +45,32 @@ metrics:
 """
 
 # seeds/period_over_period_difference__expected.csv
-period_over_period_difference__expected_csv = """
+if os.getenv('dbt_target') == 'postgres':
+    period_over_period_difference__expected_csv = """
+date_month,period_over_period_difference,period_over_period_difference_1mth
+2022-01-01,8,8
+2022-02-01,6,-2
+""".lstrip()
+
+# seeds/period_over_period_difference__expected.csv
+if os.getenv('dbt_target') == 'postgres':
+    period_over_period_difference__expected_csv = """
+date_month,period_over_period_difference,period_over_period_difference_1mth
+2022-01-01,8,8
+2022-02-01,6,-2
+""".lstrip()
+
+# seeds/period_over_period_difference__expected.csv
+if os.getenv('dbt_target') == 'redshift':
+    period_over_period_difference__expected_csv = """
+date_month,period_over_period_difference,period_over_period_difference_1mth
+2022-01-01,8,8
+2022-02-01,6,-2
+""".lstrip()
+
+# seeds/period_over_period_difference__expected.csv
+if os.getenv('dbt_target') == 'bigquery':
+    period_over_period_difference__expected_csv = """
 date_month,period_over_period_difference,period_over_period_difference_1mth
 2022-01-01,8,8
 2022-02-01,6,-2

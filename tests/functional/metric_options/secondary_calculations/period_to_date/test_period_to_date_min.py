@@ -48,7 +48,32 @@ metrics:
 """
 
 # seeds/period_to_date_min__expected.csv
-period_to_date_min__expected_csv = """
+if os.getenv('dbt_target') == 'postgres':
+    period_to_date_min__expected_csv = """
+date_month,date_year,period_to_date_min,period_to_date_min_this_year_min,period_to_date_min_max_for_year,period_to_date_min_sum_for_year,period_to_date_min_average_for_year
+2022-01-01,2022-01-01,1,1,1,1,1.0000000000000000
+2022-02-01,2022-01-01,1,1,1,2,1.0000000000000000
+""".lstrip()
+
+# seeds/period_to_date_min__expected.csv
+if os.getenv('dbt_target') == 'redshift':
+    period_to_date_min__expected_csv = """
+date_month,date_year,period_to_date_min,period_to_date_min_this_year_min,period_to_date_min_max_for_year,period_to_date_min_sum_for_year,period_to_date_min_average_for_year
+2022-01-01,2022-01-01,1,1,1,1,1.0000000000000000
+2022-02-01,2022-01-01,1,1,1,2,1.0000000000000000
+""".lstrip()
+
+# seeds/period_to_date_min__expected.csv
+if os.getenv('dbt_target') == 'snowflake':
+    period_to_date_min__expected_csv = """
+date_month,date_year,period_to_date_min,period_to_date_min_this_year_min,period_to_date_min_max_for_year,period_to_date_min_sum_for_year,period_to_date_min_average_for_year
+2022-01-01,2022-01-01,1,1,1,1,1.000000
+2022-02-01,2022-01-01,1,1,1,2,1.000000
+""".lstrip()
+
+# seeds/period_to_date_min__expected.csv
+if os.getenv('dbt_target') == 'bigquery':
+    period_to_date_min__expected_csv = """
 date_month,date_year,period_to_date_min,period_to_date_min_this_year_min,period_to_date_min_max_for_year,period_to_date_min_sum_for_year,period_to_date_min_average_for_year
 2022-01-01,2022-01-01,1,1,1,1,1.0000000000000000
 2022-02-01,2022-01-01,1,1,1,2,1.0000000000000000

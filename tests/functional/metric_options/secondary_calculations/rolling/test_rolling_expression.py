@@ -62,7 +62,32 @@ metrics:
 """
 
 # seeds/rolling_expression_metric__expected.csv
-rolling_expression_metric__expected_csv = """
+if os.getenv('dbt_target') == 'postgres':
+    rolling_expression_metric__expected_csv = """
+date_month,base_sum_metric,rolling_expression_metric,rolling_expression_metric_rolling_max_2_month,rolling_expression_metric_rolling_min_2_month,rolling_expression_metric_rolling_sum_2_month
+2022-01-01,8,9,9,9,9
+2022-02-01,6,7,9,7,16
+""".lstrip()
+
+# seeds/rolling_expression_metric__expected.csv
+if os.getenv('dbt_target') == 'redshift':
+    rolling_expression_metric__expected_csv = """
+date_month,base_sum_metric,rolling_expression_metric,rolling_expression_metric_rolling_max_2_month,rolling_expression_metric_rolling_min_2_month,rolling_expression_metric_rolling_sum_2_month
+2022-01-01,8,9,9,9,9
+2022-02-01,6,7,9,7,16
+""".lstrip()
+
+# seeds/rolling_expression_metric__expected.csv
+if os.getenv('dbt_target') == 'snowflake':
+    rolling_expression_metric__expected_csv = """
+date_month,base_sum_metric,rolling_expression_metric,rolling_expression_metric_rolling_max_2_month,rolling_expression_metric_rolling_min_2_month,rolling_expression_metric_rolling_sum_2_month
+2022-01-01,8,9,9,9,9
+2022-02-01,6,7,9,7,16
+""".lstrip()
+
+# seeds/rolling_expression_metric__expected.csv
+if os.getenv('dbt_target') == 'bigquery':
+    rolling_expression_metric__expected_csv = """
 date_month,base_sum_metric,rolling_expression_metric,rolling_expression_metric_rolling_max_2_month,rolling_expression_metric_rolling_min_2_month,rolling_expression_metric_rolling_sum_2_month
 2022-01-01,8,9,9,9,9
 2022-02-01,6,7,9,7,16

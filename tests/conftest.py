@@ -37,11 +37,11 @@ def dbt_profile_target():
         return {
             'type': 'redshift',
             'threads': 1,
-            'host': os.getenv('POSTGRES_TEST_HOST'),
+            'host': os.getenv('REDSHIFT_TEST_HOST'),
             'user': os.getenv('REDSHIFT_TEST_USER'),
             'pass': os.getenv('REDSHIFT_TEST_PASS'),
             'dbname': os.getenv('REDSHIFT_TEST_DBNAME'),
-            'port': os.getenv('REDSHIFT_TEST_PORT'),
+            'port': int(os.getenv('REDSHIFT_TEST_PORT')),
         }
 
     if os.getenv('dbt_target') == 'bigquery':
@@ -49,6 +49,7 @@ def dbt_profile_target():
             'type': 'bigquery',
             'threads': 1,
             'method': 'service-account',
+            'project': os.getenv('BIGQUERY_TEST_PROJECT'),
             'keyfile': os.getenv('BIGQUERY_SERVICE_KEY_PATH'),
             'project': os.getenv('BIGQUERY_TEST_DATABASE'),
         }

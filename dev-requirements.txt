@@ -10,8 +10,8 @@ pytest-dotenv
 # git+https://github.com/dbt-labs/dbt-bigquery.git
 
 # Most recent release candidates
-dbt-tests-adapter==1.2.0rc1
-dbt-core==1.2.0rc1
-dbt-redshift==1.2.0rc1
-dbt-snowflake==1.2.0rc1
-dbt-bigquery==1.2.0rc1
+dbt-tests-adapter==1.2.0
+dbt-core==1.2.0
+dbt-redshift==1.2.0
+dbt-snowflake==1.2.0
+dbt-bigquery==1.2.0

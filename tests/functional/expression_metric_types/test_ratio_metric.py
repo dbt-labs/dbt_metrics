@@ -73,12 +73,36 @@ metrics:
 """
 
 # seeds/ratio_metric__expected.csv
-ratio_metric__expected_csv = """
+if os.getenv('dbt_target') == 'postgres':
+  ratio_metric__expected_csv = """
 date_month,base_sum_metric,base_average_metric,ratio_metric
 2022-02-01,6,1.3333333333333333,4.5
 2022-01-01,8,1.0,8.0
 """.lstrip()
 
+# seeds/ratio_metric__expected.csv
+if os.getenv('dbt_target') == 'redshift':
+  ratio_metric__expected_csv = """
+date_month,base_sum_metric,base_average_metric,ratio_metric
+2022-02-01,6,1.3333333333333333,4.5
+2022-01-01,8,1.0,8.0
+""".lstrip()
+
+# seeds/ratio_metric__expected.csv
+if os.getenv('dbt_target') == 'snowflake':
+  ratio_metric__expected_csv = """
+date_month,base_sum_metric,base_average_metric,ratio_metric
+2022-02-01,6,1.333333,4.5
+2022-01-01,8,1.0,8.0
+""".lstrip()
+
+# seeds/ratio_metric__expected.csv
+if os.getenv('dbt_target') == 'bigquery':
+    ratio_metric__expected_csv = """
+date_month,base_sum_metric,base_average_metric,ratio_metric
+2022-02-01,6,1.333333,4.5
+2022-01-01,8,1.0,8.0
+""".lstrip()
 class TestRatioMetric:
 
     # configuration in dbt_project.yml

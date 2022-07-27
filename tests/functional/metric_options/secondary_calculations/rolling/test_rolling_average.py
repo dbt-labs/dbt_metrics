@@ -46,7 +46,32 @@ metrics:
 """
 
 # seeds/rolling_average__expected.csv
-rolling_average__expected_csv = """
+if os.getenv('dbt_target') == 'postgres':
+    rolling_average__expected_csv = """
+date_month,rolling_average,rolling_average_rolling_max_2_month,rolling_average_rolling_min_2_month
+2022-01-01,1,1,1
+2022-02-01,1.3333333333333333,1.3333333333333333,1
+""".lstrip()
+
+# seeds/rolling_average__expected.csv
+if os.getenv('dbt_target') == 'redshift':
+    rolling_average__expected_csv = """
+date_month,rolling_average,rolling_average_rolling_max_2_month,rolling_average_rolling_min_2_month
+2022-01-01,1,1,1
+2022-02-01,1.3333333333333333,1.3333333333333333,1
+""".lstrip()
+
+# seeds/rolling_average__expected.csv
+if os.getenv('dbt_target') == 'snowflake':
+    rolling_average__expected_csv = """
+date_month,rolling_average,rolling_average_rolling_max_2_month,rolling_average_rolling_min_2_month
+2022-01-01,1,1,1
+2022-02-01,1.333333,1.333333,1
+""".lstrip()
+
+# seeds/rolling_average__expected.csv
+if os.getenv('dbt_target') == 'bigquery':
+    rolling_average__expected_csv = """
 date_month,rolling_average,rolling_average_rolling_max_2_month,rolling_average_rolling_min_2_month
 2022-01-01,1,1,1
 2022-02-01,1.3333333333333333,1.3333333333333333,1
