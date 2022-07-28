@@ -49,4 +49,3 @@ jobs:
       - uses: ./.github/actions/end-to-end-test
         with:
           dbt_target: postgres
-          database-adapter-package: dbt-postgres

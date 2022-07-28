@@ -1,26 +1,19 @@
 name: "End to end testing"
 description: "Set up profile and run dbt with test project"
 inputs:
-  dbt-project:
-    description: "Location of test project"
-    required: false
-    default: "integration_tests"
   dbt_target:
     description: "Name of target to use when running dbt"
-    required: true
-  database-adapter-package:
-    description: "Name of database adapter to install"
     required: true
 
 runs:
   using: "composite"
   steps:
-    # - name: Install python dependencies
-    #   shell: bash
-    #   run: |
-    #     pip install --user --upgrade pip
-    #     pip --version
-    #     pip install -r dev-requirements.txt
+    - name: Install python dependencies
+      shell: bash
+      run: |
+        pip install --user --upgrade pip
+        pip --version
+        pip install -r dev-requirements.txt
 
     # - name: Setup dbt profile
     #   shell: bash
@@ -37,6 +30,7 @@ runs:
     - name: Run pytest
       shell: bash
       run: |
-        echo "$POSTGRES_TEST_USER"
+        echo ${{ env.POSTGRES_TEST_USER }}
         echo ${{ inputs.dbt_target }}
+        python3 -m pytest
 
