@@ -11,11 +11,11 @@ pytest_plugins = ["dbt.tests.fixtures.project"]
 # We use os.environ here instead of os.getenv because environ with [] input will
 # return a KeyError exception instead of None or Default Value. It's better to know
 # when the error is from the environment variables and not have it potentially lead
-# you down a redherring path with other issues.
+# you down a red herring path with other issues.
 @pytest.fixture(scope="class")
 def dbt_profile_target():
     
-    if os.getenv('dbt_target') == 'postgres':
+    if os.environ['dbt_target'] == 'postgres':
         return {
             'type': 'postgres',
             'threads': 1,
@@ -26,7 +26,18 @@ def dbt_profile_target():
             'database': os.environ['POSTGRES_TEST_DBNAME'],
         }
 
-    if os.getenv('dbt_target') == 'snowflake':
+    if os.environ['dbt_target'] == 'redshift':
+        return {
+            'type': 'redshift',
+            'threads': 1,
+            'host': os.environ['REDSHIFT_TEST_HOST'],
+            'user': os.environ['REDSHIFT_TEST_USER'],
+            'pass': os.environ['REDSHIFT_TEST_PASS'],
+            'dbname': os.environ['REDSHIFT_TEST_DBNAME'],
+            'port': int(os.environ['REDSHIFT_TEST_PORT']),
+        }
+
+    if os.environ['dbt_target'] == 'snowflake':
         return {
             'type': 'snowflake',
             'threads': 1,
@@ -38,18 +49,7 @@ def dbt_profile_target():
             'warehouse': os.environ['SNOWFLAKE_TEST_WAREHOUSE'],
         }
 
-    if os.getenv('dbt_target') == 'redshift':
-        return {
-            'type': 'redshift',
-            'threads': 1,
-            'host': os.environ['REDSHIFT_TEST_HOST'],
-            'user': os.environ['REDSHIFT_TEST_USER'],
-            'pass': os.environ['REDSHIFT_TEST_PASS'],
-            'dbname': os.environ['REDSHIFT_TEST_DBNAME'],
-            'port': int(os.environ['REDSHIFT_TEST_PORT']),
-        }
-
-    if os.getenv('dbt_target') == 'bigquery':
+    if os.environ['dbt_target'] == 'bigquery':
         return {
             'type': 'bigquery',
             'threads': 1,
