@@ -28,6 +28,9 @@
             {% for metric_name in leaf_set %}
                 {{metric_name}}__final.{{ calendar_dim }}
                 {% if not loop.last %},{% endif %}
+                {% if leaf_set | length == 1 %}
+                    ,NULL
+                {% endif %}
             {% endfor %}
             ) as {{calendar_dim}}
         {%- endfor %}
@@ -37,6 +40,9 @@
             {% for metric_name in leaf_set %}
                 {{metric_name}}__final.date_{{ period }}
                 {% if not loop.last %},{% endif %}
+                {% if leaf_set | length == 1 %}
+                    ,NULL
+                {% endif %}
             {% endfor %}
             ) as date_{{period}}
         {% endfor %}
@@ -47,6 +53,9 @@
             {% for metric_name in leaf_set %}
                 {{metric_name}}__final.{{ dim }}
                 {% if not loop.last %},{% endif %}
+                {% if leaf_set | length == 1 %}
+                    ,NULL
+                {% endif %}
             {% endfor %}
             ) as {{dim}}
         {%- endfor %}

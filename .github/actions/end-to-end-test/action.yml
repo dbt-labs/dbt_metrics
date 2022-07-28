@@ -22,16 +22,20 @@ runs:
         pip --version
         pip install -r dev-requirements.txt
 
-    - name: Setup dbt profile
-      shell: bash
-      run: |
-        mkdir -p $HOME/.dbt
-        cp ${{ github.action_path }}/sample.profiles.yml $HOME/.dbt/profiles.yml
+    # - name: Setup dbt profile
+    #   shell: bash
+    #   run: |
+    #     mkdir -p $HOME/.dbt
+    #     cp ${{ github.action_path }}/sample.profiles.yml $HOME/.dbt/profiles.yml
+        
+        
+    # cd ${{ inputs.dbt-project }}
+    # dbt deps --target ${{ inputs.dbt_target }}
+    # dbt seed --target ${{ inputs.dbt_target }} --full-refresh
+    # dbt build --target ${{ inputs.dbt_target }} --full-refresh
 
-    - name: Run dbt
+    - name: Run pytest
       shell: bash
       run: |
-        cd ${{ inputs.dbt-project }}
-        dbt deps --target ${{ inputs.dbt_target }}
-        dbt seed --target ${{ inputs.dbt_target }} --full-refresh
-        dbt build --target ${{ inputs.dbt_target }} --full-refresh
+        python3 -m pytest
+

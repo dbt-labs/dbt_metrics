@@ -53,7 +53,7 @@ date_month,period_over_period_difference,period_over_period_difference_1mth
 """.lstrip()
 
 # seeds/period_over_period_difference__expected.csv
-if os.getenv('dbt_target') == 'postgres':
+if os.getenv('dbt_target') == 'redshift':
     period_over_period_difference__expected_csv = """
 date_month,period_over_period_difference,period_over_period_difference_1mth
 2022-01-01,8,8
@@ -61,7 +61,7 @@ date_month,period_over_period_difference,period_over_period_difference_1mth
 """.lstrip()
 
 # seeds/period_over_period_difference__expected.csv
-if os.getenv('dbt_target') == 'redshift':
+if os.getenv('dbt_target') == 'snowflake':
     period_over_period_difference__expected_csv = """
 date_month,period_over_period_difference,period_over_period_difference_1mth
 2022-01-01,8,8
