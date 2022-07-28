@@ -15,12 +15,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install python dependencies
-      shell: bash
-      run: |
-        pip install --user --upgrade pip
-        pip --version
-        pip install -r dev-requirements.txt
+    # - name: Install python dependencies
+    #   shell: bash
+    #   run: |
+    #     pip install --user --upgrade pip
+    #     pip --version
+    #     pip install -r dev-requirements.txt
 
     # - name: Setup dbt profile
     #   shell: bash
@@ -37,5 +37,6 @@ runs:
     - name: Run pytest
       shell: bash
       run: |
-        python3 -m pytest
+        echo "$POSTGRES_TEST_USER"
+        echo ${{ inputs.dbt_target }}
 
