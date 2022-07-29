@@ -1,37 +1,28 @@
 name: "End to end testing"
 description: "Set up profile and run dbt with test project"
 inputs:
-  dbt-project:
-    description: "Location of test project"
-    required: false
-    default: "integration_tests"
-  dbt-target:
+  dbt_target:
     description: "Name of target to use when running dbt"
     required: true
-  database-adapter-package:
-    description: "Name of database adapter to install"
-    required: true
+
 
 runs:
   using: "composite"
   steps:
+
     - name: Install python dependencies
       shell: bash
       run: |
         pip install --user --upgrade pip
         pip --version
-        pip install -r dev-requirements.txt
+        pip install -r dev-requirements.txt        
 
-    - name: Setup dbt profile
+    ## Make sure to defined dbt_target as an environment variable
+    ## Previously we were supplying just as an input and os.environ
+    ## wasn't able to recognize it.
+    - name: Run pytest
       shell: bash
+      env:
+        dbt_target: ${{ inputs.dbt_target }}
       run: |
-        mkdir -p $HOME/.dbt
-        cp ${{ github.action_path }}/sample.profiles.yml $HOME/.dbt/profiles.yml
-
-    - name: Run dbt
-      shell: bash
-      run: |
-        cd ${{ inputs.dbt-project }}
-        dbt deps --target ${{ inputs.dbt-target }}
-        dbt seed --target ${{ inputs.dbt-target }} --full-refresh
-        dbt build --target ${{ inputs.dbt-target }} --full-refresh
+        python3 -m pytest tests/functional

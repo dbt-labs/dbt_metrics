@@ -1,4 +1,17 @@
-git+https://github.com/dbt-labs/dbt-redshift.git@c35865b
-git+https://github.com/dbt-labs/dbt-snowflake.git@a017382
-git+https://github.com/dbt-labs/dbt-bigquery.git@d52222e
-git+https://github.com/dbt-labs/dbt-core.git@0db634d#egg=dbt-core&subdirectory=core
+pytest
+pytest-dotenv
+
+# Bleeding edge
+# git+https://github.com/dbt-labs/dbt-core.git@main#egg=dbt-tests-adapter&subdirectory=tests/adapter
+# git+https://github.com/dbt-labs/dbt-core.git@main#egg=dbt-core&subdirectory=core
+# git+https://github.com/dbt-labs/dbt-core.git@main#egg=dbt-postgres&subdirectory=plugins/postgres
+# git+https://github.com/dbt-labs/dbt-redshift.git
+# git+https://github.com/dbt-labs/dbt-snowflake.git
+# git+https://github.com/dbt-labs/dbt-bigquery.git
+
+# Most recent release candidates
+dbt-tests-adapter==1.2.0
+dbt-core==1.2.0
+dbt-redshift==1.2.0
+dbt-snowflake==1.2.0
+dbt-bigquery==1.2.0

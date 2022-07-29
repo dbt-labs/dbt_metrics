@@ -1,6 +1,6 @@
 select *
 from 
 {{ metrics.calculate(metric('base_average_metric'), 
-    grain='day', 
+    grain='month', 
     dimensions=['had_discount']) 
 }}

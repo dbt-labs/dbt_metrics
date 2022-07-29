@@ -21,39 +21,47 @@
     ,first_join_metrics as (
 
         select
-        date_{{grain}},
+        date_{{grain}}
 
         {% for calendar_dim in calendar_dimensions %}
-            coalesce(
+            ,coalesce(
             {% for metric_name in leaf_set %}
                 {{metric_name}}__final.{{ calendar_dim }}
                 {% if not loop.last %},{% endif %}
+                {% if leaf_set | length == 1 %}
+                    ,NULL
+                {% endif %}
             {% endfor %}
-            ) as {{calendar_dim}},
+            ) as {{calendar_dim}}
         {%- endfor %}
 
         {% for period in relevant_periods %}
-            coalesce(
+            ,coalesce(
             {% for metric_name in leaf_set %}
                 {{metric_name}}__final.date_{{ period }}
                 {% if not loop.last %},{% endif %}
+                {% if leaf_set | length == 1 %}
+                    ,NULL
+                {% endif %}
             {% endfor %}
-            ) as date_{{period}},
+            ) as date_{{period}}
         {% endfor %}
 
 
         {% for dim in dimensions %}
-            coalesce(
+            ,coalesce(
             {% for metric_name in leaf_set %}
                 {{metric_name}}__final.{{ dim }}
                 {% if not loop.last %},{% endif %}
+                {% if leaf_set | length == 1 %}
+                    ,NULL
+                {% endif %}
             {% endfor %}
-            ) as {{dim}},
+            ) as {{dim}}
         {%- endfor %}
 
         {% for metric_name in leaf_set %}
-            nullif({{metric_name}},0) as {{metric_name}}
-            {% if not loop.last %},{%endif%}
+            ,nullif({{metric_name}},0) as {{metric_name}}
         {% endfor %}  
 
         from 

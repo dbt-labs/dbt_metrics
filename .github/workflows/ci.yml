@@ -29,6 +29,8 @@ jobs:
           POSTGRES_USER: ${{ env.POSTGRES_TEST_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_TEST_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_TEST_DB }}
+          POSTGRES_TEST_PORT: ${{ env.POSTGRES_TEST_PORT }}
+          POSTGRES_TEST_HOST: ${{ env.POSTGRES_TEST_HOST }}
         ports:
           - 5432:5432
         options: >-
@@ -48,11 +50,10 @@ jobs:
 
       - uses: ./.github/actions/end-to-end-test
         with:
-          dbt-target: postgres
-          database-adapter-package: dbt-postgres
+          dbt_target: postgres
 
   snowflake:
-    # needs: postgres
+    needs: postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -72,11 +73,10 @@ jobs:
           SNOWFLAKE_TEST_DATABASE: ${{ secrets.SNOWFLAKE_TEST_DATABASE }}
           SNOWFLAKE_TEST_WAREHOUSE: ${{ secrets.SNOWFLAKE_TEST_WAREHOUSE }}
         with:
-          dbt-target: snowflake
-          database-adapter-package: dbt-snowflake
+          dbt_target: snowflake
 
   redshift:
-    # needs: postgres
+    needs: postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -95,11 +95,10 @@ jobs:
           REDSHIFT_TEST_DBNAME: ${{ secrets.REDSHIFT_TEST_DBNAME }}
           REDSHIFT_TEST_PORT: ${{ secrets.REDSHIFT_TEST_PORT }}
         with:
-          dbt-target: redshift
-          database-adapter-package: dbt-redshift
+          dbt_target: redshift
 
   bigquery:
-    # needs: postgres
+    needs: postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -119,11 +118,10 @@ jobs:
           KEYFILE_PATH=$HOME/.dbt/bigquery-service-key.json
           echo $BIGQUERY_TEST_SERVICE_ACCOUNT_JSON > $KEYFILE_PATH
           echo ::set-output name=path::$KEYFILE_PATH
-
       - uses: ./.github/actions/end-to-end-test
         env:
           BIGQUERY_SERVICE_KEY_PATH: ${{ steps.keyfile.outputs.path }}
           BIGQUERY_TEST_DATABASE: ${{ secrets.BIGQUERY_TEST_DATABASE }}
+          BIGQUERY_TEST_PROJECT: ${{ secrets.BIGQUERY_TEST_PROJECT }}
         with:
-          dbt-target: bigquery
-          database-adapter-package: dbt-bigquery
+          dbt_target: bigquery
