@@ -5,25 +5,29 @@ inputs:
     description: "Name of target to use when running dbt"
     required: true
 
+
 runs:
   using: "composite"
   steps:
+
+    - name: [DEBUG] List variables
+      shell: bash
+      run: |
+        echo "All variables defined as inputs"
+        echo The test user is: ${{ env.POSTGRES_USER }}
+        echo The test db is: ${{ env.POSTGRES_TEST_DB }}
+        echo The test port is: ${{ env.POSTGRES_TEST_PORT }}
+        echo The test host is: ${{ env.POSTGRES_TEST_HOST }}
+
     - name: Install python dependencies
       shell: bash
       run: |
         pip install --user --upgrade pip
         pip --version
         pip install -r dev-requirements.txt        
-        
-    # cd ${{ inputs.dbt-project }}
-    # dbt deps --target ${{ inputs.dbt_target }}
-    # dbt seed --target ${{ inputs.dbt_target }} --full-refresh
-    # dbt build --target ${{ inputs.dbt_target }} --full-refresh
 
     - name: Run pytest
       shell: bash
       run: |
-        echo ${{ env.POSTGRES_TEST_USER }}
-        echo ${{ inputs.dbt_target }}
         python3 -m pytest -c /.github/actions/end-to-end-test/ci.env
 

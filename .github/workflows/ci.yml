@@ -29,6 +29,8 @@ jobs:
           POSTGRES_USER: ${{ env.POSTGRES_TEST_USER }}
           POSTGRES_PASSWORD: ${{ env.POSTGRES_TEST_PASSWORD }}
           POSTGRES_DB: ${{ env.POSTGRES_TEST_DB }}
+          POSTGRES_TEST_PORT: ${{ env.POSTGRES_TEST_PORT }}
+          POSTGRES_TEST_HOST: ${{ env.POSTGRES_TEST_HOST }}
         ports:
           - 5432:5432
         options: >-
