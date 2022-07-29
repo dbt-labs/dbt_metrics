@@ -74,3 +74,25 @@ jobs:
           SNOWFLAKE_TEST_WAREHOUSE: ${{ secrets.SNOWFLAKE_TEST_WAREHOUSE }}
         with:
           dbt_target: snowflake
+
+  redshift:
+    needs: postgres
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: ./.github/actions/end-to-end-test
+        env:
+          REDSHIFT_TEST_HOST: ${{ secrets.REDSHIFT_TEST_HOST }}
+          REDSHIFT_TEST_USER: ${{ secrets.REDSHIFT_TEST_USER }}
+          REDSHIFT_TEST_PASS: ${{ secrets.REDSHIFT_TEST_PASS }}
+          REDSHIFT_TEST_DBNAME: ${{ secrets.REDSHIFT_TEST_DBNAME }}
+          REDSHIFT_TEST_PORT: ${{ secrets.REDSHIFT_TEST_PORT }}
+        with:
+          dbt_target: redshift
