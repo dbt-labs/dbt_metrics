@@ -21,9 +21,9 @@ def dbt_profile_target():
             'threads': 1,
             'host': os.environ['POSTGRES_TEST_HOST'],
             'user': os.environ['POSTGRES_TEST_USER'],
-            'password': os.environ['POSTGRES_TEST_PASS'],
+            'password': os.environ['POSTGRES_TEST_PASSWORD'],
             'port': int(os.environ['POSTGRES_TEST_PORT']),
-            'database': os.environ['POSTGRES_TEST_DBNAME'],
+            'database': os.environ['POSTGRES_TEST_DB'],
         }
 
     if os.environ['dbt_target'] == 'redshift':
