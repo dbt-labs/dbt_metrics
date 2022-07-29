@@ -4,6 +4,7 @@ inputs:
   dbt_target:
     description: "Name of target to use when running dbt"
     required: true
+    default: postgres
 
 
 runs:
