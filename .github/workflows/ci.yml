@@ -96,3 +96,31 @@ jobs:
           REDSHIFT_TEST_PORT: ${{ secrets.REDSHIFT_TEST_PORT }}
         with:
           dbt_target: redshift
+
+  bigquery:
+    needs: postgres
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Set up service key file
+        id: keyfile
+        env:
+          BIGQUERY_TEST_SERVICE_ACCOUNT_JSON: ${{ secrets.BIGQUERY_TEST_SERVICE_ACCOUNT_JSON }}
+        run: |
+          mkdir -p $HOME/.dbt
+          KEYFILE_PATH=$HOME/.dbt/bigquery-service-key.json
+          echo $BIGQUERY_TEST_SERVICE_ACCOUNT_JSON > $KEYFILE_PATH
+          echo ::set-output name=path::$KEYFILE_PATH
+      - uses: ./.github/actions/end-to-end-test
+        env:
+          BIGQUERY_SERVICE_KEY_PATH: ${{ steps.keyfile.outputs.path }}
+          BIGQUERY_TEST_DATABASE: ${{ secrets.BIGQUERY_TEST_DATABASE }}
+        with:
+          dbt_target: bigquery
