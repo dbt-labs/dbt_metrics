@@ -106,7 +106,7 @@ class TestPeriodToDateSum:
     def project_config_update(self):
         return {
           "name": "example",
-          "models": {"+materialized": "view"}
+          "models": {"+materialized": "table"}
         }
 
     # install current repo as package

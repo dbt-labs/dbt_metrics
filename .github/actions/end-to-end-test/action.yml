@@ -25,4 +25,4 @@ runs:
       env:
         dbt_target: ${{ inputs.dbt_target }}
       run: |
-        python3 -m pytest tests/functional/metric_options/secondary_calculations/rolling/test_rolling_max.py
+        python3 -m pytest tests/functional

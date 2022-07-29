@@ -70,14 +70,14 @@ date_month,had_discount,order_country,base_sum_metric,multi_dimension_expression
 2022-02-01,TRUE,Japan,0,
 """.lstrip()
 
-class TestSingleDimensionExpressionMetric:
+class TestMultiDimensionExpressionMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
         return {
           "name": "example",
-          "models": {"+materialized": "view"}
+          "models": {"+materialized": "table"}
         }
 
     # install current repo as package
