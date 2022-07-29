@@ -122,5 +122,6 @@ jobs:
         env:
           BIGQUERY_SERVICE_KEY_PATH: ${{ steps.keyfile.outputs.path }}
           BIGQUERY_TEST_DATABASE: ${{ secrets.BIGQUERY_TEST_DATABASE }}
+          BIGQUERY_TEST_PROJECT: ${{ secrets.BIGQUERY_TEST_PROJECT }}
         with:
           dbt_target: bigquery
