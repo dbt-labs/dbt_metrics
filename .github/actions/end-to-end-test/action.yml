@@ -21,5 +21,6 @@ runs:
     - name: Run pytest
       shell: bash
       run: |
+        echo ${{ inputs.dbt_target }}
         python3 -m pytest -c /.github/actions/end-to-end-test/ci.env
 
