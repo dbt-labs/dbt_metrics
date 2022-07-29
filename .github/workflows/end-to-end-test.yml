@@ -1,0 +1,30 @@
+
+name: "End to end testing"
+
+on:
+  workflow_call:
+    inputs:
+      dbt_target:
+        description: "Name of target to use when running dbt"
+        type: string
+        required: true
+
+jobs:
+  testing:
+    name: A Good Name
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Install python dependencies
+        shell: bash
+        run: |
+          pip install --user --upgrade pip
+          pip --version
+          pip install -r dev-requirements.txt        
+
+      - name: Run pytest
+        shell: bash
+        run: |
+          echo ${{ inputs.dbt_target }}
+          python3 -m pytest -c /.github/actions/end-to-end-test/ci.env
