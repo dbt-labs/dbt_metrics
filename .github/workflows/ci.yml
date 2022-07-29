@@ -73,4 +73,4 @@ jobs:
           SNOWFLAKE_TEST_DATABASE: ${{ secrets.SNOWFLAKE_TEST_DATABASE }}
           SNOWFLAKE_TEST_WAREHOUSE: ${{ secrets.SNOWFLAKE_TEST_WAREHOUSE }}
         with:
-          dbt-target: snowflake
+          dbt_target: snowflake
