@@ -1,8 +1,8 @@
-{% macro gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions)) }}
+{% macro gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
+{% macro default__gen_aggregate_cte(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions) %}
 
     ,{{metric.name}}__aggregate as (
         {# This is the most important CTE. Instead of joining all relevant information
@@ -35,7 +35,7 @@
             gen_primary_metric_aggregate macro. Take a look at that one if you're curious #}
             {{- metrics.gen_primary_metric_aggregate(metric.type, 'property_to_aggregate') }} as {{ metric.name }},
             {{ dbt_utils.bool_or('metric_date_day is not null') }} as has_data
-        from ({{metrics.gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions)}}) as base_query
+        from ({{metrics.gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions)}}) as base_query
         group by {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
     )
 
