@@ -10,15 +10,6 @@ runs:
   using: "composite"
   steps:
 
-    - name: [DEBUG] List variables
-      shell: bash
-      run: |
-        echo "All variables defined as inputs"
-        echo The test user is: ${{ env.POSTGRES_USER }}
-        echo The test db is: ${{ env.POSTGRES_TEST_DB }}
-        echo The test port is: ${{ env.POSTGRES_TEST_PORT }}
-        echo The test host is: ${{ env.POSTGRES_TEST_HOST }}
-
     - name: Install python dependencies
       shell: bash
       run: |
