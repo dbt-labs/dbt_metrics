@@ -49,6 +49,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - uses: ./.github/workflows/end-to-end-test.yml@er/clean_adding_pytest
+      - uses: end-to-end-test.yml@er/clean_adding_pytest
         with:
           dbt_target: postgres
