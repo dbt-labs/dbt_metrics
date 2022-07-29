@@ -77,6 +77,22 @@ date_month,rolling_average,rolling_average_rolling_max_2_month,rolling_average_r
 2022-02-01,1.3333333333333333,1.3333333333333333,1
 """.lstrip()
 
+# seeds/rolling_average__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    rolling_average__expected_yml = """
+version: 2
+seeds:
+  - name: rolling_average__expected
+    config:
+      column_types:
+        date_month: date
+        rolling_average: FLOAT64
+        rolling_average_rolling_max_2_month: FLOAT64
+        rolling_average_rolling_min_2_month: INT64
+""".lstrip()
+else: 
+    rolling_average__expected_yml = """"""
+
 class TestRollingAverage:
 
     # configuration in dbt_project.yml
@@ -103,6 +119,7 @@ class TestRollingAverage:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "rolling_average__expected.csv": rolling_average__expected_csv,
+            "rolling_average__expected.yml": rolling_average__expected_yml
         }
 
     # everything that goes in the "models" directory

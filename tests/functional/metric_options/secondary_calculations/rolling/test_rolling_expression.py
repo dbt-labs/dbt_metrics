@@ -93,6 +93,23 @@ date_month,base_sum_metric,rolling_expression_metric,rolling_expression_metric_r
 2022-02-01,6,7,9,7,16
 """.lstrip()
 
+# seeds/rolling_expression__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    rolling_expression__expected_yml = """
+version: 2
+seeds:
+  - name: rolling_expression__expected
+    config:
+      column_types:
+        date_month: date
+        rolling_expression: INT64
+        rolling_expression_rolling_min_2_month: INT64
+        rolling_expression_rolling_max_2_month: INT64
+        rolling_expression_rolling_sum_2_month: INT64
+""".lstrip()
+else: 
+    rolling_expression__expected_yml = """"""
+
 class TestRollingExpressionMetric:
 
     # configuration in dbt_project.yml
@@ -119,6 +136,7 @@ class TestRollingExpressionMetric:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "rolling_expression_metric__expected.csv": rolling_expression_metric__expected_csv,
+            "rolling_expression__expected.yml": rolling_expression__expected_yml
         }
 
     # everything that goes in the "models" directory

@@ -79,6 +79,25 @@ date_month,date_year,period_to_date_count_distinct,period_to_date_count_distinct
 2022-02-01,2022-01-01,3,3,5,8,4.0000000000000000
 """.lstrip()
 
+# seeds/period_to_date_count_distinct__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_to_date_count_distinct__expected_yml = """
+version: 2
+seeds:
+  - name: period_to_date_count_distinct__expected
+    config:
+      column_types:
+        date_month: date
+        date_year: date
+        period_to_date_count_distinct: INT64
+        period_to_date_count_distinct_this_year_min: INT64
+        period_to_date_count_distinct_max_for_year: INT64
+        period_to_date_count_distinct_sum_for_year: INT64
+        period_to_date_count_distinct_average_for_year: FLOAT64
+""".lstrip()
+else: 
+    period_to_date_count__expected_yml = """"""
+
 class TestPeriodToDateCountDistinct:
 
     # configuration in dbt_project.yml
@@ -104,6 +123,7 @@ class TestPeriodToDateCountDistinct:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_to_date_count_distinct__expected.csv": period_to_date_count_distinct__expected_csv,
+            "period_to_date_count_distinct__expected.yml": period_to_date_count_distinct__expected_yml
         }
 
     # everything that goes in the "models" directory

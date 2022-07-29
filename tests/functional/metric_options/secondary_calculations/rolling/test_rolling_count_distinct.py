@@ -79,7 +79,25 @@ date_month,rolling_count_distinct,rolling_count_distinct_rolling_min_2_month,rol
 2022-02-01,3,3,5,8,4.0000000000000000
 """.lstrip()
 
-class TestRollingCount:
+# seeds/rolling_count_distinct__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    rolling_count_distinct__expected_yml = """
+version: 2
+seeds:
+  - name: rolling_count_distinct__expected
+    config:
+      column_types:
+        date_month: date
+        rolling_count_distinct: INT64
+        rolling_count_distinct_rolling_min_2_month: INT64
+        rolling_count_distinct_rolling_max_2_month: INT64
+        rolling_count_distinct_rolling_sum_2_month: INT64
+        rolling_count_distinct_rolling_average_2_month: FLOAT64
+""".lstrip()
+else: 
+    rolling_count_distinct__expected_yml = """"""
+
+class TestRollingCountDistinct:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -104,6 +122,7 @@ class TestRollingCount:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "rolling_count_distinct__expected.csv": rolling_count_distinct__expected_csv,
+            "rolling_count_distinct__expected.yml": rolling_count_distinct__expected_yml
         }
 
     # everything that goes in the "models" directory

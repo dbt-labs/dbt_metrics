@@ -1,25 +1,25 @@
 # seeds/seed_slack_users.csv
 seed_slack_users_csv = """
 user_id,joined_at,is_active_past_quarter,has_messaged
-1,2021-01-01 14:18:27,true,true
-2,2021-02-03 17:18:55,false,true
-3,2021-04-01 11:01:28,false,false
-4,2021-04-08 22:43:09,false,false
+1,2021-01-01,true,true
+2,2021-02-03,false,true
+3,2021-04-01,false,false
+4,2021-04-08,false,false
 """.lstrip()
 
 # seeds/fact_orders_source.csv
 fact_orders_source_csv = """
 order_id,order_country,order_total,had_discount,customer_id,order_date
-1,France,2,false,1,01/28/2022
-2,Japan,1,false,2,01/20/2022
-3,France,1,false,1,01/13/2022
-4,France,1,true,3,01/06/2022
-5,France,1,false,4,01/08/2022
-6,Japan,1,false,5,01/21/2022
-7,Japan,1,true,2,01/22/2022
-8,France,4,true,1,02/15/2022
-9,Japan,1,false,2,02/03/2022
-10,Japan,1,false,3,02/13/2022
+1,France,2,false,1,2022-01-28
+2,Japan,1,false,2,2022-01-20
+3,France,1,false,1,2022-01-13
+4,France,1,true,3,2022-01-06
+5,France,1,false,4,2022-01-08
+6,Japan,1,false,5,2022-01-21
+7,Japan,1,true,2,2022-01-22
+8,France,4,true,1,2022-02-15
+9,Japan,1,false,2,2022-02-03
+10,Japan,1,false,3,2022-02-13
 """.lstrip()
 
 # seeds/dim_customers_source.csv
@@ -35,11 +35,11 @@ customer_id,first_name,last_name,email,gender,is_new_customer,date_added
 # seeds/mock_purchase_data.csv
 mock_purchase_data_csv = """
 purchased_at,payment_type,payment_total
-2021-02-14 17:52:36,maestro,10
-2021-02-15 04:16:50,jcb,10
-2021-02-15 11:30:45,solo,10
-2021-02-16 13:08:18,americanexpress,10
-2021-02-17 05:41:34,americanexpress,10
+2021-02-14,maestro,10
+2021-02-15,jcb,10
+2021-02-15,solo,10
+2021-02-16,americanexpress,10
+2021-02-17,americanexpress,10
 """.lstrip()
 
 # models/fact_orders.sql

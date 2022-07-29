@@ -76,6 +76,22 @@ date_month,period_over_period_difference,period_over_period_difference_1mth
 2022-02-01,6,-2
 """.lstrip()
 
+# seeds/period_to_period_difference___expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_over_period_difference__expected_yml = """
+version: 2
+seeds:
+  - name: period_over_period_difference__expected
+    config:
+      column_types:
+        date_month: date
+        period_over_period_difference: INT64
+        period_over_period_difference_1mth: INT64
+""".lstrip()
+else: 
+    period_over_period_difference__expected_yml = """"""
+
+
 class TestPeriodOverPeriodDifference:
 
     # configudifferencen in dbt_project.yml
@@ -102,6 +118,7 @@ class TestPeriodOverPeriodDifference:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_over_period_difference__expected.csv": period_over_period_difference__expected_csv,
+            "period_over_period_difference__expected.yml": period_over_period_difference__expected_yml
         }
 
     # everything that goes in the "models" directory

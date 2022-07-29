@@ -79,6 +79,26 @@ date_month,date_year,period_to_date_sum,period_to_date_sum_this_year_sum,period_
 2022-02-01,2022-01-01,6,24,18,24,12.0000000000000000
 """.lstrip()
 
+# seeds/period_to_date_sum__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_to_date_sum__expected_yml = """
+version: 2
+seeds:
+  - name: period_to_date_sum__expected
+    config:
+      column_types:
+        date_month: date
+        date_year: date
+        period_to_date_sum: INT64
+        period_to_date_sum_this_year_min: INT64
+        period_to_date_sum_max_for_year: INT64
+        period_to_date_sum_sum_for_year: INT64
+        period_to_date_sum_average_for_year: FLOAT64
+""".lstrip()
+else: 
+    period_to_date_sum__expected_yml = """"""
+    
+
 class TestPeriodToDateSum:
 
     # configuration in dbt_project.yml
@@ -104,6 +124,7 @@ class TestPeriodToDateSum:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_to_date_sum__expected.csv": period_to_date_sum__expected_csv,
+            "period_to_date_sum__expected_yml": period_to_date_sum__expected_yml
         }
 
     # everything that goes in the "models" directory

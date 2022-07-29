@@ -79,6 +79,25 @@ date_month,date_year,period_to_date_min,period_to_date_min_this_year_min,period_
 2022-02-01,2022-01-01,1,1,1,2,1.0000000000000000
 """.lstrip()
 
+# seeds/period_to_date_min__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_to_date_min__expected_yml = """
+version: 2
+seeds:
+  - name: period_to_date_min__expected
+    config:
+      column_types:
+        date_month: date
+        date_year: date
+        period_to_date_min: INT64
+        period_to_date_min_this_year_min: INT64
+        period_to_date_min_max_for_year: INT64
+        period_to_date_min_sum_for_year: INT64
+        period_to_date_min_average_for_year: FLOAT64
+""".lstrip()
+else: 
+    period_to_date_min__expected_yml = """"""
+
 class TestPeriodToDateMin:
 
     # configuration in dbt_project.yml
@@ -104,6 +123,7 @@ class TestPeriodToDateMin:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_to_date_min__expected.csv": period_to_date_min__expected_csv,
+            "period_to_date_min__expected.yml": period_to_date_min__expected_yml
         }
 
     # everything that goes in the "models" directory

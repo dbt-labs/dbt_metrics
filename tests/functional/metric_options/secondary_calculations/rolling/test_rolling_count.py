@@ -79,6 +79,24 @@ date_month,rolling_count,rolling_count_rolling_min_2_month,rolling_count_rolling
 2022-02-01,3,3,7,10,5.0000000000000000
 """.lstrip()
 
+# seeds/rolling_count__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    rolling_count__expected_yml = """
+version: 2
+seeds:
+  - name: rolling_count__expected
+    config:
+      column_types:
+        date_month: date
+        rolling_count: INT64
+        rolling_count_rolling_min_2_month: INT64
+        rolling_count_rolling_max_2_month: INT64
+        rolling_count_rolling_sum_2_month: INT64
+        rolling_count_rolling_average_2_month: FLOAT64
+""".lstrip()
+else: 
+    rolling_count__expected_yml = """"""
+
 class TestRollingCount:
 
     # configuration in dbt_project.yml
@@ -104,6 +122,7 @@ class TestRollingCount:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "rolling_count__expected.csv": rolling_count__expected_csv,
+            "rolling_count__expected.yml": rolling_count__expected_yml
         }
 
     # everything that goes in the "models" directory

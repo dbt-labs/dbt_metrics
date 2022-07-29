@@ -51,6 +51,21 @@ date_month,period_over_period_ratio,period_over_period_ratio_1mth
 2022-02-01,6,0.75
 """.lstrip()
 
+# seeds/period_over_period_ratio___expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_over_period_ratio__expected_yml = """
+version: 2
+seeds:
+  - name: period_over_period_ratio__expected
+    config:
+      column_types:
+        date_month: date
+        period_over_period_ratio: INT64
+        period_over_period_ratio_1mth: FLOAT64
+""".lstrip()
+else: 
+    period_over_period_ratio__expected_yml = """"""
+
 class TestPeriodOverPeriodRatio:
 
     # configuration in dbt_project.yml
@@ -77,6 +92,7 @@ class TestPeriodOverPeriodRatio:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_over_period_ratio__expected.csv": period_over_period_ratio__expected_csv,
+            "period_over_period_ratio__expected.yml": period_over_period_ratio__expected_yml
         }
 
     # everything that goes in the "models" directory

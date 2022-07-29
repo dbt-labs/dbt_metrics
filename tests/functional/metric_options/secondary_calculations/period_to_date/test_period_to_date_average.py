@@ -77,6 +77,24 @@ date_month,date_year,period_to_date_average,period_to_date_average_this_year_min
 2022-02-01,2022-01-01,1.3333333333333333,1,1.3333333333333333
 """.lstrip()
 
+# seeds/period_to_date_average__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_to_date_average__expected_yml = """
+version: 2
+seeds:
+  - name: period_to_date_average__expected
+    config:
+      column_types:
+        date_month: date
+        date_year: date
+        period_to_date_average: FLOAT64
+        period_to_date_average_this_year_min: INT64
+        period_to_date_average_max_for_year: FLOAT64
+""".lstrip()
+else: 
+    period_to_date_average__expected_yml = """"""
+
+
 class TestPeriodToDateAverage:
 
     # configuration in dbt_project.yml
@@ -103,6 +121,7 @@ class TestPeriodToDateAverage:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_to_date_average__expected.csv": period_to_date_average__expected_csv,
+            "period_to_date_average__expected.yml": period_to_date_average__expected_yml
         }
 
     # everything that goes in the "models" directory

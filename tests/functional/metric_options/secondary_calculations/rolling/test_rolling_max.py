@@ -79,6 +79,24 @@ date_month,rolling_max,rolling_max_rolling_min_2_month,rolling_max_rolling_max_2
 2022-02-01,4,2,4,6,3.0000000000000000
 """.lstrip()
 
+# seeds/rolling_max__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    rolling_max__expected_yml = """
+version: 2
+seeds:
+  - name: rolling_max__expected
+    config:
+      column_types:
+        date_month: date
+        rolling_max: INT64
+        rolling_max_rolling_min_2_month: INT64
+        rolling_max_rolling_max_2_month: INT64
+        rolling_max_rolling_sum_2_month: INT64
+        rolling_max_rolling_average_2_month: FLOAT64
+""".lstrip()
+else: 
+    rolling_max__expected_yml = """"""
+
 class TestRollingMax:
 
     # configuration in dbt_project.yml
@@ -104,6 +122,7 @@ class TestRollingMax:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "rolling_max__expected.csv": rolling_max__expected_csv,
+            "rolling_max__expected.yml": rolling_max__expected_yml,
         }
 
     # everything that goes in the "models" directory

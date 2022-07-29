@@ -79,6 +79,25 @@ date_month,date_year,period_to_date_max,period_to_date_max_this_year_min,period_
 2022-02-01,2022-01-01,3,3,5,8,4.0000000000000000
 """.lstrip()
 
+# seeds/period_to_date_max__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_to_date_max__expected_yml = """
+version: 2
+seeds:
+  - name: period_to_date_max__expected
+    config:
+      column_types:
+        date_month: date
+        date_year: date
+        period_to_date_max: INT64
+        period_to_date_max_this_year_min: INT64
+        period_to_date_max_max_for_year: INT64
+        period_to_date_max_sum_for_year: INT64
+        period_to_date_max_average_for_year: FLOAT64
+""".lstrip()
+else: 
+    period_to_date_max__expected_yml = """"""
+
 class TestPeriodToDateMax:
 
     # configuration in dbt_project.yml
@@ -104,6 +123,7 @@ class TestPeriodToDateMax:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_to_date_max__expected.csv": period_to_date_max__expected_csv,
+            "period_to_date_max__expected.yml": period_to_date_max__expected_yml
         }
 
     # everything that goes in the "models" directory

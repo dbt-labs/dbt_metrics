@@ -68,6 +68,24 @@ date_month,date_year,base_sum_metric,period_to_date_expression_metric,period_to_
 2022-02-01,2022-01-01,6,7,7,9,16
 """.lstrip()
 
+# seeds/period_to_date_expression_metric__expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    period_to_date_expression_metric__expected_yml = """
+version: 2
+seeds:
+  - name: period_to_date_expression_metric__expected
+    config:
+      column_types:
+        date_month: date
+        date_year: date
+        period_to_date_expression_metric: INT64
+        period_to_date_expression_metric_this_year_min: INT64
+        period_to_date_expression_metric_max_for_year: INT64
+        period_to_date_expression_metric_sum_for_year: INT64
+""".lstrip()
+else: 
+    period_to_date_expression_metric__expected_yml = """"""
+
 class TestPeriodToDateExpressionMetric:
 
     # configuration in dbt_project.yml

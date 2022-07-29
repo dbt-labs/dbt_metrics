@@ -100,9 +100,25 @@ date_month,base_sum_metric,base_average_metric,ratio_metric
 if os.getenv('dbt_target') == 'bigquery':
     ratio_metric__expected_csv = """
 date_month,base_sum_metric,base_average_metric,ratio_metric
-2022-02-01,6,1.333333,4.5
+2022-02-01,6,1.3333333333333333,4.5
 2022-01-01,8,1.0,8.0
 """.lstrip()
+
+# seeds/ratio_metric___expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    ratio_metric__expected_yml = """
+version: 2
+seeds:
+  - name: ratio_metric__expected
+    config:
+      column_types:
+        date_month: date
+        base_sum_metric: INT64
+        base_average_metric: FLOAT64
+        ratio_metric: FLOAT64
+""".lstrip()
+else: 
+    ratio_metric__expected_yml = """"""
 
 class TestRatioMetric:
 
@@ -130,6 +146,7 @@ class TestRatioMetric:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "ratio_metric__expected.csv": ratio_metric__expected_csv,
+            "ratio_metric__expected.yml": ratio_metric__expected_yml
         }
 
     # everything that goes in the "models" directory

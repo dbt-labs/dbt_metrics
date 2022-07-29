@@ -73,6 +73,20 @@ date_month,base_average_metric
 2022-02-01,1.3333333333333333
 """.lstrip()
 
+# seeds/base_average_metric___expected.yml
+if os.getenv('dbt_target') == 'bigquery':
+    base_average_metric__expected_yml = """
+version: 2
+seeds:
+  - name: base_average_metric__expected
+    config:
+      column_types:
+        date_month: date
+        base_average_metric: FLOAT64
+""".lstrip()
+else: 
+    base_average_metric__expected_yml = """"""
+
 class TestBaseAverageMetric:
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -98,6 +112,7 @@ class TestBaseAverageMetric:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "base_average_metric__expected.csv": base_average_metric__expected_csv,
+            "base_average_metric__expected.yml": base_average_metric__expected_yml
         }
 
     # everything that goes in the "models" directory

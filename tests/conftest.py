@@ -56,5 +56,4 @@ def dbt_profile_target():
             'method': 'service-account',
             'project': os.environ['BIGQUERY_TEST_PROJECT'],
             'keyfile': os.environ['BIGQUERY_SERVICE_KEY_PATH'],
-            'project': os.environ['BIGQUERY_TEST_DATABASE'],
         }
