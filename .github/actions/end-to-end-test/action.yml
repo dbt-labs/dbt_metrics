@@ -25,5 +25,4 @@ runs:
       run: |
         echo ${{ env.dbt_target }}
         echo ${{ env.POSTGRES_TEST_HOST }}
-        python3 -m pytest tests/functional/metric_options/secondary_calculations/rolling/test_rolling_max.py
-
+        python3 -m pytest tests/functional
