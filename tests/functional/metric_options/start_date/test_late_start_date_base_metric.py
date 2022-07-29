@@ -51,12 +51,20 @@ date_month,late_start_date_base_sum_metric
 class TestLateStartDateBaseSumMetric:
 
     # configuration in dbt_project.yml
-    @pytest.fixture(scope="class")
-    def project_config_update(self):
-        return {
-          "name": "example",
-          "models": {"+materialized": "table"}
-        }
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
 
     # install current repo as package
     @pytest.fixture(scope="class")

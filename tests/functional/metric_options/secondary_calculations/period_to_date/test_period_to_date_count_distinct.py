@@ -96,17 +96,25 @@ seeds:
         period_to_date_count_distinct_average_for_year: FLOAT64
 """.lstrip()
 else: 
-    period_to_date_count__expected_yml = """"""
+    period_to_date_count_distinct__expected_yml = """"""
 
 class TestPeriodToDateCountDistinct:
 
     # configuration in dbt_project.yml
-    @pytest.fixture(scope="class")
-    def project_config_update(self):
-        return {
-          "name": "example",
-          "models": {"+materialized": "table"}
-        }
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
 
     # install current repo as package
     @pytest.fixture(scope="class")

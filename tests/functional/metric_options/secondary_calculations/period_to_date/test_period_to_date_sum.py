@@ -102,12 +102,20 @@ else:
 class TestPeriodToDateSum:
 
     # configuration in dbt_project.yml
-    @pytest.fixture(scope="class")
-    def project_config_update(self):
-        return {
-          "name": "example",
-          "models": {"+materialized": "table"}
-        }
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
 
     # install current repo as package
     @pytest.fixture(scope="class")
@@ -124,7 +132,7 @@ class TestPeriodToDateSum:
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
             "period_to_date_sum__expected.csv": period_to_date_sum__expected_csv,
-            "period_to_date_sum__expected_yml": period_to_date_sum__expected_yml
+            "period_to_date_sum__expected.yml": period_to_date_sum__expected_yml
         }
 
     # everything that goes in the "models" directory

@@ -10,16 +10,16 @@ user_id,joined_at,is_active_past_quarter,has_messaged
 # seeds/fact_orders_source.csv
 fact_orders_source_csv = """
 order_id,order_country,order_total,had_discount,customer_id,order_date
-1,France,2,false,1,2022-01-28
-2,Japan,1,false,2,2022-01-20
-3,France,1,false,1,2022-01-13
 4,France,1,true,3,2022-01-06
 5,France,1,false,4,2022-01-08
+3,France,1,false,1,2022-01-13
+2,Japan,1,false,2,2022-01-20
 6,Japan,1,false,5,2022-01-21
 7,Japan,1,true,2,2022-01-22
-8,France,4,true,1,2022-02-15
+1,France,2,false,1,2022-01-28
 9,Japan,1,false,2,2022-02-03
 10,Japan,1,false,3,2022-02-13
+8,France,4,true,1,2022-02-15
 """.lstrip()
 
 # seeds/dim_customers_source.csv

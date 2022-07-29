@@ -41,8 +41,21 @@ metrics:
       - order_country
 """
 
-# seeds/week_grain__expected.csv
-week_grain__expected_csv = """
+if os.getenv('dbt_target') == 'bigquery':
+    # seeds/week_grain__expected.csv
+    week_grain__expected_csv = """
+date_week,week_grain_metric
+2022-02-13,2
+2022-02-06,0
+2022-01-30,1
+2022-01-23,1
+2022-01-16,3
+2022-01-09,1
+2022-01-02,2
+""".lstrip()
+else: 
+    # seeds/week_grain__expected.csv
+    week_grain__expected_csv = """
 date_week,week_grain_metric
 2022-02-14,1
 2022-02-07,1
@@ -56,12 +69,20 @@ date_week,week_grain_metric
 class TestWeekGrain:
 
     # configuration in dbt_project.yml
-    @pytest.fixture(scope="class")
-    def project_config_update(self):
-        return {
-          "name": "example",
-          "models": {"+materialized": "table"}
-        }
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
 
     # install current repo as package
     @pytest.fixture(scope="class")

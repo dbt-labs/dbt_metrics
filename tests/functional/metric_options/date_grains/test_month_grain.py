@@ -51,13 +51,20 @@ date_month,month_grain_metric
 class TestmonthGrain:
 
     # configuration in dbt_project.yml
-    @pytest.fixture(scope="class")
-    def project_config_update(self):
-        return {
-          "name": "example",
-          "models": {"+materialized": "table"}
-        }
-
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
     # install current repo as package
     @pytest.fixture(scope="class")
     def packages(self):
