@@ -48,6 +48,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - uses: dbt-labs/dbt_metrics/.github/workflows/end-to-end-test.yml
+      - uses: ./.github/actions/end-to-end-test
         with:
           dbt_target: postgres
