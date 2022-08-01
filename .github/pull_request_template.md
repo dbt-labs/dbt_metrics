@@ -1,3 +1,4 @@
+
 ## What is this PR?
 This is a:
 - [ ] documentation update
@@ -21,3 +22,11 @@ Describe your changes, and why you're making them. Be as descriptive as possible
 - [ ] I have updated the README.md (if applicable)
 - [ ] I have added tests & descriptions to my models (and macros if applicable)
 - [ ] I have added an entry to CHANGELOG.md
+
+---
+### Tenets to keep in mind 
+- A metric value should be consistent everywhere that it is referenced
+- We prefer generalized metrics with many dimensions over specific metrics with few dimensions
+- It should be easier to use dbt’s metrics than it is to avoid them
+- Organization and discoverability are as important as precision
+- One-off models built to power metrics are an anti-pattern
