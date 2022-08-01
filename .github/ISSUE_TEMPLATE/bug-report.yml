@@ -1,5 +1,5 @@
 name: 🐞 Bug
-description: Report a bug or an issue you've found with dbt
+description: Report a bug or an issue you've found with dbt_metrics
 title: "[Bug] <title>"
 labels: ["bug", "triage"]
 body:
