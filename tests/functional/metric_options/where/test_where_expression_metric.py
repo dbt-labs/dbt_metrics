@@ -17,7 +17,7 @@ from
 {{ metrics.calculate(metric('where_expression_metric'), 
     grain='month',
     dimensions=['had_discount'],
-    where=["had_discount=true"]
+    where="had_discount=true"
     )
 }}
 """

@@ -19,12 +19,7 @@
 
             -- metric where clauses...
         {% if where %}
-        where (
-            {%- for filter in where %}
-                {{ filter }}
-                {% if not loop.last %} and {% endif %}
-            {%- endfor %}
-        )
+        where {{ where }}
         {% endif %}
 
     {% else %}
@@ -33,12 +28,7 @@
 
     -- metric where clauses...
     {% if where %}
-    where (
-        {%- for filter in where %}
-            {{ filter }}
-            {% if not loop.last %} and {% endif %}
-        {%- endfor %}
-    )
+        where {{ where }}
     {% endif %}
 
     {% endif %}
@@ -60,12 +50,7 @@
 
         -- metric where clauses...
         {% if where %}
-        where (
-            {%- for filter in where %}
-                {{ filter }}
-                {% if not loop.last %} and {% endif %}
-            {%- endfor %}
-        )
+        where {{ where }}
         {% endif %}
 
         {% else %}
@@ -77,12 +62,7 @@
 
         -- metric where clauses...
         {% if where %}
-        where (
-            {%- for filter in where %}
-                {{ filter }}
-                {% if not loop.last %} and {% endif %}
-            {%- endfor %}
-        )
+        where {{ where }}
         {% endif %}
 
     {% endif %}

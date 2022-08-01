@@ -34,6 +34,10 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
     {%- do exceptions.raise_compiler_error("No date grain provided") %}
 {%- endif %}
 
+{% if where is iterable and (where is not string and where is not mapping) %}
+    {%- do exceptions.raise_compiler_error("From v0.3.0 onwards, the where clause takes a single string, not a list of filters. Please fix to reflect this change") %}
+{% endif %}
+
 {% do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set'])%}
 
 {% do metrics.validate_expression_metrics(metric_tree['full_set'])%}

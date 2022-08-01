@@ -17,7 +17,7 @@ from
 {{ metrics.calculate(metric('invalid_where'), 
     grain='month',
     dimensions=['had_discount'],
-    where=["order_country='Japan'"]
+    where="order_country='Japan'"
     )
 }}
 """
@@ -96,7 +96,7 @@ class TestInvalidWhereMetric:
         results = run_dbt(["seed"])
         assert len(results) == 1
 
-        # Here we expect the run to fail because the incorrect
-        # time grain won't allow it to compile
+        # Here we expect the run to fail because the value provided
+        # in the where clause isn't included in the final dataset
         results = run_dbt(["run"], expect_pass = False)
 
