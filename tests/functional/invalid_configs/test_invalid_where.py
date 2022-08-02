@@ -10,22 +10,28 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/end_date_expression_metric.sql
-end_date_expression_metric_sql = """
+# models/invalid_where.sql
+invalid_where_sql = """
 select *
 from 
-{{ metrics.calculate(metric('end_date_expression_metric'), 
+{{ metrics.calculate(metric('invalid_where'), 
     grain='month',
-    end_date='2022-01-31'
+    dimensions=['had_discount'],
+    where="order_country='Japan'"
     )
 }}
 """
 
-# models/base_sum_metric.yml
-base_sum_metric_yml = """
+# models/invalid_where.yml
+invalid_where_yml = """
 version: 2 
+models:
+  - name: invalid_where
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('invalid_where__expected')
 metrics:
-  - name: base_sum_metric
+  - name: invalid_where
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
@@ -37,33 +43,7 @@ metrics:
       - order_country
 """
 
-# models/end_date_expression_metric.yml
-end_date_expression_metric_yml = """
-version: 2 
-models:
-  - name: end_date_expression_metric
-    tests: 
-      - dbt_utils.equality:
-          compare_model: ref('end_date_expression_metric__expected')
-metrics:
-  - name: end_date_expression_metric
-    label: Expression ($)
-    timestamp: order_date
-    time_grains: [day, week, month]
-    type: expression
-    sql: "{{metric('base_sum_metric')}} + 1"
-    dimensions:
-      - had_discount
-      - order_country
-"""
-
-# seeds/end_date_expression_metric__expected.csv
-end_date_expression_metric__expected_csv = """
-date_month,base_sum_metric,end_date_expression_metric
-2022-01-01,8,9
-""".lstrip()
-
-class TestEndDateExpressionMetric:
+class TestInvalidWhereMetric:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 
@@ -97,19 +77,17 @@ class TestEndDateExpressionMetric:
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
-            "fact_orders_source.csv": fact_orders_source_csv,
-            "end_date_expression_metric__expected.csv": end_date_expression_metric__expected_csv,
-        }
+            "fact_orders_source.csv": fact_orders_source_csv
+            }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
     def models(self):
         return {
-            "fact_orders.yml": fact_orders_yml,
-            "base_sum_metric.yml": base_sum_metric_yml,
-            "end_date_expression_metric.yml": end_date_expression_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "end_date_expression_metric.sql": end_date_expression_metric_sql
+            "fact_orders.yml": fact_orders_yml,
+            "invalid_where.sql": invalid_where_sql,
+            "invalid_where.yml": invalid_where_yml
         }
 
     def test_build_completion(self,project,):
@@ -118,16 +96,9 @@ class TestEndDateExpressionMetric:
 
         # seed seeds
         results = run_dbt(["seed"])
-        assert len(results) == 2
-
-        # initial run
-        results = run_dbt(["run"])
-        assert len(results) == 3
-
-        # test tests
-        results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # # # # validate that the results include pass
-        result_statuses = sorted(r.status for r in results)
-        assert result_statuses == ["pass"]
+        # Here we expect the run to fail because the value provided
+        # in the where clause isn't included in the final dataset
+        results = run_dbt(["run"], expect_pass = False)
+

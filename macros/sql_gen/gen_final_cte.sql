@@ -1,8 +1,8 @@
-{% macro gen_final_cte(base_set,grain,full_set,secondary_calculations) %}
-    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(base_set,grain,full_set,secondary_calculations)) }}
+{% macro gen_final_cte(base_set,grain,full_set,secondary_calculations, where) %}
+    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(base_set,grain,full_set,secondary_calculations, where)) }}
 {% endmacro %}
 
-{% macro default__gen_final_cte(base_set,grain,full_set,secondary_calculations) %}
+{% macro default__gen_final_cte(base_set,grain,full_set,secondary_calculations, where) %}
 
 {%- if full_set | length > 1 %}
 
@@ -17,9 +17,19 @@
 
         select * from final 
 
+            -- metric where clauses...
+        {% if where %}
+        where {{ where }}
+        {% endif %}
+
     {% else %}
 
     select * from joined_metrics
+
+    -- metric where clauses...
+    {% if where %}
+        where {{ where }}
+    {% endif %}
 
     {% endif %}
 
@@ -38,11 +48,22 @@
 
         select * from final 
 
+        -- metric where clauses...
+        {% if where %}
+        where {{ where }}
+        {% endif %}
+
         {% else %}
 
         -- single metric without secondary calculations
 
         select * from {{base_set[0]}}__final 
+
+
+        -- metric where clauses...
+        {% if where %}
+        where {{ where }}
+        {% endif %}
 
     {% endif %}
 

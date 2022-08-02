@@ -65,6 +65,8 @@ date_month,had_discount,base_sum_metric,expression_metric
 class TestMultipleMetricsWithExpressionAndDimension:
 
     # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
     if os.getenv('dbt_target') == 'bigquery':
         @pytest.fixture(scope="class")
         def project_config_update(self):

@@ -1,8 +1,8 @@
-{% macro gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions)) }}
+{% macro gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
+{% macro default__gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions) %}
 
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
@@ -49,7 +49,7 @@
         )      
     {% endif %} 
 
-    -- metric where clauses...
+    -- metric filter clauses...
     {% if metric.filters %}
     and (
         {%- for filter in metric.filters %}
@@ -59,20 +59,9 @@
     )
     {% endif%}
 
-
-    -- metric where clauses...
-    {% if where %}
-    and (
-        {%- for filter in where %}
-            {{ filter }}
-            {% if not loop.last %} and {% endif %}
-        {%- endfor %}
-    )
-    {% endif %}
-
 {% endmacro %}
 
-{% macro bigquery__gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, where, calendar_tbl,relevant_periods,calendar_dimensions) %}
+{% macro bigquery__gen_base_query(metric,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions) %}
 
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
@@ -119,7 +108,7 @@
         )      
     {% endif %} 
 
-    -- metric where clauses...
+    -- metric filter clauses...
     {% if metric.filters %}
     and (
         {%- for filter in metric.filters %}
@@ -128,16 +117,5 @@
         {%- endfor %}
     )
     {% endif%}
-
-
-    -- metric where clauses...
-    {% if where %}
-    and (
-        {%- for filter in where %}
-            {{ filter }}
-            {% if not loop.last %} and {% endif %}
-        {%- endfor %}
-    )
-    {% endif %}
 
 {% endmacro %}

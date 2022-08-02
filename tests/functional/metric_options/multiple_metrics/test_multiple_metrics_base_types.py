@@ -63,6 +63,8 @@ date_month,base_sum_metric,base_count_metric
 class TestMultipleMetrics:
 
     # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
     if os.getenv('dbt_target') == 'bigquery':
         @pytest.fixture(scope="class")
         def project_config_update(self):

@@ -66,6 +66,8 @@ date_month,base_sum_metric,late_start_date_expression_metric
 class TestStartDateExpressionMetric:
 
     # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
     if os.getenv('dbt_target') == 'bigquery':
         @pytest.fixture(scope="class")
         def project_config_update(self):

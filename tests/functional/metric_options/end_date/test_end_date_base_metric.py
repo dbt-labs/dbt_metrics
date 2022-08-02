@@ -51,6 +51,8 @@ date_month,end_date_base_sum_metric
 class TestEndDateBaseSumMetric:
 
     # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
     if os.getenv('dbt_target') == 'bigquery':
         @pytest.fixture(scope="class")
         def project_config_update(self):

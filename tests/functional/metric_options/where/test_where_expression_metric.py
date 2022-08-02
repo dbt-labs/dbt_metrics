@@ -10,87 +10,62 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/same_period_and_grain.sql
-same_period_and_grain_sql = """
+# models/where_expression_metric.sql
+where_expression_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('same_period_and_grain'), 
-    grain='day',
-    secondary_calculations=[
-        metrics.period_to_date(aggregate="sum", period="day",alias="day_sum")
-    ]
+{{ metrics.calculate(metric('where_expression_metric'), 
+    grain='month',
+    dimensions=['had_discount'],
+    where="had_discount=true"
     )
 }}
 """
 
-# models/same_period_and_grain.yml
-same_period_and_grain_yml = """
+# models/base_sum_metric.yml
+base_sum_metric_yml = """
 version: 2 
-models:
-  - name: same_period_and_grain
-    tests: 
-      - dbt_utils.equality:
-          compare_model: ref('same_period_and_grain__expected')
 metrics:
-  - name: same_period_and_grain
+  - name: base_sum_metric
     model: ref('fact_orders')
-    label: Count
+    label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: count
-    sql: customer_id
+    type: sum
+    sql: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/same_period_and_grain__expected.csv
-same_period_and_grain__expected_csv = """
-date_day,same_period_and_grain,same_period_and_grain_day_sum
-2022-02-03,1,1
-2022-01-12,0,0
-2022-01-07,0,0
-2022-02-01,0,0
-2022-01-08,1,1
-2022-02-10,0,0
-2022-01-28,1,1
-2022-01-14,0,0
-2022-02-15,1,1
-2022-02-08,0,0
-2022-01-21,1,1
-2022-02-13,1,1
-2022-02-04,0,0
-2022-01-17,0,0
-2022-02-09,0,0
-2022-01-13,1,1
-2022-02-06,0,0
-2022-01-11,0,0
-2022-02-12,0,0
-2022-01-16,0,0
-2022-02-05,0,0
-2022-01-15,0,0
-2022-01-23,0,0
-2022-01-06,1,1
-2022-01-26,0,0
-2022-01-22,1,1
-2022-01-19,0,0
-2022-01-25,0,0
-2022-01-09,0,0
-2022-02-14,0,0
-2022-01-10,0,0
-2022-01-30,0,0
-2022-02-11,0,0
-2022-01-27,0,0
-2022-01-29,0,0
-2022-01-24,0,0
-2022-01-31,0,0
-2022-01-20,1,1
-2022-01-18,0,0
-2022-02-02,0,0
-2022-02-07,0,0
+# models/where_expression_metric.yml
+where_expression_metric_yml = """
+version: 2 
+models:
+  - name: where_expression_metric
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('where_expression_metric__expected')
+metrics:
+  - name: where_expression_metric
+    label: Expression ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    type: expression
+    sql: "{{metric('base_sum_metric')}} + 1"
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# seeds/where_expression_metric__expected.csv
+where_expression_metric__expected_csv = """
+date_month,had_discount,base_sum_metric,where_expression_metric
+2022-01-01,TRUE,2,3
+2022-02-01,TRUE,4,5
 """.lstrip()
 
-class TestSamePeriodAndGrainCount:
+class TestWhereExpressionMetric:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 
@@ -119,22 +94,24 @@ class TestSamePeriodAndGrainCount:
                 ]
         }
 
+
     # everything that goes in the "seeds" directory
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "same_period_and_grain__expected.csv": same_period_and_grain__expected_csv
-            }
+            "where_expression_metric__expected.csv": where_expression_metric__expected_csv,
+        }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
     def models(self):
         return {
-            "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "same_period_and_grain.sql": same_period_and_grain_sql,
-            "same_period_and_grain.yml": same_period_and_grain_yml
+            "base_sum_metric.yml": base_sum_metric_yml,
+            "where_expression_metric.yml": where_expression_metric_yml,
+            "fact_orders.sql": fact_orders_sql,
+            "where_expression_metric.sql": where_expression_metric_sql
         }
 
     def test_build_completion(self,project,):
@@ -153,6 +130,6 @@ class TestSamePeriodAndGrainCount:
         results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # # # validate that the results include pass
+        # # # # validate that the results include pass
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["pass"]
