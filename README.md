@@ -3,7 +3,8 @@
 <!--ts-->
 * [dbt_metrics](#dbt_metrics)
 * [About](#about)
-   * [Installation Instructions](#installation-instructions)
+  * [Tenets](#tenets)
+  * [Installation Instructions](#installation-instructions)
 * [Usage](#usage)
 * [Use cases and examples](#use-cases-and-examples)
    * [Jaffle Shop Metrics](#jaffle-shop-metrics)
@@ -28,8 +29,18 @@
 
 <!--te-->
 
+
+
 # About
 This dbt package generates queries based on [metrics](https://docs.getdbt.com/docs/building-a-dbt-project/metrics), introduced to dbt Core in v1.0. For more information on metrics, such as available types, properties, and other definition parameters, please reference the documentation linked above.
+
+## Tenets
+The tenets of `dbt_metrics`, which should be considered during development, issues, and contributions, are:
+- A metric value should be consistent everywhere that it is referenced
+- We prefer generalized metrics with many dimensions over specific metrics with few dimensions
+- It should be easier to use dbt’s metrics than it is to avoid them
+- Organization and discoverability are as important as precision
+- One-off models built to power metrics are an anti-pattern
 
 ## Installation Instructions
 Check [dbt Hub](https://hub.getdbt.com/dbt-labs/metrics/latest/) for the latest installation instructions, or [read the docs](https://docs.getdbt.com/docs/package-management) for more information on installing packages.
