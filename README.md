@@ -50,7 +50,7 @@ Include in your `package.yml`
 ```yaml
 packages:
   - package: dbt-labs/metrics
-    version: 0.3.0
+    version: 0.3.1
 ```
 
 # Usage
