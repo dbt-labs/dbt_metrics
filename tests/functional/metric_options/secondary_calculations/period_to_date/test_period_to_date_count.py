@@ -37,7 +37,7 @@ models:
 metrics:
   - name: period_to_date_count
     model: ref('fact_orders')
-    label: Count Distinct
+    label: Count
     timestamp: order_date
     time_grains: [day, week, month]
     type: count
