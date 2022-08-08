@@ -73,7 +73,7 @@ from {{ metrics.calculate(
     ],
     start_date='2022-01-01',
     end_date='2022-12-31',
-    where=["some_column='filter_value'"]
+    where="some_column='filter_value'"
 ) }}
 ```
 
