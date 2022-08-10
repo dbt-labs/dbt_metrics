@@ -7,6 +7,10 @@
 {%- macro get_metric_sql_deprecated(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 
 {# Keeping the list formatting here for ease of use #}
+{% if metric_relation is iterable and (metric_relation is not string and metric_relation is not mapping) %}
+    {%- do exceptions.raise_compiler_error("The metric macro does not support multiple metrics. To use this functionality, please find the information in the ReadMe of the repo and migrate to calculate.") %}
+{% endif %}
+
 {%- set metric_relation = metrics.get_metric_relation(metric_name) -%}
 {% set metric_list = [metric_relation] %}
 {%- set faux_metric_tree = [metric_name] -%}
