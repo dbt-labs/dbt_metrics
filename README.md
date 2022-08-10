@@ -3,9 +3,10 @@
 <!--ts-->
 * [dbt_metrics](#dbt_metrics)
 * [About](#about)
-  * [Tenets](#tenets)
-  * [Installation Instructions](#installation-instructions)
+   * [Tenets](#tenets)
+   * [Installation Instructions](#installation-instructions)
 * [Usage](#usage)
+* [Migration from metric to calculate](#migration-from-metric-to-calculate)
 * [Use cases and examples](#use-cases-and-examples)
    * [Jaffle Shop Metrics](#jaffle-shop-metrics)
    * [Inside of dbt Models](#inside-of-dbt-models)
@@ -25,7 +26,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Tue Jul 12 18:14:25 UTC 2022 -->
+<!-- Added by: runner, at: Wed Aug 10 15:11:21 UTC 2022 -->
 
 <!--te-->
 
