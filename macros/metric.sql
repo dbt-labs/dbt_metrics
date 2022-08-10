@@ -11,7 +11,7 @@
         {%- do return("not execute") %}
     {%- endif %}
 
-    {%- set sql = metrics.get_metric_sql_deprecated(
+    {%- set sql = metrics.get_metric_sql_backwards_compatibility(
         metric_name=metric_name,
         grain=grain,
         dimensions=dimensions,

@@ -4,10 +4,10 @@
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
-{%- macro get_metric_sql_deprecated(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
+{%- macro get_metric_sql_backwards_compatibility(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
 
 {# Keeping the list formatting here for ease of use #}
-{% if metric_relation is iterable and (metric_relation is not string and metric_relation is not mapping) %}
+{% if metric_name is iterable and (metric_name is not string and metric_name is not mapping) %}
     {%- do exceptions.raise_compiler_error("The metric macro does not support multiple metrics. To use this functionality, please find the information in the ReadMe of the repo and migrate to calculate.") %}
 {% endif %}
 
