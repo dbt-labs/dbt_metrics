@@ -13,11 +13,3 @@
         {% do exceptions.raise_compiler_error("Can't calculate secondary metric at " ~ calculation_grain ~"-level when metric is at " ~ metric_grain ~ "-level") %}
     {% endif %}
 {% endmacro %}
-
-{% macro get_grain_order() %}
-    {{ return(adapter.dispatch('get_grain_order', 'metrics')()) }}
-{% endmacro %}
-
-{% macro default__get_grain_order() %}
-    {% do return (['day', 'week', 'month', 'quarter', 'year']) %}
-{% endmacro %}
