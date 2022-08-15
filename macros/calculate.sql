@@ -19,7 +19,7 @@
         start_date=start_date,
         end_date=end_date,
         where=where,
-        macro='calculate'
+        initiated_by='calculate'
     ) %}
     ({{ sql }}) metric_subq
 {%- endmacro %}

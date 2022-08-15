@@ -4,16 +4,16 @@
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
-{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, macro) %}
+{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, initiated_by) %}
 
 {# ############
 VALIDATION AROUND METRIC VS CALCULATE 
 ############ #}
 
-{% if macro == 'metric'%}
+{% if initiated_by == 'metric'%}
     {% set is_metric_macro = true %}
     {% set is_calculate_macro = false %}
-{% elif macro == 'calculate' %}
+{% elif initiated_by == 'calculate' %}
     {% set is_metric_macro = false %}
     {% set is_calculate_macro = true %}
 {% endif %}
