@@ -18,7 +18,8 @@
         secondary_calculations=secondary_calculations,
         start_date=start_date,
         end_date=end_date,
-        where=where
+        where=where,
+        macro='calculate'
     ) %}
     ({{ sql }}) metric_subq
 {%- endmacro %}

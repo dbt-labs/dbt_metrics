@@ -4,19 +4,40 @@
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
-{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where) %}
+{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, macro) %}
+
+{# ############
+VALIDATION AROUND METRIC VS CALCULATE 
+############ #}
+
+{% if macro == 'metric'%}
+    {% set is_metric_macro = true %}
+    {% set is_calculate_macro = false %}
+{% elif macro == 'calculate' %}
+    {% set is_metric_macro = false %}
+    {% set is_calculate_macro = true %}
+{% endif %}
 
 {# ############
 VARIABLE SETTING ROUND 1: List Vs Single Metric!
 ############ #}
 
-{% if metric_list is not iterable %}
+{% if is_calculate_macro and metric_list is not iterable %}
     {% set metric_list = [metric_list] %}
+{% elif is_metric_macro %}
+    {# Here we are overriding the metric list variable with the metric call of the 
+    metric name provided by the metric macro #}
+    {% set metric_relation = metrics.get_metric_relation(metric_list) %}
+    {% set metric_list = [metric_relation.name] %}
 {% endif %}
 
 {# We are creating the metric tree here - this includes all the leafs (first level parents)
 , the expression metrics, and the full combination of them both #}
-{%- set metric_tree = metrics.get_metric_tree(metric_list) %}
+{% if is_calculate_macro %}
+    {% set metric_tree = metrics.get_metric_tree(metric_list) %}
+{% elif is_metric_macro %}
+    {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
+{% endif %}
 
 {# ############
 VALIDATION ROUND ONE - THE MACRO LEVEL!
