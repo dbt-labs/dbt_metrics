@@ -4,18 +4,24 @@
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
-{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, initiated_by) %}
+{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, initiated_by,metric_definition=None) %}
 
 {# ############
-VALIDATION AROUND METRIC VS CALCULATE 
+VALIDATION AROUND METRIC VS CALCULATE VS DEVELOP
 ############ #}
 
 {% if initiated_by == 'metric'%}
     {% set is_metric_macro = true %}
     {% set is_calculate_macro = false %}
+    {% set is_develop_macro = false %}
 {% elif initiated_by == 'calculate' %}
     {% set is_metric_macro = false %}
     {% set is_calculate_macro = true %}
+    {% set is_develop_macro = false %}
+{% elif initiated_by == 'develop' %}
+    {% set is_metric_macro = false %}
+    {% set is_calculate_macro = false %}
+    {% set is_develop_macro = true %}
 {% endif %}
 
 {# ############
@@ -29,6 +35,8 @@ VARIABLE SETTING ROUND 1: List Vs Single Metric!
     metric name provided by the metric macro #}
     {% set metric_relation = metrics.get_metric_relation(metric_list) %}
     {% set metric_list = [metric_relation.name] %}
+{% elif is_develop_macro %}
+    {% set metric_list = [metric_definition["name"]] %}
 {% endif %}
 
 {# We are creating the metric tree here - this includes all the leafs (first level parents)
@@ -36,6 +44,8 @@ VARIABLE SETTING ROUND 1: List Vs Single Metric!
 {% if is_calculate_macro %}
     {% set metric_tree = metrics.get_metric_tree(metric_list) %}
 {% elif is_metric_macro %}
+    {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
+{% elif is_develop_macro %}
     {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
 {% endif %}
 
@@ -59,9 +69,13 @@ VALIDATION ROUND ONE - THE MACRO LEVEL!
     {%- do exceptions.raise_compiler_error("From v0.3.0 onwards, the where clause takes a single string, not a list of filters. Please fix to reflect this change") %}
 {% endif %}
 
-{% do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set'])%}
+{% if not is_develop_macro %}
+    {% do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set'])%}
+{% endif %}
 
-{% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
+{% if not is_develop_macro %}
+    {% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
+{% endif %}
 
 {# ############
 LETS SET SOME VARIABLES AND VALIDATE!
@@ -78,24 +92,32 @@ LETS SET SOME VARIABLES AND VALIDATE!
 a custom calendar #}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
 
-{# Here we are creating a list of all valid dimensions, as well as providing compilation
-errors if there are any provided dimensions that don't work. #}
-{% set common_valid_dimension_list = metrics.get_common_valid_dimension_list(dimensions, metric_tree['full_set']) %}
+{% if not is_develop_macro %}
 
-{# We have to break out calendar dimensions as their own list of acceptable dimensions. 
-This is because of the date-spining. If we don't do this, it creates impossible combinations
-of calendar dimension + base dimensions #}
-{%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions, common_valid_dimension_list) -%}
+    {# Here we are creating a list of all valid dimensions, as well as providing compilation
+    errors if there are any provided dimensions that don't work. #}
+    {% set common_valid_dimension_list = metrics.get_common_valid_dimension_list(dimensions, metric_tree['full_set']) %}
 
-{# Additionally, we also have to restrict the dimensions coming in from the macro to 
-no longer include those we've designated as calendar dimensions. That way they 
-are correctly handled by the spining. We override the dimensions variable for 
-cleanliness #}
-{%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions) -%}
+    {# We have to break out calendar dimensions as their own list of acceptable dimensions. 
+    This is because of the date-spining. If we don't do this, it creates impossible combinations
+    of calendar dimension + base dimensions #}
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions, common_valid_dimension_list) -%}
 
-{# Finally we set the relevant periods, which is a list of all time grains that need to be contained
-within the final dataset in order to accomplish base + secondary calc functionality. #}
-{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+    {# Additionally, we also have to restrict the dimensions coming in from the macro to 
+    no longer include those we've designated as calendar dimensions. That way they 
+    are correctly handled by the spining. We override the dimensions variable for 
+    cleanliness #}
+    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions) -%}
+
+    {# Finally we set the relevant periods, which is a list of all time grains that need to be contained
+    within the final dataset in order to accomplish base + secondary calc functionality. #}
+    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+
+{% else %}
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(metric_definition["dimensions"], dimensions) -%}
+    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(metric_definition["dimensions"]) -%}
+    {%- set relevant_periods = metrics.get_relevent_periods(metric_definition["grain"], secondary_calculations) %}
+{% endif %}
 
 {# ############
 VALIDATION ROUND TWO - CONFIG ELEMENTS!
@@ -105,13 +127,21 @@ VALIDATION ROUND TWO - CONFIG ELEMENTS!
 {#- /* TODO: build a list of failures and return them all at once*/ #}
 {% for metric in metric_list %}
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
+        {% if is_develop_macro %}
+            {%- do metrics.validate_aggregate_coherence(metric_definition["type"], calc_config.aggregate) %}
+        {% else %}
+            {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
+        {% endif %}
     {%- endfor %}
 {%endfor%}
 
 {#- /* TODO: build a list of failures and return them all at once*/ #}
 {%- for calc_config in secondary_calculations if calc_config.period %}
-    {%- do metrics.validate_grain_order(grain, calc_config.period) %}
+    {% if is_develop_macro %}
+        {%- do metrics.validate_grain_order(metric_definition["grain"], calc_config.period) %}
+    {% else %}
+        {%- do metrics.validate_grain_order(grain, calc_config.period) %}
+    {% endif %}
 {%- endfor %}
 
 {# ############
