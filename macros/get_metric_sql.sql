@@ -112,7 +112,7 @@ metrics there are #}
 
     {% for metric_name in metric_tree["parent_set"]%}
         {%- set loop_metric = metrics.get_metric_relation(metric_name) -%}
-        {%- set loop_base_model = loop_metric.model.split('\'')[1]  -%}
+        {%- set loop_base_model = loop_metric.model.replace('"','\'').split('\'')[1]  -%}
         {%- set loop_model = metrics.get_model_relation(loop_base_model if execute else "") %}
         {{ metrics.build_metric_sql(loop_metric, loop_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
     {% endfor %}
@@ -129,7 +129,7 @@ metrics there are #}
 
     {% for metric_name in metric_tree["full_set"]%}
         {%- set single_metric = metric(metric_name) -%}
-        {%- set single_base_model = single_metric.model.split('\'')[1]  -%}
+        {%- set single_base_model = single_metric.model.replace('"','\'').split('\'')[1]  -%}
         {%- set single_model = metrics.get_model_relation(single_base_model if execute else "") %}
         {{ metrics.build_metric_sql(single_metric, single_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
     {% endfor %}
