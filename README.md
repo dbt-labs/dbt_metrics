@@ -166,7 +166,7 @@ There may be instances where you want to return multiple metrics within a single
 
 
 ## Where Clauses
-Sometimes you'll want to see the metric in the context of a particular filter but this filter isn't neccesarily part of the metric definition. In this case, you can use the `where` parameter of the metrics package. It takes a list of `sql` statements and adds them in as filters to the first CTE in the produced SQL. This reduces the load on the query planner to run full table scans and will hopefully improve performance.
+Sometimes you'll want to see the metric in the context of a particular filter but this filter isn't neccesarily part of the metric definition. In this case, you can use the `where` parameter of the metrics package. It takes a list of `sql` statements and adds them in as filters to the final CTE in the produced SQL. 
 
 Additionally, this parameter can be used by BI Tools to as a way for filters in their UI to be passed through into the metric logic.
 
