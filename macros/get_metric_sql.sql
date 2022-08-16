@@ -25,6 +25,24 @@ VALIDATION AROUND METRIC VS CALCULATE VS DEVELOP
 {% endif %}
 
 {# ############
+METRIC ATTRIBUTES TO VARIABLES
+We do this so that we can support metric attributes coming in from other formats
+like develop. This is easier than altering all of the downstream logic to have flags
+for calculate vs develop
+############ #}
+{% if is_develop_macro %}
+    {% set metric_name = metric_definition["name"]%}
+    {% set metric_type = metric_definition["type"]%}
+    {% set metric_sql = metric_definition["sql"]%}
+    {% set metric_timestamp = metric_definition["timestamp"]%}
+    {% set metric_time_grains = metric_definition["time_grains"]%}
+    {% set metric_dimensions = metric_definition["dimensions"]%}
+    {% set metric_filters = metric_definition["filters"]%}
+    {% set metric_base_model = metric_definition["model"].replace('"','\'').split('\'')[1]  %}
+    {% set metric_model = metrics.get_model_relation(metric_base_model if execute else "") %}
+{% endif %}
+
+{# ############
 VARIABLE SETTING ROUND 1: List Vs Single Metric!
 ############ #}
 
@@ -92,8 +110,12 @@ LETS SET SOME VARIABLES AND VALIDATE!
 a custom calendar #}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
 
-{% if not is_develop_macro %}
+{% if is_develop_macro %}
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(metric_dimensions, dimensions) -%}
+    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(metric_dimensions) -%}
+    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 
+{% else %}
     {# Here we are creating a list of all valid dimensions, as well as providing compilation
     errors if there are any provided dimensions that don't work. #}
     {% set common_valid_dimension_list = metrics.get_common_valid_dimension_list(dimensions, metric_tree['full_set']) %}
@@ -113,10 +135,6 @@ a custom calendar #}
     within the final dataset in order to accomplish base + secondary calc functionality. #}
     {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 
-{% else %}
-    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(metric_definition["dimensions"], dimensions) -%}
-    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(metric_definition["dimensions"]) -%}
-    {%- set relevant_periods = metrics.get_relevent_periods(metric_definition["grain"], secondary_calculations) %}
 {% endif %}
 
 {# ############
@@ -126,22 +144,17 @@ VALIDATION ROUND TWO - CONFIG ELEMENTS!
 {#- /* TODO: #49 Do I need to validate that the requested grain is defined on the metric? */ #}
 {#- /* TODO: build a list of failures and return them all at once*/ #}
 {% for metric in metric_list %}
+    {% if not is_develop_macro %}
+        {% set metric_type = metric.type%}
+    {% endif %}
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {% if is_develop_macro %}
-            {%- do metrics.validate_aggregate_coherence(metric_definition["type"], calc_config.aggregate) %}
-        {% else %}
-            {%- do metrics.validate_aggregate_coherence(metric.type, calc_config.aggregate) %}
-        {% endif %}
+        {%- do metrics.validate_aggregate_coherence(metric_type, calc_config.aggregate) %}
     {%- endfor %}
 {%endfor%}
 
 {#- /* TODO: build a list of failures and return them all at once*/ #}
 {%- for calc_config in secondary_calculations if calc_config.period %}
-    {% if is_develop_macro %}
-        {%- do metrics.validate_grain_order(metric_definition["grain"], calc_config.period) %}
-    {% else %}
-        {%- do metrics.validate_grain_order(grain, calc_config.period) %}
-    {% endif %}
+    {%- do metrics.validate_grain_order(grain, calc_config.period) %}
 {%- endfor %}
 
 {# ############
@@ -162,17 +175,37 @@ metrics there are #}
     up the composite metric. #}
 
     {% for metric_name in metric_tree["parent_set"]%}
-        {%- set loop_metric = metrics.get_metric_relation(metric_name) -%}
-        {%- set loop_base_model = loop_metric.model.replace('"','\'').split('\'')[1]  -%}
-        {%- set loop_model = metrics.get_model_relation(loop_base_model if execute else "") %}
-        {{ metrics.build_metric_sql(loop_metric, loop_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
+        {% set loop_metric = metrics.get_metric_relation(metric_name) %}
+
+        {# Here we set the metric parameters. Previously we just provided the metric object
+        but in order to support develop logic we need to break these down into their own 
+        variables #}
+        {% set metric_name = loop_metric.name%}
+        {% set metric_type = loop_metric.type%}
+        {% set metric_sql = loop_metric.sql%}
+        {% set metric_timestamp = loop_metric.timestamp%}
+        {% set metric_time_grains = loop_metric.time_grains%}
+        {% set metric_dimensions = loop_metric.dimensions%}
+        {% set metric_filters = loop_metric.filters%}
+        {% set metric_base_model = loop_metric.model.replace('"','\'').split('\'')[1]  %}
+        {% set metric_model = metrics.get_model_relation(metric_base_model if execute else "") %}
+
+        {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_dimensions, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
     {% endfor %}
 
     {{ metrics.gen_joined_metrics_cte(metric_tree["parent_set"], metric_tree["expression_set"], metric_tree["ordered_expression_set"], grain, non_calendar_dimensions, calendar_dimensions, secondary_calculations, relevant_periods) }}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
     
-    {# If it is NOT a composite metric, we run the baseline model #}
+{# If we're calling the develop macro then we don't need to loop through the metrics because we know 
+this is only a single metric and not an expression metric #}
+{%- elif is_develop_macro -%}
+
+    {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_dimensions, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
+    {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
+    {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
+
+{# If it is NOT a composite metric, we run the baseline model #}
 {%- else -%}
 
     {# We only set these variables here because they're only needed if it isn't a 
@@ -180,9 +213,21 @@ metrics there are #}
 
     {% for metric_name in metric_tree["full_set"]%}
         {%- set single_metric = metric(metric_name) -%}
-        {%- set single_base_model = single_metric.model.replace('"','\'').split('\'')[1]  -%}
-        {%- set single_model = metrics.get_model_relation(single_base_model if execute else "") %}
-        {{ metrics.build_metric_sql(single_metric, single_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
+
+        {# Here we set the metric parameters. Previously we just provided the metric object
+        but in order to support develop logic we need to break these down into their own 
+        variables #}
+        {% set metric_name = single_metric.name%}
+        {% set metric_type = single_metric.type%}
+        {% set metric_sql = single_metric.sql%}
+        {% set metric_timestamp = single_metric.timestamp%}
+        {% set metric_time_grains = single_metric.time_grains%}
+        {% set metric_dimensions = single_metric.dimensions%}
+        {% set metric_filters = single_metric.filters%}
+        {% set metric_base_model = single_metric.model.replace('"','\'').split('\'')[1]  %}
+        {% set metric_model = metrics.get_model_relation(metric_base_model if execute else "") %}
+
+        {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_dimensions, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
     {% endfor %}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
