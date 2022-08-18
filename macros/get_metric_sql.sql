@@ -10,16 +10,10 @@
 VALIDATION AROUND METRIC VS CALCULATE VS DEVELOP
 ############ #}
 
-{% if initiated_by == 'metric'%}
-    {% set is_metric_macro = true %}
-    {% set is_calculate_macro = false %}
-    {% set is_develop_macro = false %}
-{% elif initiated_by == 'calculate' %}
-    {% set is_metric_macro = false %}
+{% if initiated_by == 'calculate' %}
     {% set is_calculate_macro = true %}
     {% set is_develop_macro = false %}
 {% elif initiated_by == 'develop' %}
-    {% set is_metric_macro = false %}
     {% set is_calculate_macro = false %}
     {% set is_develop_macro = true %}
 {% endif %}
@@ -48,11 +42,6 @@ VARIABLE SETTING ROUND 1: List Vs Single Metric!
 
 {% if is_calculate_macro and metric_list is not iterable %}
     {% set metric_list = [metric_list] %}
-{% elif is_metric_macro %}
-    {# Here we are overriding the metric list variable with the metric call of the 
-    metric name provided by the metric macro #}
-    {% set metric_relation = metrics.get_metric_relation(metric_list) %}
-    {% set metric_list = [metric_relation.name] %}
 {% elif is_develop_macro %}
     {% set metric_list = [metric_definition["name"]] %}
 {% endif %}
@@ -61,8 +50,6 @@ VARIABLE SETTING ROUND 1: List Vs Single Metric!
 , the expression metrics, and the full combination of them both #}
 {% if is_calculate_macro %}
     {% set metric_tree = metrics.get_metric_tree(metric_list) %}
-{% elif is_metric_macro %}
-    {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
 {% elif is_develop_macro %}
     {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
 {% endif %}
