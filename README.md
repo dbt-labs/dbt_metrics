@@ -5,8 +5,10 @@
 * [About](#about)
    * [Tenets](#tenets)
    * [Installation Instructions](#installation-instructions)
-* [Usage](#usage)
-* [Migration from metric to calculate](#migration-from-metric-to-calculate)
+* [Macros](#macros)
+   * [Calculate](#calculate)
+      * [Migration from metric to calculate](#migration-from-metric-to-calculate)
+   * [Develop](#develop)
 * [Use cases and examples](#use-cases-and-examples)
    * [Jaffle Shop Metrics](#jaffle-shop-metrics)
    * [Inside of dbt Models](#inside-of-dbt-models)
@@ -26,7 +28,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Mon Aug 15 17:04:31 UTC 2022 -->
+<!-- Added by: runner, at: Thu Aug 18 14:11:59 UTC 2022 -->
 
 <!--te-->
 
