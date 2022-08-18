@@ -112,7 +112,7 @@ a custom calendar #}
 
 {% if is_develop_macro %}
     {%- set calendar_dimensions = metrics.get_calendar_dimension_list(metric_dimensions, dimensions) -%}
-    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(metric_dimensions) -%}
+    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions) -%}
     {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 
 {% else %}
@@ -190,18 +190,19 @@ metrics there are #}
         {% set metric_base_model = loop_metric.model.replace('"','\'').split('\'')[1]  %}
         {% set metric_model = metrics.get_model_relation(metric_base_model if execute else "") %}
 
-        {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_dimensions, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
+        {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
     {% endfor %}
 
     {{ metrics.gen_joined_metrics_cte(metric_tree["parent_set"], metric_tree["expression_set"], metric_tree["ordered_expression_set"], grain, non_calendar_dimensions, calendar_dimensions, secondary_calculations, relevant_periods) }}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
     
+
 {# If we're calling the develop macro then we don't need to loop through the metrics because we know 
 this is only a single metric and not an expression metric #}
 {%- elif is_develop_macro -%}
 
-    {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_dimensions, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
+    {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, dimensions_provided) }}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
 
@@ -227,7 +228,7 @@ this is only a single metric and not an expression metric #}
         {% set metric_base_model = single_metric.model.replace('"','\'').split('\'')[1]  %}
         {% set metric_model = metrics.get_model_relation(metric_base_model if execute else "") %}
 
-        {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_dimensions, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
+        {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
     {% endfor %}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
     {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}

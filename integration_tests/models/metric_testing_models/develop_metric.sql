@@ -17,7 +17,6 @@ metrics:
 select * 
 from {{ metrics.develop(
         develop_yml=my_metric_yml,
-        grain='day',
-        dimensions=['had_discount']
+        grain='month'
         )
     }}

@@ -1,4 +1,4 @@
-{%- macro build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_dimensions, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, dimensions_provided) %}
+{%- macro build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, dimensions_provided) %}
     
     {# This is the SQL Gen part - we've broken each component out into individual macros #}
     {# We broke this out so it can loop for composite metrics #}
