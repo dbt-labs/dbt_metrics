@@ -54,8 +54,12 @@ packages:
     version: 0.3.1
 ```
 
-# Usage
-Access metrics [like any other macro](https://docs.getdbt.com/docs/building-a-dbt-project/jinja-macros#using-a-macro-from-a-package): 
+# Macros
+
+## Calculate
+The calculate macro performs the metric aggregation and returns the dataset based on the specifications
+of the metric definition and the options selected in the macro. It can be accessed [like any other macro](https://docs.getdbt.com/docs/building-a-dbt-project/jinja-macros#using-a-macro-from-a-package): 
+
 ```sql
 select * 
 from {{ metrics.calculate(
@@ -80,13 +84,45 @@ from {{ metrics.calculate(
 
 `start_date` and `end_date` are optional. When not provided, the spine will span all dates from oldest to newest in the metric's dataset. This default is likely to be correct in most cases, but you can use the arguments to either narrow the resulting table or expand it (e.g. if there was no new customers until 3 January but you want to include the first two days as well). Both values are inclusive.
 
-# Migration from metric to calculate
+### Migration from metric to calculate
 In version `0.3.0` of the dbt_metrics package, the name of the main macro was changed from `metric` to `calculate`. This was done in order to better reflect the work being performed by the macro and match the semantic naming followed by the rest of the macros in the package (describing the action, not the output). Additionally, the `metric_name` input was changed to take a single `metric` function or multiple `metric` functions provided in a list.
 
 To correctly change this syntax, you must:
 - change `metrics.metric` to `metrics.calculate`.
 - change `metric_name` to `metric('name_here')` 
   - alternatively use `[metric('name_here'),metric('another_name_here')]` for multiple metrics
+
+## Develop
+There are times when you want to test what a metric might look like before defining it in your project. In these cases you should use the `develop` metric, which allows you to provide a single metric in a contained yml in order to simulate what the metric might loook like if defined in your project.
+
+**Limitations:**
+- The provided yml can only contain one metric
+- The metric in question cannot be an expression metric
+
+```sql
+{% set my_metric_yml -%}
+
+metrics:
+  - name: develop_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    type: average
+    sql: discount_total
+    dimensions:
+      - had_discount
+      - order_country
+
+{%- endset %}
+
+select * 
+from {{ metrics.develop(
+        develop_yml=my_metric_yml,
+        grain='month'
+        )
+    }}
+```
 
 # Use cases and examples
 
