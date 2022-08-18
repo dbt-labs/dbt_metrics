@@ -35,7 +35,7 @@ for calculate vs develop
     {% set metric_base_model = metric_definition["model"].replace('"','\'').split('\'')[1]  %}
     {% set metric_model = metrics.get_model_relation(metric_base_model if execute else "") %}
 {% endif %}
-
+ 
 {# ############
 VARIABLE SETTING ROUND 1: List Vs Single Metric!
 ############ #}
