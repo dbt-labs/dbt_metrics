@@ -224,7 +224,20 @@ vars:
 ```
 
 ### Dimensions from calendar tables
-You may want to aggregate metrics by a dimension in your custom calendar table, for example `is_weekend`. You can include this within the list of `dimensions` in the macro call **without** it needing to be defined in the metric definition. The macro will correctly recognize that it is coming from the calendar dimension and treat it accordingly.
+You may want to aggregate metrics by a dimension in your custom calendar table, for example `is_weekend`. You can include this within the list of `dimensions` in the macro call **without** it needing to be defined in the metric definition. 
+
+To do so, set the `allow_calendar_dimensions` parameter of the macro to true. This will allow columns from the calendar dimension to be included in the dimension list. See example below:
+
+```sql
+  select *
+  from 
+  {{ metrics.calculate(
+      metric('base_sum_metric'), 
+      grain='day', 
+      dimensions=['is_weekend'],
+      allow_calendar_dimensions=true
+  }}
+```
 
 ## Time Grains 
 The package protects against nonsensical secondary calculations, such as a month-to-date aggregate of data which has been rolled up to the quarter. If you customise your calendar (for example by adding a [4-5-4 retail calendar](https://calogica.com/sql/dbt/2018/11/15/retail-calendar-in-sql.html) month), you will need to override the [`get_grain_order()`](/macros/secondary_calculations/validate_grain_order.sql) macro. In that case, you might remove `month` and replace it with `month_4_5_4`. All date columns must be prefixed with `date_` in the table. Do not include the prefix when defining your metric, it will be added automatically.
