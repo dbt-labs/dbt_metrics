@@ -1,9 +1,9 @@
-{% macro develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
-    {{ return(adapter.dispatch('develop', 'metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
+{% macro develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None, allow_calendar_dimensions=False) -%}
+    {{ return(adapter.dispatch('develop', 'metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where, allow_calendar_dimensions)) }}
 {% endmacro %}
 
 
-{% macro default__develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
+{% macro default__develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None, allow_calendar_dimensions=False) -%}
     -- Need this here, since the actual ref is nested within loops/conditions:
     -- depends on: {{ ref(var('dbt_metrics_calendar_model', 'dbt_metrics_default_calendar')) }}
 
@@ -11,11 +11,12 @@
         {%- do return("not execute") %}
     {%- endif %}
     
+    {% set develop_yml = fromyaml(develop_yml)%}
+
     {# ############
     VALIDATION OF PROVIDED YML
     ############ #}
-    {% set develop_yml = fromyaml(develop_yml) %}
-
+    
     {% if develop_yml["metrics"] | length > 1%}
         {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") %}
     {% endif %}
@@ -73,7 +74,8 @@
         end_date=end_date,
         where=where,
         initiated_by='develop',
-        metric_definition=metric_definition
+        metric_definition=metric_definition,
+        allow_calendar_dimensions=allow_calendar_dimensions
     ) %}
     ({{ sql }}) metric_subq
 {%- endmacro %}
