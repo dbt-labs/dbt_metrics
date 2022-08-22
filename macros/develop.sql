@@ -14,9 +14,9 @@
     {% set develop_yml = fromyaml(develop_yml)%}
 
     {# ############
-    VALIDATION OF PROVIDED YML
+    VALIDATION OF PROVIDED YML - Gotta make sure the metric looks good!
     ############ #}
-    
+
     {% if develop_yml["metrics"] | length > 1%}
         {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") %}
     {% endif %}
@@ -40,7 +40,7 @@
     {%- endif %}
 
     {%- if grain not in metric_definition["time_grains"] %}
-        {%- do exceptions.raise_compiler_error("The macro provided grain is missing from the metric definition yml") %}
+        {%- do exceptions.raise_compiler_error("The selected grain is missing from the metric definition yml") %}
     {%- endif %}
 
     {%- if not metric_definition["type"] %}
@@ -62,11 +62,39 @@
     {% endfor %}
 
     {# ############
-    CREATING THE METRIC SQL
+    VALIDATION OF MACRO INPUTS - Making sure we have a provided grain!
+    ############ #}
+
+    {%- if not grain %}
+        {%- do exceptions.raise_compiler_error("No date grain provided") %}
+    {%- endif %}
+
+    {# ############
+    VARIABLE SETTING - Creating the faux metric tree and faux metric list. The faux fur of 2022
+    ############ #}
+
+    {% set metric_list = [metric_definition["name"]] %}
+    {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
+    {% set metric_type = metric_definition["type"]%}
+
+    {# ############
+    SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
+    ############ #}
+
+    {%- for calc_config in secondary_calculations if calc_config.aggregate %}
+        {%- do metrics.validate_aggregate_coherence(metric_type, calc_config.aggregate) %}
+    {%- endfor %}
+
+    {%- for calc_config in secondary_calculations if calc_config.period %}
+        {%- do metrics.validate_grain_order(grain, calc_config.period) %}
+    {%- endfor %}
+
+    {# ############
+    SQL GENERATION - Lets build that SQL!
     ############ #}
 
     {%- set sql = metrics.get_metric_sql(
-        metric_list=[],
+        metric_list=metric_list,
         grain=grain,
         dimensions=dimensions,
         secondary_calculations=secondary_calculations,
@@ -75,6 +103,7 @@
         where=where,
         initiated_by='develop',
         metric_definition=metric_definition,
+        metric_tree=metric_tree,
         allow_calendar_dimensions=allow_calendar_dimensions
     ) %}
     ({{ sql }}) metric_subq

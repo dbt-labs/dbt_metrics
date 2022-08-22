@@ -4,17 +4,15 @@
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
-{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, initiated_by, allow_calendar_dimensions, metric_definition=None) %}
+{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, initiated_by, metric_tree, allow_calendar_dimensions, metric_definition=None) %}
 
 {# ############
 VALIDATION AROUND METRIC VS CALCULATE VS DEVELOP
 ############ #}
 
 {% if initiated_by == 'calculate' %}
-    {% set is_calculate_macro = true %}
     {% set is_develop_macro = false %}
 {% elif initiated_by == 'develop' %}
-    {% set is_calculate_macro = false %}
     {% set is_develop_macro = true %}
 {% endif %}
 
@@ -34,52 +32,6 @@ for calculate vs develop
     {% set metric_filters = metric_definition["filters"]%}
     {% set metric_base_model = metric_definition["model"].replace('"','\'').split('\'')[1]  %}
     {% set metric_model = metrics.get_model_relation(metric_base_model if execute else "") %}
-{% endif %}
- 
-{# ############
-VARIABLE SETTING ROUND 1: List Vs Single Metric!
-############ #}
-
-{% if is_calculate_macro and metric_list is not iterable %}
-    {% set metric_list = [metric_list] %}
-{% elif is_develop_macro %}
-    {% set metric_list = [metric_definition["name"]] %}
-{% endif %}
-
-{# We are creating the metric tree here - this includes all the leafs (first level parents)
-, the expression metrics, and the full combination of them both #}
-{% if is_calculate_macro %}
-    {% set metric_tree = metrics.get_metric_tree(metric_list) %}
-{% elif is_develop_macro %}
-    {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
-{% endif %}
-
-{# ############
-VALIDATION ROUND ONE - THE MACRO LEVEL!
-############ #}
-
-{%- if not execute %}
-    {%- do return("Did not execute") %}
-{%- endif %}
-
-{%- if not metric_list %}
-    {%- do exceptions.raise_compiler_error("No metric or metrics provided") %}
-{%- endif %}
-
-{%- if not grain %}
-    {%- do exceptions.raise_compiler_error("No date grain provided") %}
-{%- endif %}
-
-{% if where is iterable and (where is not string and where is not mapping) %}
-    {%- do exceptions.raise_compiler_error("From v0.3.0 onwards, the where clause takes a single string, not a list of filters. Please fix to reflect this change") %}
-{% endif %}
-
-{% if not is_develop_macro %}
-    {% do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set'])%}
-{% endif %}
-
-{% if not is_develop_macro %}
-    {% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
 {% endif %}
 
 {# ############
@@ -124,26 +76,6 @@ a custom calendar #}
     {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 
 {% endif %}
-
-{# ############
-VALIDATION ROUND TWO - CONFIG ELEMENTS!
-############ #}
-
-{#- /* TODO: #49 Do I need to validate that the requested grain is defined on the metric? */ #}
-{#- /* TODO: build a list of failures and return them all at once*/ #}
-{% for metric in metric_list %}
-    {% if not is_develop_macro %}
-        {% set metric_type = metric.type%}
-    {% endif %}
-    {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {%- do metrics.validate_aggregate_coherence(metric_type, calc_config.aggregate) %}
-    {%- endfor %}
-{%endfor%}
-
-{#- /* TODO: build a list of failures and return them all at once*/ #}
-{%- for calc_config in secondary_calculations if calc_config.period %}
-    {%- do metrics.validate_grain_order(grain, calc_config.period) %}
-{%- endfor %}
 
 {# ############
 LET THE COMPOSITION BEGIN!
