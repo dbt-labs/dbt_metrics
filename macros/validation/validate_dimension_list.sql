@@ -22,7 +22,7 @@
                 {% if allow_calendar_dimensions %}
                     {% do exceptions.raise_compiler_error("The dimension " ~ dim ~ " is not part of the metric " ~ metric_relation.name) %}
                 {% else %}
-                    {% do exceptions.raise_compiler_error("The dimension " ~ dim ~ " is not part of the metric " ~ metric_relation.name ~ ". If the dimension is from the calendar table, please set allow_calendar_dimensions = True in the macro.") %}
+                    {% do exceptions.raise_compiler_error("The dimension " ~ dim ~ " is not part of the metric " ~ metric_relation.name ~ ". If the dimension is from a custom calendar table, please create the custom_calendar_dimension_list as shown in the README.") %}
                 {% endif %}
             {% endif %}
 

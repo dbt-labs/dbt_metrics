@@ -1,9 +1,9 @@
-{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None, allow_calendar_dimensions=False) -%}
-    {{ return(adapter.dispatch('calculate', 'metrics')(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, allow_calendar_dimensions)) }}
+{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
+    {{ return(adapter.dispatch('calculate', 'metrics')(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
 {% endmacro %}
 
 
-{% macro default__calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None, allow_calendar_dimensions=False) -%}
+{% macro default__calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
     -- Need this here, since the actual ref is nested within loops/conditions:
     -- depends on: {{ ref(var('dbt_metrics_calendar_model', 'dbt_metrics_default_calendar')) }}
 
@@ -24,7 +24,7 @@
     {# We have to break out calendar dimensions as their own list of acceptable dimensions. 
     This is because of the date-spining. If we don't do this, it creates impossible combinations
     of calendar dimension + base dimensions #}
-    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions, allow_calendar_dimensions) -%}
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list() -%}
 
     {# Additionally, we also have to restrict the dimensions coming in from the macro to 
     no longer include those we've designated as calendar dimensions. That way they 
@@ -60,7 +60,7 @@
 
     {% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
 
-    {% do metrics.validate_dimension_list(dimensions, metric_tree['full_set'], calendar_dimensions, allow_calendar_dimensions) %}
+    {% do metrics.validate_dimension_list(dimensions, metric_tree['full_set'], calendar_dimensions) %}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Let there be window functions

@@ -1,9 +1,9 @@
-{% macro develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None, allow_calendar_dimensions=False) -%}
-    {{ return(adapter.dispatch('develop', 'metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where, allow_calendar_dimensions)) }}
+{% macro develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
+    {{ return(adapter.dispatch('develop', 'metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
 {% endmacro %}
 
 
-{% macro default__develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None, allow_calendar_dimensions=False) -%}
+{% macro default__develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
     -- Need this here, since the actual ref is nested within loops/conditions:
     -- depends on: {{ ref(var('dbt_metrics_calendar_model', 'dbt_metrics_default_calendar')) }}
 
@@ -93,7 +93,7 @@
     VARIABLES FOR SQL GEN - More variables we need for sql gen
     ############ #}
 
-    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions, allow_calendar_dimensions) -%}
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list() -%}
     {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions,calendar_dimensions) -%}
     {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
 
