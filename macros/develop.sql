@@ -90,6 +90,14 @@
     {%- endfor %}
 
     {# ############
+    VARIABLES FOR SQL GEN - More variables we need for sql gen
+    ############ #}
+
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions, allow_calendar_dimensions) -%}
+    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions,calendar_dimensions) -%}
+    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+
+    {# ############
     SQL GENERATION - Lets build that SQL!
     ############ #}
 
@@ -104,7 +112,9 @@
         initiated_by='develop',
         metric_definition=metric_definition,
         metric_tree=metric_tree,
-        allow_calendar_dimensions=allow_calendar_dimensions
-    ) %}
+        calendar_dimensions=calendar_dimensions,
+        non_calendar_dimensions=non_calendar_dimensions,
+        relevant_periods=relevant_periods
+        ) %}
     ({{ sql }}) metric_subq
 {%- endmacro %}

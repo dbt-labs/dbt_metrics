@@ -1,19 +1,11 @@
-{% macro get_common_valid_dimension_list(dimensions, metric_names, calendar_dimensions, allow_calendar_dimensions) %}
+{% macro validate_dimension_list(dimensions, metric_names, calendar_dimensions, allow_calendar_dimensions) %}
     
     {# This macro exists to invalidate dimensions provided to the metric macro that are not viable 
     candidates based on metric definitions. This prevents downstream run issues when the sql 
     logic attempts to group by provided dimensions and fails because they don't exist for 
     one or more of the required metrics. #}
 
-    {# First we create an empty dictionary to store information as we loop through 
-    the dimension provided in the macro #}
-    {% set common_valid_dimension_dict = {} %}
     {% for dim in dimensions %}
-
-        {# We create a base key value pair in the dictionary that has a base value of 0.
-        This value is later used downstream to match the number of metrics in the full set
-        and only include the dimension if the counts match #}
-        {% do common_valid_dimension_dict.update({dim:0})%}
 
         {# Now we loop through all the metrics in the full set, which is all metrics, parent metrics,
         and expression metrics associated with the macro call #}
@@ -32,24 +24,9 @@
                 {% else %}
                     {% do exceptions.raise_compiler_error("The dimension " ~ dim ~ " is not part of the metric " ~ metric_relation.name ~ ". If the dimension is from the calendar table, please set allow_calendar_dimensions = True in the macro.") %}
                 {% endif %}
-            {% else %}
-                {# Here we update the value of the dictionary value to be + 1 to the previous value #}
-                {% set new_dim_value = common_valid_dimension_dict[dim] + 1 %}
-                {% do common_valid_dimension_dict.update({dim:new_dim_value})%}
             {% endif %}
 
         {%endfor%}
     {%endfor%}
-
-    {# We create an empty list that we later return at the end of the macro #}
-    {% set common_valid_dimension_list = [] %}
-    {# Now we iterate through the dictionary and create a list that contains the 
-    dimensions that have not raised compilation errors. #}
-    {% for key, value in common_valid_dimension_dict.items() %}
-            {% do common_valid_dimension_list.append(key) %}
-    {% endfor %}
-
-    {# Return the list!  #}
-    {% do return(common_valid_dimension_list) %}
 
 {% endmacro %}
