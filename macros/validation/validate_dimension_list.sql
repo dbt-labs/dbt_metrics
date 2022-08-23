@@ -1,4 +1,4 @@
-{% macro validate_dimension_list(dimensions, metric_names, calendar_dimensions, allow_calendar_dimensions) %}
+{% macro validate_dimension_list(dimensions, metric_names, calendar_dimensions) %}
     
     {# This macro exists to invalidate dimensions provided to the metric macro that are not viable 
     candidates based on metric definitions. This prevents downstream run issues when the sql 
@@ -19,7 +19,7 @@
             will raise an error. If it is missing in ANY of the metrics, it cannot be used in the 
             macro call. Only dimensions that are valid in all metrics are valid in the macro call #}
             {% if dim not in complete_dimension_list %}
-                {% if allow_calendar_dimensions %}
+                {% if dim not in calendar_dimensions  %}
                     {% do exceptions.raise_compiler_error("The dimension " ~ dim ~ " is not part of the metric " ~ metric_relation.name) %}
                 {% else %}
                     {% do exceptions.raise_compiler_error("The dimension " ~ dim ~ " is not part of the metric " ~ metric_relation.name ~ ". If the dimension is from a custom calendar table, please create the custom_calendar_dimension_list as shown in the README.") %}
