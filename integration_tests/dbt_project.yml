@@ -28,4 +28,4 @@ models:
 
 vars:
   dbt_metrics_calendar_model: custom_calendar
-  testing: fact_orders
+  custom_calendar_dimension_list: ["is_weekend"]

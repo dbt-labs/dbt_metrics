@@ -3,9 +3,12 @@
 <!--ts-->
 * [dbt_metrics](#dbt_metrics)
 * [About](#about)
-  * [Tenets](#tenets)
-  * [Installation Instructions](#installation-instructions)
-* [Usage](#usage)
+   * [Tenets](#tenets)
+   * [Installation Instructions](#installation-instructions)
+* [Macros](#macros)
+   * [Calculate](#calculate)
+      * [Migration from metric to calculate](#migration-from-metric-to-calculate)
+   * [Develop](#develop)
 * [Use cases and examples](#use-cases-and-examples)
    * [Jaffle Shop Metrics](#jaffle-shop-metrics)
    * [Inside of dbt Models](#inside-of-dbt-models)
@@ -25,7 +28,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Tue Jul 12 18:14:25 UTC 2022 -->
+<!-- Added by: runner, at: Tue Aug 23 15:13:02 UTC 2022 -->
 
 <!--te-->
 
@@ -50,11 +53,15 @@ Include in your `package.yml`
 ```yaml
 packages:
   - package: dbt-labs/metrics
-    version: 0.3.1
+    version: [">=0.3.0", "<0.4.0"]
 ```
 
-# Usage
-Access metrics [like any other macro](https://docs.getdbt.com/docs/building-a-dbt-project/jinja-macros#using-a-macro-from-a-package): 
+# Macros
+
+## Calculate
+The calculate macro performs the metric aggregation and returns the dataset based on the specifications
+of the metric definition and the options selected in the macro. It can be accessed [like any other macro](https://docs.getdbt.com/docs/building-a-dbt-project/jinja-macros#using-a-macro-from-a-package): 
+
 ```sql
 select * 
 from {{ metrics.calculate(
@@ -78,6 +85,46 @@ from {{ metrics.calculate(
 ```
 
 `start_date` and `end_date` are optional. When not provided, the spine will span all dates from oldest to newest in the metric's dataset. This default is likely to be correct in most cases, but you can use the arguments to either narrow the resulting table or expand it (e.g. if there was no new customers until 3 January but you want to include the first two days as well). Both values are inclusive.
+
+### Migration from metric to calculate
+In version `0.3.0` of the dbt_metrics package, the name of the main macro was changed from `metric` to `calculate`. This was done in order to better reflect the work being performed by the macro and match the semantic naming followed by the rest of the macros in the package (describing the action, not the output). Additionally, the `metric_name` input was changed to take a single `metric` function or multiple `metric` functions provided in a list.
+
+To correctly change this syntax, you must:
+- change `metrics.metric` to `metrics.calculate`.
+- change `metric_name` to `metric('name_here')` 
+  - alternatively use `[metric('name_here'),metric('another_name_here')]` for multiple metrics
+
+## Develop
+There are times when you want to test what a metric might look like before defining it in your project. In these cases you should use the `develop` metric, which allows you to provide a single metric in a contained yml in order to simulate what the metric might loook like if defined in your project.
+
+**Limitations:**
+- The provided yml can only contain one metric
+- The metric in question cannot be an expression metric
+
+```sql
+{% set my_metric_yml -%}
+
+metrics:
+  - name: develop_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    type: average
+    sql: discount_total
+    dimensions:
+      - had_discount
+      - order_country
+
+{%- endset %}
+
+select * 
+from {{ metrics.develop(
+        develop_yml=my_metric_yml,
+        grain='month'
+        )
+    }}
+```
 
 # Use cases and examples
 
@@ -177,7 +224,16 @@ vars:
 ```
 
 ### Dimensions from calendar tables
-You may want to aggregate metrics by a dimension in your custom calendar table, for example `is_weekend`. You can include this within the list of `dimensions` in the macro call **without** it needing to be defined in the metric definition. The macro will correctly recognize that it is coming from the calendar dimension and treat it accordingly.
+You may want to aggregate metrics by a dimension in your custom calendar table, for example `is_weekend`. You can include this within the list of `dimensions` in the macro call **without** it needing to be defined in the metric definition. 
+
+To do so, set a list variable at the project level called `custom_calendar_dimension_list`, as shown in the example below.
+
+```yml
+vars:
+  custom_calendar_dimension_list: ["is_weekend"]
+```
+
+The `is_weekend` field can now be used by your metrics. 
 
 ## Time Grains 
 The package protects against nonsensical secondary calculations, such as a month-to-date aggregate of data which has been rolled up to the quarter. If you customise your calendar (for example by adding a [4-5-4 retail calendar](https://calogica.com/sql/dbt/2018/11/15/retail-calendar-in-sql.html) month), you will need to override the [`get_grain_order()`](/macros/secondary_calculations/validate_grain_order.sql) macro. In that case, you might remove `month` and replace it with `month_4_5_4`. All date columns must be prefixed with `date_` in the table. Do not include the prefix when defining your metric, it will be added automatically.
