@@ -4,7 +4,7 @@
       - allow start/end dates on metrics. Maybe special-case "today"?
       - allow passing in a seed with targets for a metric's value
 */
-{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, initiated_by ,metric_tree, metric_definition=None) %}
+{%- macro get_metric_sql(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where, initiated_by, metric_tree, calendar_dimensions, non_calendar_dimensions, relevant_periods, metric_definition=None) %}
 
 {# ############
 VALIDATION AROUND METRIC VS CALCULATE VS DEVELOP
@@ -48,33 +48,6 @@ LETS SET SOME VARIABLES AND VALIDATE!
 {# Here we set the calendar table as a variable, which ensures the default overwritten if they include
 a custom calendar #}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) %}
-
-{% if is_develop_macro %}
-    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(metric_dimensions, dimensions) -%}
-    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions) -%}
-    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
-
-{% else %}
-    {# Here we are creating a list of all valid dimensions, as well as providing compilation
-    errors if there are any provided dimensions that don't work. #}
-    {% set common_valid_dimension_list = metrics.get_common_valid_dimension_list(dimensions, metric_tree['full_set']) %}
-
-    {# We have to break out calendar dimensions as their own list of acceptable dimensions. 
-    This is because of the date-spining. If we don't do this, it creates impossible combinations
-    of calendar dimension + base dimensions #}
-    {%- set calendar_dimensions = metrics.get_calendar_dimension_list(dimensions, common_valid_dimension_list) -%}
-
-    {# Additionally, we also have to restrict the dimensions coming in from the macro to 
-    no longer include those we've designated as calendar dimensions. That way they 
-    are correctly handled by the spining. We override the dimensions variable for 
-    cleanliness #}
-    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions) -%}
-
-    {# Finally we set the relevant periods, which is a list of all time grains that need to be contained
-    within the final dataset in order to accomplish base + secondary calc functionality. #}
-    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
-
-{% endif %}
 
 {# ############
 LET THE COMPOSITION BEGIN!

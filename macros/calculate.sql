@@ -18,6 +18,25 @@
     {% set metric_tree = metrics.get_metric_tree(metric_list) %}
 
     {# ############
+    SQL GEN VARIABLE SETTING - Gotta catch all those variables! Common dimension list is the pikachu
+    ############ #}
+
+    {# We have to break out calendar dimensions as their own list of acceptable dimensions. 
+    This is because of the date-spining. If we don't do this, it creates impossible combinations
+    of calendar dimension + base dimensions #}
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list() -%}
+
+    {# Additionally, we also have to restrict the dimensions coming in from the macro to 
+    no longer include those we've designated as calendar dimensions. That way they 
+    are correctly handled by the spining. We override the dimensions variable for 
+    cleanliness #}
+    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions, calendar_dimensions) -%}
+
+    {# Finally we set the relevant periods, which is a list of all time grains that need to be contained
+    within the final dataset in order to accomplish base + secondary calc functionality. #}
+    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+
+    {# ############
     VALIDATION - Make sure everything is good!
     ############ #}
 
@@ -41,6 +60,7 @@
 
     {% do metrics.validate_expression_metrics(metric_tree['full_set'])%}
 
+    {% do metrics.validate_dimension_list(dimensions, metric_tree['full_set'], calendar_dimensions) %}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Let there be window functions
@@ -70,7 +90,10 @@
         end_date=end_date,
         where=where,
         initiated_by='calculate',
-        metric_tree=metric_tree
+        metric_tree=metric_tree,
+        calendar_dimensions=calendar_dimensions,
+        non_calendar_dimensions=non_calendar_dimensions,
+        relevant_periods=relevant_periods
     ) %}
     ({{ sql }}) metric_subq
 {%- endmacro %}

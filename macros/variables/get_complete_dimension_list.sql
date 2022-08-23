@@ -1,13 +1,8 @@
-{% macro get_complete_dimension_list(metric) %}
+{% macro get_complete_dimension_list(metric, calendar_dimensions) %}
     
     {# Here we set the calendar as either being the default provided by the package
     or the variable provided in the project #}
-    {% set calendar_dims = dbt_utils.get_filtered_columns_in_relation(from=ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar"))) %}
-
-    {% set calendar_dimensions = [] %}
-    {% for dim in calendar_dims %}
-        {% do calendar_dimensions.append(dim | lower) %}
-    {% endfor %}
+    {% set calendar_dims = calendar_dimensions %}
 
     {# Here we are going to ensure that the metrics provided are accurate and that they are present 
     in either the metric definition or the default/custom calendar table #}

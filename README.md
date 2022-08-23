@@ -28,7 +28,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Thu Aug 18 14:11:59 UTC 2022 -->
+<!-- Added by: runner, at: Mon Aug 22 21:45:24 UTC 2022 -->
 
 <!--te-->
 
@@ -224,7 +224,16 @@ vars:
 ```
 
 ### Dimensions from calendar tables
-You may want to aggregate metrics by a dimension in your custom calendar table, for example `is_weekend`. You can include this within the list of `dimensions` in the macro call **without** it needing to be defined in the metric definition. The macro will correctly recognize that it is coming from the calendar dimension and treat it accordingly.
+You may want to aggregate metrics by a dimension in your custom calendar table, for example `is_weekend`. You can include this within the list of `dimensions` in the macro call **without** it needing to be defined in the metric definition. 
+
+To do so, set a list variable at the project level called `custom_calendar_dimension_list`, as shown in the example below.
+
+```yml
+vars:
+  custom_calendar_dimension_list: ["is_weekend"]
+```
+
+The `is_weekend` field can now be used by your metrics. 
 
 ## Time Grains 
 The package protects against nonsensical secondary calculations, such as a month-to-date aggregate of data which has been rolled up to the quarter. If you customise your calendar (for example by adding a [4-5-4 retail calendar](https://calogica.com/sql/dbt/2018/11/15/retail-calendar-in-sql.html) month), you will need to override the [`get_grain_order()`](/macros/secondary_calculations/validate_grain_order.sql) macro. In that case, you might remove `month` and replace it with `month_4_5_4`. All date columns must be prefixed with `date_` in the table. Do not include the prefix when defining your metric, it will be added automatically.

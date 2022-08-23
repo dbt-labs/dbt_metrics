@@ -11,11 +11,11 @@
         {%- do return("not execute") %}
     {%- endif %}
     
+    {% set develop_yml = fromyaml(develop_yml)%}
+
     {# ############
     VALIDATION OF PROVIDED YML - Gotta make sure the metric looks good!
     ############ #}
-
-    {% set develop_yml = fromyaml(develop_yml) %}
 
     {% if develop_yml["metrics"] | length > 1%}
         {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") %}
@@ -90,6 +90,14 @@
     {%- endfor %}
 
     {# ############
+    VARIABLES FOR SQL GEN - More variables we need for sql gen
+    ############ #}
+
+    {%- set calendar_dimensions = metrics.get_calendar_dimension_list() -%}
+    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions,calendar_dimensions) -%}
+    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
+
+    {# ############
     SQL GENERATION - Lets build that SQL!
     ############ #}
 
@@ -103,7 +111,10 @@
         where=where,
         initiated_by='develop',
         metric_definition=metric_definition,
-        metric_tree=metric_tree
-    ) %}
+        metric_tree=metric_tree,
+        calendar_dimensions=calendar_dimensions,
+        non_calendar_dimensions=non_calendar_dimensions,
+        relevant_periods=relevant_periods
+        ) %}
     ({{ sql }}) metric_subq
 {%- endmacro %}
