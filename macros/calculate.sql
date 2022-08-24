@@ -18,6 +18,27 @@
     {% set metric_tree = metrics.get_metric_tree(metric_list) %}
 
     {# ############
+    CREATING THE DICTIONARY
+    ############ #}
+
+    {% set metric_dictionary = {}%}
+
+    {% for metric in metric_list%}
+        {% do metric_dictionary.update({metric.name:{}})%}
+
+        {% set metric_name = metric.name%}
+        {% set metric_type = metric.type%}
+        {% set metric_sql = metric.sql%}
+        {% set metric_timestamp = metric.timestamp%}
+        {% set metric_time_grains = metric.time_grains%}
+        {% set metric_dimensions = metric.dimensions%}
+        {% set metric_filters = metric.filters%}
+
+    {% endfor %}
+
+    {% do log("Metric Dictionary: " ~ metric_dictionary, info=True) %}
+
+    {# ############
     SQL GEN VARIABLE SETTING - Gotta catch all those variables! Common dimension list is the pikachu
     ############ #}
 
