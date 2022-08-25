@@ -17,7 +17,7 @@
 
     {% if dict_metric.type != 'expression' %}
         {% do metrics_dictionary[metric].update({'metric_model_name':dict_metric.model.replace('"','\'').split('\'')[1]})%}
-        {% do metrics_dictionary[metric].update({'metric_model':metrics.get_model_relation(metrics_dictionary[metric]['metric_model_name'])}) %}
+        {% do metrics_dictionary[metric].update({'metric_model':metrics.get_model_relation(metrics_dictionary[metric]['metric_model_name'], metrics_dictionary[metric]['name'])}) %}
     {% endif %}
 
 {% endfor %}

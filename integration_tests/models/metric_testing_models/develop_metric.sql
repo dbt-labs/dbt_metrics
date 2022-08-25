@@ -2,7 +2,7 @@
 
 metrics:
   - name: develop_metric
-    model: ref('fact_orders')
+    model: ref('fact_orderss')
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]

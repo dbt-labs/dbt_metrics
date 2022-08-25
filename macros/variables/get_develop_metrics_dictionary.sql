@@ -12,7 +12,8 @@
     {% do metrics_dictionary[metric].update({'dimensions':metric_definition["dimensions"]})%}
     {% do metrics_dictionary[metric].update({'filters':metric_definition["filters"]})%}
     {% do metrics_dictionary[metric].update({'metric_model_name':metric_definition["model"].replace('"','\'').split('\'')[1]})%}
-    {% do metrics_dictionary[metric].update({'metric_model':metrics.get_model_relation(metrics_dictionary[metric]['metric_model_name'])}) %}
+    {% do metrics_dictionary[metric].update({'metric_model':metrics.get_model_relation(metrics_dictionary[metric]['metric_model_name'], metrics_dictionary[metric]["name"])}) %}
+
 {% endfor %}
 
 {% do return(metrics_dictionary) %}
