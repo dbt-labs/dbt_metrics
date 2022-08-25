@@ -77,4 +77,5 @@ class TestDevelopMetricDimension:
         results = run_dbt(["seed"])
 
         # initial run
-        results = run_dbt(["run"],expect_pass = False)
+        results = run_dbt(["run"],expect_pass = False) 
+        
