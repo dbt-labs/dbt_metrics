@@ -75,14 +75,14 @@
 
     {% set metric_list = [metric_definition["name"]] %}
     {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
-    {% set metric_type = metric_definition["type"]%}
+    {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree, metric_definition) %}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
     ############ #}
 
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {%- do metrics.validate_aggregate_coherence(metric_type, calc_config.aggregate) %}
+        {%- do metrics.validate_aggregate_coherence(metrics_dictionary[0]['type'], calc_config.aggregate) %}
     {%- endfor %}
 
     {%- for calc_config in secondary_calculations if calc_config.period %}
@@ -90,31 +90,19 @@
     {%- endfor %}
 
     {# ############
-    VARIABLES FOR SQL GEN - More variables we need for sql gen
-    ############ #}
-
-    {%- set calendar_dimensions = metrics.get_calendar_dimension_list() -%}
-    {%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions,calendar_dimensions) -%}
-    {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) %}
-
-    {# ############
     SQL GENERATION - Lets build that SQL!
     ############ #}
 
     {%- set sql = metrics.get_metric_sql(
-        metric_list=metric_list,
+        metrics_dictionary=metrics_dictionary,
         grain=grain,
         dimensions=dimensions,
         secondary_calculations=secondary_calculations,
         start_date=start_date,
         end_date=end_date,
         where=where,
-        initiated_by='develop',
-        metric_definition=metric_definition,
-        metric_tree=metric_tree,
-        calendar_dimensions=calendar_dimensions,
-        non_calendar_dimensions=non_calendar_dimensions,
-        relevant_periods=relevant_periods
+        metric_tree=metric_tree
         ) %}
     ({{ sql }}) metric_subq
+
 {%- endmacro %}

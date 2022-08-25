@@ -1,8 +1,8 @@
-{% macro gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods) %}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods)) }}
+{% macro gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) %}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary)) }}
 {% endmacro %}
 
-{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods) %}
+{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) %}
 
 {# This section is a hacky workaround to account for postgres changes #}
 {% set cte_numbers = []%}
@@ -96,8 +96,7 @@
             {%endif%}
                 {% for metric in ordered_expression_set%}
                     {% if ordered_expression_set[metric] == cte_number%}
-                        {%- set expression_metric = metrics.get_metric_relation(metric) -%}
-                        ,({{expression_metric.sql | replace(".metric_value","")}}) as {{expression_metric.name}}
+                        ,({{metrics_dictionary[metric]['sql'] | replace(".metric_value","")}}) as {{metrics_dictionary[metric]['name']}}
                     {% endif %}
                 {% endfor %}
             {% if loop.first %}
