@@ -56,53 +56,56 @@ up the composite metric. #}
 
 
     {{ metrics.build_metric_sql(
-        metrics_dictionary[metric_name]['name'], 
-        metrics_dictionary[metric_name]['type'], 
-        metrics_dictionary[metric_name]['sql'], 
-        metrics_dictionary[metric_name]['timestamp'], 
-        metrics_dictionary[metric_name]['filters'], 
-        metrics_dictionary[metric_name]['metric_model'], 
-        grain, 
-        non_calendar_dimensions, 
-        secondary_calculations, 
-        start_date, 
-        end_date,
-        calendar_tbl, 
-        relevant_periods,
-        calendar_dimensions,
-        dimensions_provided) 
-    }}
+            metric_name=metrics_dictionary[metric_name]['name'], 
+            metric_type=metrics_dictionary[metric_name]['type'], 
+            metric_sql=metrics_dictionary[metric_name]['sql'], 
+            metric_timestamp=metrics_dictionary[metric_name]['timestamp'], 
+            metric_filters=metrics_dictionary[metric_name]['filters'], 
+            metric_lookback=metrics_dictionary[metric_name]['lookback'], 
+            model=metrics_dictionary[metric_name]['metric_model'], 
+            grain=grain, 
+            dimensions=non_calendar_dimensions, 
+            secondary_calculations=secondary_calculations, 
+            start_date=start_date, 
+            end_date=end_date,
+            calendar_tbl=calendar_tbl, 
+            relevant_periods=relevant_periods,
+            calendar_dimensions=calendar_dimensions,
+            dimensions_provided=dimensions_provided) 
+        }}
 
 {% endfor %}
 
 {%- if metric_tree["full_set"]|length > 1 -%}
 
     {{ metrics.gen_joined_metrics_cte(
-        metric_tree["parent_set"], 
-        metric_tree["expression_set"], 
-        metric_tree["ordered_expression_set"], 
-        grain, 
-        non_calendar_dimensions, 
-        calendar_dimensions, 
-        secondary_calculations, 
-        relevant_periods,
-        metrics_dictionary ) 
-    }}
+            parent_set=metric_tree["parent_set"], 
+            expression_set=metric_tree["expression_set"], 
+            ordered_expression_set=metric_tree["ordered_expression_set"], 
+            grain=grain, 
+            dimensions=non_calendar_dimensions, 
+            calendar_dimensions=calendar_dimensions, 
+            secondary_calculations=secondary_calculations, 
+            relevant_periods=relevant_periods,
+            metrics_dictionary=metrics_dictionary ) 
+        }}
 
 {% endif %}
 
 {{ metrics.gen_secondary_calculation_cte(
-    metric_tree["base_set"], 
-    non_calendar_dimensions, 
-    grain, 
-    metric_tree["full_set"], 
-    secondary_calculations, 
-    calendar_dimensions) }}
+        base_set=metric_tree["base_set"], 
+        full_set=metric_tree["full_set"], 
+        dimensions=non_calendar_dimensions, 
+        grain=grain, 
+        secondary_calculations=secondary_calculations, 
+        calendar_dimensions=calendar_dimensions) 
+    }}
 
 {{ metrics.gen_final_cte(
-    metric_tree["base_set"], 
-    grain, 
-    metric_tree["full_set"], 
-    secondary_calculations,where) }}
+        metric_tree["base_set"], 
+        grain, 
+        metric_tree["full_set"], 
+        secondary_calculations,where) 
+    }}
 
 {% endmacro %}

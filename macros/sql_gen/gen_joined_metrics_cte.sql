@@ -1,8 +1,8 @@
-{% macro gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) %}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary)) }}
+{% macro gen_joined_metrics_cte(parent_set, expression_set, ordered_expression_set, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) %}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(parent_set, expression_set, ordered_expression_set, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary)) }}
 {% endmacro %}
 
-{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) %}
+{% macro default__gen_joined_metrics_cte(parent_set, expression_set, ordered_expression_set, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) %}
 
 {# This section is a hacky workaround to account for postgres changes #}
 {% set cte_numbers = []%}
@@ -25,10 +25,10 @@
 
         {% for calendar_dim in calendar_dimensions %}
             ,coalesce(
-            {% for metric_name in leaf_set %}
+            {% for metric_name in parent_set %}
                 {{metric_name}}__final.{{ calendar_dim }}
                 {% if not loop.last %},{% endif %}
-                {% if leaf_set | length == 1 %}
+                {% if parent_set | length == 1 %}
                     ,NULL
                 {% endif %}
             {% endfor %}
@@ -37,10 +37,10 @@
 
         {% for period in relevant_periods %}
             ,coalesce(
-            {% for metric_name in leaf_set %}
+            {% for metric_name in parent_set %}
                 {{metric_name}}__final.date_{{ period }}
                 {% if not loop.last %},{% endif %}
-                {% if leaf_set | length == 1 %}
+                {% if parent_set | length == 1 %}
                     ,NULL
                 {% endif %}
             {% endfor %}
@@ -50,23 +50,23 @@
 
         {% for dim in dimensions %}
             ,coalesce(
-            {% for metric_name in leaf_set %}
+            {% for metric_name in parent_set %}
                 {{metric_name}}__final.{{ dim }}
                 {% if not loop.last %},{% endif %}
-                {% if leaf_set | length == 1 %}
+                {% if parent_set | length == 1 %}
                     ,NULL
                 {% endif %}
             {% endfor %}
             ) as {{dim}}
         {%- endfor %}
 
-        {% for metric_name in leaf_set %}
+        {% for metric_name in parent_set %}
             ,nullif({{metric_name}},0) as {{metric_name}}
         {% endfor %}  
 
         from 
             {# Loop through leaf metric list #}
-            {% for metric_name in leaf_set %}
+            {% for metric_name in parent_set %}
                 {% if loop.first %}
                     {{metric_name}}__final
                 {% else %}
@@ -126,7 +126,7 @@
                 ,first_join_metrics.{{ dim }}
             {% endfor %}
 
-            {% for metric_name in leaf_set %}
+            {% for metric_name in parent_set %}
                 ,coalesce(first_join_metrics.{{metric_name}},0) as {{metric_name}}
             {% endfor %}  
 

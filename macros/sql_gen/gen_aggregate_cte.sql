@@ -1,8 +1,8 @@
-{% macro gen_aggregate_cte(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters,model,grain,dimensions,secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)) }}
+{% macro gen_aggregate_cte(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_lookback, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_lookback, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_aggregate_cte(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions) %}
+{% macro default__gen_aggregate_cte(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_lookback, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl,relevant_periods,calendar_dimensions) %}
 
     ,{{metric_name}}__aggregate as (
         {# This is the most important CTE. Instead of joining all relevant information
@@ -37,7 +37,32 @@
             {{ metrics.gen_primary_metric_aggregate(metric_type, 'property_to_aggregate') }} as {{ metric_name }},
             {{ dbt_utils.bool_or('metric_date_day is not null') }} as has_data
 
-        from ({{metrics.gen_base_query(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)}}) as base_query
+        from ({{metrics.gen_base_query(
+                    metric_name=metric_name,
+                    metric_type=metric_type, 
+                    metric_sql=metric_sql,
+                    metric_timestamp=metric_timestamp,
+                    metric_filters=metric_filters,
+                    metric_lookback=metric_lookback,
+                    model=model,
+                    grain=grain,
+                    dimensions=dimensions,
+                    secondary_calculations=secondary_calculations, 
+                    start_date=start_date, 
+                    end_date=end_date, 
+                    calendar_tbl=calendar_tbl, 
+                    relevant_periods=relevant_periods, 
+                    calendar_dimensions=calendar_dimensions)
+                    }}) as base_query
+        
+        where 1=1
+
+        {% if metric_lookback is string and metric_lookback != '' %}
+
+            and date_{{grain}} = date_day 
+
+        {% endif %}
+
         group by {{ metrics.gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
     )
 

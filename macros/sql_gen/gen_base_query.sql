@@ -1,8 +1,8 @@
-{% macro gen_base_query(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)) }}
+{% macro gen_base_query(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_lookback, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
+    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_lookback, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)) }}
 {% endmacro %}
 
-{% macro default__gen_base_query(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
+{% macro default__gen_base_query(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_lookback, model, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
 
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
@@ -11,6 +11,9 @@
         the value input into the macro is accurate #}
         cast({{metric_timestamp}} as date) as metric_date_day, -- timestamp field
         calendar_table.date_{{ grain }} as date_{{grain}},
+        {% if grain != 'day' %}
+            calendar_table.date_day as date_day,
+        {% endif %}
         {% if secondary_calculations | length > 0 %}
             {% for period in relevant_periods %}
                 calendar_table.date_{{ period }},
@@ -32,7 +35,14 @@
         {%- endif %}
     from {{ model }}
     left join {{calendar_tbl}} calendar_table
+    
+    {% if metric_lookback is string and metric_lookback != '' %}
+        on cast({{metric_timestamp}} as date) >= date_day - interval '{{metric_lookback}}'
+        and {{metric_timestamp}} <= date_day
+    {% else %}
         on cast({{metric_timestamp}} as date) = date_day
+    {% endif %}
+
     where 1=1
     
     -- metric start/end dates also applied here to limit incoming data

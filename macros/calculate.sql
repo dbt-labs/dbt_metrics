@@ -46,6 +46,8 @@
 
     {% do metrics.validate_dimension_list(dimensions, metric_tree['full_set']) %} 
 
+    {% do metrics.validate_lookback(metrics_dictionary, metric_tree['parent_set']) %} 
+
     {# ############
     SECONDARY CALCULATION VALIDATION - Let there be window functions
     ############ #}
