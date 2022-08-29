@@ -7,17 +7,17 @@
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
     select 
-        {# This section looks at the sql aspect of the metric and ensures that 
-        the value input into the macro is accurate #}
+        {#- This section looks at the sql aspect of the metric and ensures that 
+        the value input into the macro is accurate -#}
         cast({{metric_timestamp}} as date) as metric_date_day, -- timestamp field
         calendar_table.date_{{ grain }} as date_{{grain}},
-        {% if secondary_calculations | length > 0 %}
-            {% for period in relevant_periods %}
+        {% if secondary_calculations | length > 0 -%}
+            {%- for period in relevant_periods %}
                 calendar_table.date_{{ period }},
-            {% endfor %}
-        {% endif %}
+            {% endfor -%}
+        {%- endif -%}
         -- ALL DIMENSIONS
-        {% for dim in dimensions %}
+        {% for dim in dimensions -%}
             {{ dim }},
         {%- endfor %}
         {% for calendar_dim in calendar_dimensions %}

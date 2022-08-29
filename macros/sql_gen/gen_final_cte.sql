@@ -6,7 +6,7 @@
 
 {%- if full_set | length > 1 %}
 
-    {% if secondary_calculations | length > 0 %}
+    {%- if secondary_calculations | length > 0 -%}
 
         ,final as (
 
@@ -27,19 +27,19 @@
     select * from joined_metrics
 
     -- metric where clauses...
-    {% if where %}
+    {%- if where -%}
         where {{ where }}
-    {% endif %}
+    {%- endif -%}
 
-    {% endif %}
+    {%- endif %}
 
 {% else %}
 
-    {% if secondary_calculations | length > 0 %}
+    {%- if secondary_calculations | length > 0 %}
 
         -- single metric with secondary calculations
         
-        ,final as (
+        , final as (
 
             select
                 *
@@ -49,11 +49,11 @@
         select * from final 
 
         -- metric where clauses...
-        {% if where %}
+        {%- if where %}
         where {{ where }}
-        {% endif %}
+        {% endif -%}
 
-        {% else %}
+        {%- else -%}
 
         -- single metric without secondary calculations
 
@@ -61,9 +61,9 @@
 
 
         -- metric where clauses...
-        {% if where %}
+        {%- if where -%}
         where {{ where }}
-        {% endif %}
+        {%- endif -%}
 
     {% endif %}
 
