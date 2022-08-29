@@ -26,9 +26,9 @@
         {%- endfor %}
 
     from calendar
-    {%- if dimensions_provided -%}
+    {%- if dimensions_provided %}
     cross join {{metric_name}}__dims
-    {% endif %}
+    {%- endif %}
     group by {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
 
 )
