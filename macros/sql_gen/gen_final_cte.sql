@@ -1,6 +1,6 @@
-{% macro gen_final_cte(base_set,grain,full_set,secondary_calculations, where) %}
+{%- macro gen_final_cte(base_set,grain,full_set,secondary_calculations, where) -%}
     {{ return(adapter.dispatch('gen_final_cte', 'metrics')(base_set,grain,full_set,secondary_calculations, where)) }}
-{% endmacro %}
+{%- endmacro -%}
 
 {% macro default__gen_final_cte(base_set,grain,full_set,secondary_calculations, where) %}
 
@@ -8,30 +8,30 @@
 
     {%- if secondary_calculations | length > 0 -%}
 
-        ,final as (
+, final as (
 
-            select
-                *
-            from secondary_calculations
-        )
+    select
+        *
+    from secondary_calculations
+)
 
-        select * from final 
+select * from final 
 
-            -- metric where clauses...
-        {% if where %}
-        where {{ where }}
-        {% endif %}
+{# metric where clauses #}
+{%- if where %}
+where {{ where }}
+{%- endif %}
 
-    {% else %}
+{%- else -%}
 
-    select * from joined_metrics
+select * from joined_metrics
 
-    -- metric where clauses...
-    {%- if where -%}
-        where {{ where }}
-    {%- endif -%}
+{#- metric where clauses -#}
+{%- if where -%}
+    where {{ where }}
+{%- endif -%}
 
-    {%- endif %}
+{%- endif %}
 
 {% else %}
 
@@ -39,34 +39,34 @@
 
         -- single metric with secondary calculations
         
-        , final as (
+, final as (
 
-            select
-                *
-            from secondary_calculations
-        )
+    select
+        *
+    from secondary_calculations
+)
 
-        select * from final 
+select * from final 
 
-        -- metric where clauses...
-        {%- if where %}
-        where {{ where }}
-        {% endif -%}
+{#- metric where clauses -#}
+{%- if where -%}
+    where {{ where }}
+{%- endif -%}
 
-        {%- else -%}
+    {%- else -%}
 
-        -- single metric without secondary calculations
+-- single metric without secondary calculations
 
-        select * from {{base_set[0]}}__final 
+select * from {{base_set[0]}}__final 
 
 
-        -- metric where clauses...
-        {%- if where -%}
-        where {{ where }}
-        {%- endif -%}
+{#- metric where clauses -#}
+{%- if where -%}
+    where {{ where }}
+{%- endif -%}
 
-    {% endif %}
+{%- endif -%}
 
-{% endif %}
+{%- endif -%}
 
-{% endmacro %}
+{%- endmacro %}

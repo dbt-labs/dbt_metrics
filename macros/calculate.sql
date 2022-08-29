@@ -1,10 +1,10 @@
-{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) %}
+l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) %}
     {{ return(adapter.dispatch('calculate', 'metrics')(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
 {% endmacro %}
 
 
 {% macro default__calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) %}
-    -- Need this here, since the actual ref is nested within loops/conditions:
+    {#- Need this here, since the actual ref is nested within loops/conditions: -#}
     -- depends on: {{ ref(var('dbt_metrics_calendar_model', 'dbt_metrics_default_calendar')) }}
     {# ############
     VARIABLE SETTING - Creating the metric tree and making sure metric list is a list!
@@ -16,8 +16,8 @@
 
     {%- set metric_tree = metrics.get_metric_tree(metric_list) -%}
 
-    {# Here we are creating the metrics dictionary which contains all of the metric information needed for sql gen. #}
-    {% set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree) %}
+    {#- Here we are creating the metrics dictionary which contains all of the metric information needed for sql gen. -#}
+    {%- set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree) -%}
 
     {#- ############
     VALIDATION - Make sure everything is good!
@@ -43,22 +43,22 @@
 
     {%- do metrics.validate_expression_metrics(metric_tree['full_set']) -%}
 
-    {% do metrics.validate_dimension_list(dimensions, metric_tree['full_set']) %} 
+    {%- do metrics.validate_dimension_list(dimensions, metric_tree['full_set']) -%} 
 
     {#- ############
     SECONDARY CALCULATION VALIDATION - Let there be window functions
     ############ -#}
 
-    {% for metric in metric_list %}
-        {% set metric_type = metric.type%}
-        {% for calc_config in secondary_calculations if calc_config.aggregate %}
-            {% do metrics.validate_aggregate_coherence(metric_type, calc_config.aggregate) %}
-        {% endfor %}
-    {%endfor%}
+    {%- for metric in metric_list %}
+        {%- set metric_type = metric.type -%}
+        {%- for calc_config in secondary_calculations if calc_config.aggregate -%}
+            {%- do metrics.validate_aggregate_coherence(metric_type, calc_config.aggregate) -%}
+        {%- endfor -%}
+    {%- endfor -%}
 
-    {% for calc_config in secondary_calculations if calc_config.period %}
-        {% do metrics.validate_grain_order(grain, calc_config.period) %}
-    {% endfor %} 
+    {%- for calc_config in secondary_calculations if calc_config.period -%}
+        {%- do metrics.validate_grain_order(grain, calc_config.period) -%}
+    {%- endfor -%} 
 
     {#- ############
     SQL GENERATION - Lets build that SQL!
@@ -74,6 +74,6 @@
         where=where,
         metric_tree=metric_tree
     ) %}
-    ({{ sql }}) metric_subq 
+({{ sql }}) metric_subq 
 
-{% endmacro %}
+{%- endmacro -%}
