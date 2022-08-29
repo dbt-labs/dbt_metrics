@@ -81,21 +81,21 @@
     )
 
 {%- for cte_number in cte_numbers | unique | sort %}
-    {%- set previous_cte_number = cte_number - 1 %}
+    {% set previous_cte_number = cte_number - 1 %}
 , join_metrics__{{cte_number}} as (
 
     select 
-    {%- if loop.first %}
+    {% if loop.first %}
         first_join_metrics.*
-    {%- else -%}
+    {%- else %}
         join_metrics__{{previous_cte_number}}.*
     {%- endif %}
     {%- for metric in ordered_expression_set %}
-        {%- if ordered_expression_set[metric] == cte_number -%}
+        {%- if ordered_expression_set[metric] == cte_number %}
         ,({{metrics_dictionary[metric]['sql'] | replace(".metric_value","")}}) as {{metrics_dictionary[metric]['name']}}
         {%- endif -%}
     {%- endfor %}
-    {%- if loop.first %}
+    {% if loop.first %}
     from first_join_metrics
     {%- else %}
     from join_metrics__{{previous_cte_number}}
