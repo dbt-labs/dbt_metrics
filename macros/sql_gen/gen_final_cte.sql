@@ -27,8 +27,8 @@ where {{ where }}
 select * from joined_metrics
 
 {#- metric where clauses -#}
-{%- if where -%}
-    where {{ where }}
+{%- if where %}
+where {{ where }}
 {%- endif -%}
 
 {%- endif %}
@@ -49,8 +49,8 @@ select * from joined_metrics
 select * from final 
 
 {#- metric where clauses -#}
-{%- if where -%}
-    where {{ where }}
+{%- if where %}
+where {{ where }}
 {%- endif -%}
 
     {%- else -%}
@@ -61,8 +61,8 @@ select * from {{base_set[0]}}__final
 
 
 {#- metric where clauses -#}
-{%- if where -%}
-    where {{ where }}
+{%- if where %}
+where {{ where }}
 {%- endif -%}
 
 {%- endif -%}
