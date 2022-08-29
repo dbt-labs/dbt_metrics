@@ -1,9 +1,11 @@
-{% macro validate_dimension_list(dimensions, metric_names, calendar_dimensions) %}
+{% macro validate_dimension_list(dimensions, metric_names) %}
     
     {# This macro exists to invalidate dimensions provided to the metric macro that are not viable 
     candidates based on metric definitions. This prevents downstream run issues when the sql 
     logic attempts to group by provided dimensions and fails because they don't exist for 
     one or more of the required metrics. #}
+
+    {% set calendar_dimensions = var('custom_calendar_dimension_list',[]) %}
 
     {% for dim in dimensions %}
 
@@ -13,7 +15,7 @@
             {% set metric_relation = metric(metric_name)%}
             
             {# This macro returns a list of dimensions that are inclusive of calendar dimensions #}
-            {% set complete_dimension_list = metrics.get_complete_dimension_list(metric_relation, calendar_dimensions) %}
+            {% set complete_dimension_list = metric_relation.dimensions + calendar_dimensions %}
 
             {# If the dimension provided is not present in the loop metrics dimension list then we 
             will raise an error. If it is missing in ANY of the metrics, it cannot be used in the 
