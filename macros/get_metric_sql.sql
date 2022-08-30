@@ -13,20 +13,20 @@ LETS SET SOME VARIABLES AND VALIDATE!
 {#- We have to break out calendar dimensions as their own list of acceptable dimensions. 
 This is because of the date-spining. If we don't do this, it creates impossible combinations
 of calendar dimension + base dimensions -#}
-{%- set calendar_dimensions = var('custom_calendar_dimension_list',[]) -%}
+{%- set calendar_dimensions = metrics.get_calendar_dimensions(dimensions) -%}
 
 {#- Additionally, we also have to restrict the dimensions coming in from the macro to 
 no longer include those we've designated as calendar dimensions. That way they 
 are correctly handled by the spining. We override the dimensions variable for 
 cleanliness -#}
-{%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions, calendar_dimensions) -%}
+{%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions, var('custom_calendar_dimension_list',[])) -%}
 
 {#- Finally we set the relevant periods, which is a list of all time grains that need to be contained
 within the final dataset in order to accomplish base + secondary calc functionality. -#}
 {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) -%}
 
 {# Setting a variable to denote if the user has provided any dimensions #}
-{%- if dimensions | length > 0 -%}
+{%- if non_calendar_dimensions | length > 0 -%}
     {%- set dimensions_provided = true -%}
 {%- else -%}
     {%- set dimensions_provided = false -%}
