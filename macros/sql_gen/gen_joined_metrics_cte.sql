@@ -57,7 +57,7 @@
         ) as {{dim}}
     {%- endfor %}
     {% for metric_name in leaf_set %}
-        , nullif({{metric_name}},0) as {{metric_name}}
+        , {{metric_name}} as {{metric_name}}
     {%- endfor %}  
 
     from 
@@ -92,7 +92,16 @@
     {%- endif %}
     {%- for metric in ordered_expression_set %}
         {%- if ordered_expression_set[metric] == cte_number %}
-        ,({{metrics_dictionary[metric]['sql'] | replace(".metric_value","")}}) as {{metrics_dictionary[metric]['name']}}
+            {%- set metric_definition = metrics_dictionary[metric]['sql'] %}
+            {%- if "/" in metric_definition -%}
+                {%- set split_division_metric = metric_definition.split('/') -%}
+                {%- set dividend = split_division_metric[0] -%}
+                {%- set divisors = split_division_metric[1:] | list -%}
+                {%- set expression = dividend ~ " / nullif(" ~ divisors | join(", 0) / nullif(") ~ ", 0)" -%}
+            {%- else -%}
+                {%- set expression = metric_definition -%}
+            {%- endif %}
+        , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric]['name'] }}
         {%- endif -%}
     {%- endfor %}
     {% if loop.first %}
@@ -123,7 +132,7 @@
         , coalesce(first_join_metrics.{{metric_name}},0) as {{metric_name}}
         {%- endfor %}  
         {%- for metric in ordered_expression_set%}
-        , {{metric}}
+        , coalesce({{ metric }}, 0) as {{ metric }}
         {%- endfor %}
 
     from first_join_metrics
