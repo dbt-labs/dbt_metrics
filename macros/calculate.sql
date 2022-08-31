@@ -14,10 +14,10 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
         {%- set metric_list = [metric_list] -%}
     {%- endif -%}
 
-    {%- set metric_tree = metrics.get_metric_tree(metric_list) -%}
+    {%- set metric_tree = metrics.get_metric_tree(metric_list=metric_list) -%}
 
     {#- Here we are creating the metrics dictionary which contains all of the metric information needed for sql gen. -#}
-    {%- set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree) -%}
+    {%- set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree=metric_tree) -%}
 
     {#- ############
     VALIDATION - Make sure everything is good!
@@ -39,25 +39,24 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
         {%- do exceptions.raise_compiler_error("From v0.3.0 onwards, the where clause takes a single string, not a list of filters. Please fix to reflect this change") %}
     {%- endif -%}
 
-    {%- do metrics.validate_grain(grain, metric_tree['full_set'], metric_tree['base_set']) -%}
+    {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree) -%}
 
-    {%- do metrics.validate_expression_metrics(metric_tree['full_set']) -%}
+    {%- do metrics.validate_expression_metrics(metric_tree=metric_tree) -%}
 
-    {%- do metrics.validate_dimension_list(dimensions, metric_tree['full_set']) -%} 
+    {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree) -%} 
 
     {#- ############
     SECONDARY CALCULATION VALIDATION - Let there be window functions
     ############ -#}
 
-    {%- for metric in metric_list %}
-        {%- set metric_type = metric.type -%}
+    {%- for metric_name in metric_tree.base_set %}
         {%- for calc_config in secondary_calculations if calc_config.aggregate -%}
-            {%- do metrics.validate_aggregate_coherence(metric_type, calc_config.aggregate) -%}
+            {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[metric_name].type, calculation_aggregate=calc_config.aggregate) -%}
         {%- endfor -%}
     {%- endfor -%}
 
     {%- for calc_config in secondary_calculations if calc_config.period -%}
-        {%- do metrics.validate_grain_order(grain, calc_config.period) -%}
+        {%- do metrics.validate_grain_order(metric_grain=grain, calculation_grain=calc_config.period) -%}
     {%- endfor -%} 
 
     {#- ############
@@ -74,6 +73,7 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
         where=where,
         metric_tree=metric_tree
     ) %}
+
 ({{ sql }}) metric_subq 
 
 {%- endmacro -%}

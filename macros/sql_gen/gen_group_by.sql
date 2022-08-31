@@ -1,8 +1,8 @@
-{%- macro gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) -%}
-    {{ return(adapter.dispatch('gen_group_by', 'metrics')(grain,dimensions,calendar_dimensions,relevant_periods)) }}
+{%- macro gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) -%}
+    {{ return(adapter.dispatch('gen_group_by', 'metrics')(grain, dimensions, calendar_dimensions, relevant_periods)) }}
 {%- endmacro -%}
 
-{% macro default__gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) %}
+{% macro default__gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) %}
 
 {#- This model exclusively exists because dynamic group by counts based on range 
 were too funky when we hardcoded values for 1+1. So we're getting around it by

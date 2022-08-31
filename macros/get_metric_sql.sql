@@ -7,7 +7,12 @@
 {%- macro get_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, where, metric_tree) %}
 
 {#- ############
-LETS SET SOME VARIABLES AND VALIDATE!
+TODO: COMMENT AROUND how get metric sql doesn't do validation and that lives further upstream in calculate and develop
+############ -#}
+
+
+{#- ############
+LETS SET SOME VARIABLES!
 ############ -#}
 
 {#- We have to break out calendar dimensions as their own list of acceptable dimensions. 
@@ -42,7 +47,11 @@ LET THE COMPOSITION BEGIN!
 
 {#- First we add the calendar table - we only need to do this once no matter how many
 metrics there are -#}
-{{ metrics.gen_calendar_cte(calendar_tbl, start_date, end_date) }}
+{{ metrics.gen_calendar_cte(
+    calendar_tbl=calendar_tbl,
+    start_date=start_date, 
+    end_date=end_date) 
+    }}
 
 {#- Next we check if it is a composite metric or single metric by checking the length of the list -#}
 {#- This filter forms the basis of how we construct the SQL -#}
@@ -51,24 +60,18 @@ metrics there are -#}
 up the composite metric. -#}
 
 {%- for metric_name in metric_tree["parent_set"] -%}
-    {#- {% do log("Metric Dict:" ~ metrics_dictionary[metric_name], info=True)%} -#}
 
     {{ metrics.build_metric_sql(
-        metrics_dictionary[metric_name]['name'], 
-        metrics_dictionary[metric_name]['type'], 
-        metrics_dictionary[metric_name]['sql'], 
-        metrics_dictionary[metric_name]['timestamp'], 
-        metrics_dictionary[metric_name]['filters'], 
-        metrics_dictionary[metric_name]['metric_model'], 
-        grain, 
-        non_calendar_dimensions, 
-        secondary_calculations, 
-        start_date, 
-        end_date,
-        calendar_tbl, 
-        relevant_periods,
-        calendar_dimensions,
-        dimensions_provided) 
+        metric_dictionary=metrics_dictionary[metric_name], 
+        grain=grain, 
+        dimensions=non_calendar_dimensions, 
+        secondary_calculations=secondary_calculations, 
+        start_date=start_date, 
+        end_date=end_date,
+        calendar_tbl=calendar_tbl, 
+        relevant_periods=relevant_periods,
+        calendar_dimensions=calendar_dimensions,
+        dimensions_provided=dimensions_provided) 
     }}
 
 {%- endfor -%}
@@ -76,31 +79,30 @@ up the composite metric. -#}
 {%- if metric_tree["full_set"] | length > 1 -%}
 
     {{ metrics.gen_joined_metrics_cte(
-        metric_tree["parent_set"], 
-        metric_tree["expression_set"], 
-        metric_tree["ordered_expression_set"], 
-        grain, 
-        non_calendar_dimensions, 
-        calendar_dimensions, 
-        secondary_calculations, 
-        relevant_periods,
-        metrics_dictionary ) 
+        metric_tree=metric_tree,
+        grain=grain, 
+        dimensions=non_calendar_dimensions, 
+        calendar_dimensions=calendar_dimensions, 
+        secondary_calculations=secondary_calculations, 
+        relevant_periods=relevant_periods,
+        metrics_dictionary=metrics_dictionary ) 
     }}
 
 {% endif -%}
 
 {{ metrics.gen_secondary_calculation_cte(
-    metric_tree["base_set"], 
-    non_calendar_dimensions, 
-    grain, 
-    metric_tree["full_set"], 
-    secondary_calculations, 
-    calendar_dimensions) }}
+    metric_tree=metric_tree,
+    grain=grain, 
+    dimensions=non_calendar_dimensions, 
+    secondary_calculations=secondary_calculations, 
+    calendar_dimensions=calendar_dimensions) 
+    }}
 
 {{ metrics.gen_final_cte(
-    metric_tree["base_set"], 
-    grain, 
-    metric_tree["full_set"], 
-    secondary_calculations,where) }}
+    metric_tree=metric_tree,
+    grain=grain, 
+    secondary_calculations=secondary_calculations,
+    where=where) 
+    }}
 
 {% endmacro %}

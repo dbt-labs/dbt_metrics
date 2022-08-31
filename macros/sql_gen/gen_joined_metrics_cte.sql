@@ -1,16 +1,16 @@
-{%- macro gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) -%}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary)) }}
+{%- macro gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) -%}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary)) }}
 {%- endmacro -%}
 
-{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) %}
+{% macro default__gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) %}
 
 {#- This section is a hacky workaround to account for postgres changes -#}
 {%- set cte_numbers = [] -%}
 {%- set unique_cte_numbers = [] -%}
 {#- the cte numbers are more representative of node depth -#}
-{%- if expression_set | length > 0 -%}
-    {%- for metric in ordered_expression_set -%}
-        {%- do cte_numbers.append(ordered_expression_set[metric]) -%}
+{%- if metric_tree.expression_set | length > 0 -%}
+    {%- for metric_name in metric_tree.ordered_expression_set -%}
+        {%- do cte_numbers.append(metric_tree.ordered_expression_set[metric_name]) -%}
     {%- endfor -%}
     {%- for cte_num in cte_numbers|unique -%}
         {%- do unique_cte_numbers.append(cte_num) -%}
@@ -25,9 +25,9 @@
 
         {%- for calendar_dim in calendar_dimensions %}
         , coalesce(
-            {%- for metric_name in leaf_set %}
+            {%- for metric_name in metric_tree.parent_set %}
                 {{metric_name}}__final.{{ calendar_dim }}{%- if not loop.last -%},{% endif %}
-                {%- if leaf_set | length == 1 -%}
+                {%- if metric_tree.parent_set | length == 1 -%}
                 , NULL
                 {%- endif -%}
             {% endfor %}
@@ -36,9 +36,9 @@
 
     {%- for period in relevant_periods %}
         , coalesce(
-        {%- for metric_name in leaf_set %}
+        {%- for metric_name in metric_tree.parent_set %}
             {{metric_name}}__final.date_{{ period }} {%- if not loop.last -%},{% endif %}
-            {%- if leaf_set | length == 1 %}
+            {%- if metric_tree.parent_set | length == 1 %}
             , NULL
             {%- endif -%}
         {% endfor %}
@@ -48,21 +48,21 @@
 
     {%- for dim in dimensions %}
         , coalesce(
-        {%- for metric_name in leaf_set %}
+        {%- for metric_name in metric_tree.parent_set %}
             {{metric_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
-            {%- if leaf_set | length == 1 %}
+            {%- if metric_tree.parent_set | length == 1 %}
             , NULL
             {%- endif -%}
         {% endfor %}
         ) as {{dim}}
     {%- endfor %}
-    {% for metric_name in leaf_set %}
+    {% for metric_name in metric_tree.parent_set %}
         , nullif({{metric_name}},0) as {{metric_name}}
     {%- endfor %}  
 
     from 
         {#- Loop through leaf metric list -#}
-        {%- for metric_name in leaf_set -%}
+        {%- for metric_name in metric_tree.parent_set -%}
             {%- if loop.first %}
         {{ metric_name }}__final
             {%- else %}
@@ -90,9 +90,9 @@
     {%- else %}
         join_metrics__{{previous_cte_number}}.*
     {%- endif %}
-    {%- for metric in ordered_expression_set %}
-        {%- if ordered_expression_set[metric] == cte_number %}
-        ,({{metrics_dictionary[metric]['sql'] | replace(".metric_value","")}}) as {{metrics_dictionary[metric]['name']}}
+    {%- for metric in metric_tree.ordered_expression_set %}
+        {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
+        ,({{metrics_dictionary[metric].sql | replace(".metric_value","")}}) as {{metrics_dictionary[metric].name}}
         {%- endif -%}
     {%- endfor %}
     {% if loop.first %}
@@ -119,15 +119,15 @@
         {%- for dim in dimensions %}
         , first_join_metrics.{{ dim }}
         {%- endfor %}
-        {%- for metric_name in leaf_set %}
+        {%- for metric_name in metric_tree.parent_set %}
         , coalesce(first_join_metrics.{{metric_name}},0) as {{metric_name}}
         {%- endfor %}  
-        {%- for metric in ordered_expression_set%}
+        {%- for metric in metric_tree.ordered_expression_set%}
         , {{metric}}
         {%- endfor %}
 
     from first_join_metrics
-    {% if expression_set | length > 0 %}
+    {% if metric_tree.expression_set | length > 0 %}
     {#- TODO check sort logic -#}
     left join join_metrics__999
         using ( 
