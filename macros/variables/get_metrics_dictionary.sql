@@ -2,7 +2,7 @@
 
 {% set metrics_dictionary = {} %}
 
-{% for metric_name in metric_tree["full_set"] %}
+{% for metric_name in metric_tree.full_set %}
 
     {% set dict_metric = metrics.get_metric_relation(metric_name) %}
 
@@ -17,7 +17,7 @@
 
     {% if dict_metric.type != 'expression' %}
         {% set metric_model_name = metrics.get_metric_model_name(metric_model=dict_metric.model) %}
-        {% do metrics_dictionary[metric_name].update({'metric_model': metrics.get_model_relation(metric_model_name)}) %}
+        {% do metrics_dictionary[metric_name].update({'metric_model': metrics.get_model_relation(metric_model_name, metric_name)}) %}
     {% endif %}
 
 {% endfor %}
