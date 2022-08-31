@@ -5,28 +5,28 @@
 {% endmacro %}
 
 {% macro default__generate_secondary_calculation_alias(metric_name, calc_config, grain, is_multiple_metrics) %}
-    {% if calc_config.alias %}
-        {% if is_multiple_metrics %}
-            {% do return(metric_name ~ "_" ~ calc_config.alias) %}
-        {% else %}
+    {%- if calc_config.alias -%}
+        {%- if is_multiple_metrics -%}
+            {%- do return(metric_name ~ "_" ~ calc_config.alias) -%}
+        {%- else -%}
             {% do return(calc_config.alias) %}
-        {% endif %}
-    {% endif %}
+        {%- endif -%}
+    {%- endif -%}
     
-    {%- set calc_type = calc_config.calculation %}
-    {%- if calc_type == 'period_over_period' %}
-        {% if is_multiple_metrics %}
+    {%- set calc_type = calc_config.calculation -%}
+    {%- if calc_type == 'period_over_period' -%}
+        {%- if is_multiple_metrics -%}
             {%- do return(metric_name ~ "_" ~ calc_config.comparison_strategy ~ "_to_" ~ calc_config.interval ~ "_" ~ grain ~ "_ago") %}
-        {% else %}
+        {%- else -%}
             {%- do return(calc_config.comparison_strategy ~ "_to_" ~ calc_config.interval ~ "_" ~ grain ~ "_ago") %}
-        {% endif %}
+        {%- endif -%}
    
     {%- elif calc_type == 'rolling' %}
-        {% if is_multiple_metrics %}
+        {%- if is_multiple_metrics -%}
             {%- do return(metric_name ~ "_" ~ "rolling_" ~ calc_config.aggregate ~ "_" ~ calc_config.interval ~ "_" ~ grain) %}
-        {% else %}
+        {%- else -%}
             {%- do return("rolling_" ~ calc_config.aggregate ~ "_" ~ calc_config.interval ~ "_" ~ grain) %}
-        {% endif %}
+        {%- endif -%}
     
     {%- elif calc_type == 'period_to_date' %}
         {% if is_multiple_metrics %}
@@ -39,5 +39,5 @@
         {%- do exceptions.raise_compiler_error("Can't generate alias for unknown secondary calculation: " ~ calc_type ~ ". calc_config: " ~ calc_config) %}  
     {%- endif %}
 
-    {{- calc_sql }}
+    {{ calc_sql }}
 {% endmacro %}

@@ -48,7 +48,7 @@ select *
 from 
 {{ metrics.calculate(metric('base_sum_metric'), 
     grain='month',
-    dimensions=["is_not_weekend"]
+    dimensions=["is_weekend"]
     )
 }}
 """
@@ -74,7 +74,14 @@ metrics:
       - order_country
 """
 
-class TestInvalidCustomCalendarDimensionsMetric:
+# seeds/base_sum_metric__expected.csv
+base_sum_metric__expected_csv = """
+date_month,is_weekend,base_sum_metric
+2022-01-01,true,8
+2022-02-01,true,6
+""".lstrip()
+
+class TestCustomCalendarDimensionsMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -101,7 +108,8 @@ class TestInvalidCustomCalendarDimensionsMetric:
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
-            "fact_orders_source.csv": fact_orders_source_csv
+            "fact_orders_source.csv": fact_orders_source_csv,
+            "base_sum_metric__expected.csv": base_sum_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -118,7 +126,21 @@ class TestInvalidCustomCalendarDimensionsMetric:
     def test_build_completion(self,project,):
         # running deps to install package
         results = run_dbt(["deps"])
+
+        # seed seeds
         results = run_dbt(["seed"])
+        assert len(results) == 2
 
         # initial run
-        results = run_dbt(["run"],expect_pass = False)
+        results = run_dbt(["run"])
+        assert len(results) == 4
+
+        # breakpoint()
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == 1
+
+        # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]
