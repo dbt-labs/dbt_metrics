@@ -22,7 +22,7 @@
                 base_model.{{ dim }},
             {%- endfor %}
             {%- for calendar_dim in calendar_dimensions %}
-                base_model.{{ calendar_dim }},
+                calendar_table.{{ calendar_dim }},
             {%- endfor %}
             {%- if metric_dictionary.sql and metric_dictionary.sql | replace('*', '') | trim != '' %}
                 base_model.{{ metric_dictionary.sql }} as property_to_aggregate
