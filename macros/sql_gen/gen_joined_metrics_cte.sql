@@ -92,8 +92,8 @@
             {%- if loop.first %}
         {{ metric_name }}__final
             {%- else %}
-        left outer join {{metric_name}}__final
                 {%- if grain != 'all_time'%}
+        left outer join {{metric_name}}__final
                 using (
                     date_{{grain}}
                     {%- for calendar_dim in calendar_dimensions %}
@@ -103,8 +103,9 @@
                     , {{ dim }}
                     {%- endfor %}
                 )
-                {% else %}
+                {%- else -%}
                     {% if dimension_count != 0 %}
+        left outer join {{metric_name}}__final
                     using (
                         {%- for calendar_dim in calendar_dimensions %}
                             {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
@@ -115,6 +116,8 @@
                         , {{ dim }}
                         {%- endfor -%}
                     )
+                    {%- elif dimension_count == 0 %}
+        cross join {{metric_name}}__final
                     {%- endif %}
                 {%- endif %}
             {%- endif -%}
