@@ -173,10 +173,11 @@
             calendar_table.date_{{ period }},
                 {% endfor -%}
             {%- endif -%}
-            -- ALL DIMENSIONS
+
             {%- for dim in dimensions %}
                 base_model.{{ dim }},
             {%- endfor %}
+
             {%- for calendar_dim in calendar_dimensions %}
                 calendar_table.{{ calendar_dim }},
             {%- endfor %}
