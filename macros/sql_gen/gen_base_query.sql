@@ -10,7 +10,7 @@
         
             {# This section looks at the sql aspect of the metric and ensures that 
             the value input into the macro is accurate -#}
-            cast({{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
+            cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
             calendar_table.date_{{ grain }} as date_{{grain}},
             {% if secondary_calculations | length > 0 -%}
                 {%- for period in relevant_periods %}
@@ -19,22 +19,22 @@
             {%- endif -%}
             -- ALL DIMENSIONS
             {%- for dim in dimensions %}
-                {{ dim }},
+                base_model.{{ dim }},
             {%- endfor %}
             {%- for calendar_dim in calendar_dimensions %}
-                {{ calendar_dim }},
+                calendar_table.{{ calendar_dim }},
             {%- endfor %}
             {%- if metric_dictionary.sql and metric_dictionary.sql | replace('*', '') | trim != '' %}
-                {{ metric_dictionary.sql }} as property_to_aggregate
+                base_model.{{ metric_dictionary.sql }} as property_to_aggregate
             {%- elif metric_dictionary.dbt.type_numeric == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
             {%- else -%}
                 {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric_dictionary.name ~ "`") -%}  
             {%- endif %}
 
-        from {{ metric_dictionary.metric_model }}
+        from {{ metric_dictionary.metric_model }} base_model 
         left join {{calendar_tbl}} calendar_table
-            on cast({{metric_dictionary.timestamp}} as date) = date_day
+            on cast(base_model.{{metric_dictionary.timestamp}} as date) = calendar_table.date_day
 
         where 1=1
         
