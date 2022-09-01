@@ -19,8 +19,18 @@ remove the grain from the list of relevant periods so it isnt double counted -#}
     {%- set period_length = relevant_periods | length -%}
     {%- set total_length = dimension_length + period_length + calendar_dimension_length -%}
 
-    {% for number in range(1,total_length+2) -%}
-        {{ number }} {%- if not loop.last -%}, {% endif -%}
-    {% endfor -%}
+    {% if grain == 'all_time' %}
+        {% if total_length > 0%}
+            group by
+            {% for number in range(1,total_length+1) -%}
+                {{ number }} {%- if not loop.last -%}, {% endif -%}
+            {% endfor -%}
+        {% endif %}
+    {% else %}
+        group by
+        {% for number in range(1,total_length+2) -%}
+            {{ number }} {%- if not loop.last -%}, {% endif -%}
+        {% endfor -%}
+    {% endif %}
 
 {% endmacro %}

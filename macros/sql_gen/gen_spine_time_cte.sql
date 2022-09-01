@@ -29,7 +29,7 @@
     {%- if dimensions_provided %}
     cross join {{metric_name}}__dims
     {%- endif %}
-    group by {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
+    {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
 
 )
 {%- endmacro -%}

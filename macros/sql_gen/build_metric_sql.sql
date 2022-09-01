@@ -15,24 +15,29 @@
     ) }}
     
     {#- Adding conditional logic to exclude the unique combinations of dimensions if there are no dimensions -#}
-    {%- if dimensions_provided == true -%}
-    
-        {{ metrics.gen_dimensions_cte(
-            metric_name=metric_dictionary.name, 
-            dimensions=dimensions
-        ) }}
-    
-    {%- endif -%}
+    {%- if grain != "all_time" -%}
 
-    {{ metrics.gen_spine_time_cte(
-        metric_name=metric_dictionary.name, 
-        grain=grain, 
-        dimensions=dimensions, 
-        secondary_calculations=secondary_calculations, 
-        relevant_periods=relevant_periods, 
-        calendar_dimensions=calendar_dimensions, 
-        dimensions_provided=dimensions_provided
-    )}}
+        {%- if dimensions_provided == true -%}
+        
+            {{ metrics.gen_dimensions_cte(
+                metric_name=metric_dictionary.name, 
+                dimensions=dimensions
+            ) }}
+        
+        {%- endif -%}
+
+
+        {{ metrics.gen_spine_time_cte(
+            metric_name=metric_dictionary.name, 
+            grain=grain, 
+            dimensions=dimensions, 
+            secondary_calculations=secondary_calculations, 
+            relevant_periods=relevant_periods, 
+            calendar_dimensions=calendar_dimensions, 
+            dimensions_provided=dimensions_provided
+        )}}
+
+    {%- endif -%}
 
     {{ metrics.gen_metric_cte(
         metric_name=metric_dictionary.name, 
