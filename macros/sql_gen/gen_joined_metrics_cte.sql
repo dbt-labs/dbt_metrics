@@ -17,17 +17,16 @@
     {%- endfor -%}
 {%- endif -%}
 
-{% set dimension_count = dimensions | length + calendar_dimensions | length %}
+{% set dimension_count = (dimensions | length + calendar_dimensions | length) | int %}
 
 , first_join_metrics as (
 
     select
-        {% if grain != 'all_time'%}
+        {% if grain != 'all_time'-%}
         date_{{grain}}
-        {% else %}
+        {%- else -%}
         1 as comma_placeholder
-        {% endif %}
-
+        {%- endif -%}
         {%- for calendar_dim in calendar_dimensions %}
         , coalesce(
             {%- for metric_name in metric_tree.parent_set %}
@@ -94,30 +93,33 @@
         {{ metric_name }}__final
             {%- else %}
         left outer join {{metric_name}}__final
-                {% if not grain == 'all_time' and not dimension_count == 0 %}
-            using (
-                    {% if grain != 'all_time' %}
-                date_{{grain}}
-                    {% endif %}
+                {%- if grain != 'all_time'%}
+                using (
+                    date_{{grain}}
                     {%- for calendar_dim in calendar_dimensions %}
-                        {%- if loop.first and grain == 'all_time' %}
-                {{ calendar_dim }}
-                        {% else %}
-                , {{ calendar_dim }}
-                        {% endif %}
-                    {%- endfor %}
+                    , {{ calendar_dim }}
+                    {% endfor %}
                     {%- for dim in dimensions %}
-                        {%- if loop.first and grain == 'all_time' and calendar_dimensions | length == 0 %}
-                {{ dim }}
-                        {% else %}
-                , {{ dim }}
-                        {% endif %}
+                    , {{ dim }}
                     {%- endfor %}
                 )
-                {%- endif -%}
+                {% else %}
+                    {% if dimension_count != 0 %}
+                    using (
+                        {%- for calendar_dim in calendar_dimensions %}
+                            {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
+                        {% endfor -%}
+
+                        {%- for dim in dimensions %}
+                            {%- if loop.first and calendar_dimensions | length == 0 -%}{{ dim }}{%- endif -%}
+                        , {{ dim }}
+                        {%- endfor -%}
+                    )
+                    {%- endif %}
+                {%- endif %}
             {%- endif -%}
         {%- endfor %} 
-    )
+)
 
 {%- for cte_number in cte_numbers | unique | sort %}
     {% set previous_cte_number = cte_number - 1 %}
@@ -169,7 +171,7 @@
         {%- endfor %}  
         {%- for metric in metric_tree.ordered_expression_set%}
         , {{metric}}
-        {% endfor %}
+        {% endfor -%}
     
     {% if metric_tree.expression_set | length == 0 %}
     from first_join_metrics
