@@ -184,6 +184,9 @@ Constructor: `metrics.rolling(aggregate, interval [, alias])`
 # Customisation
 Most behaviour in the package can be overridden or customised.
 
+## All_Time Grain
+If you're interested in returning the metric value across all time (or ignoring time bounds all together), you can include the `all_time` grain in the metric definition and then use that in the `calculate` or `develop` macro. This will return a single value for the metric (more if dimensions included) and the start/end date range for that metric calculation.
+
 ## Expression Metrics 
 Version `0.3.0` of this package, and beyond, offer support for `expression` metrics! More information around this type can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
