@@ -39,7 +39,7 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
         {%- do exceptions.raise_compiler_error("From v0.3.0 onwards, the where clause takes a single string, not a list of filters. Please fix to reflect this change") %}
     {%- endif -%}
 
-    {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree) -%}
+    {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree, secondary_calculations=secondary_calculations) -%}
 
     {%- do metrics.validate_expression_metrics(metric_tree=metric_tree) -%}
 
