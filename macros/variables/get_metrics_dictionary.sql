@@ -14,6 +14,7 @@
     {% do metrics_dictionary[metric_name].update({'time_grains': dict_metric.time_grains})%}
     {% do metrics_dictionary[metric_name].update({'dimensions': dict_metric.dimensions})%}
     {% do metrics_dictionary[metric_name].update({'filters': dict_metric.filters})%}
+    {% do metrics_dictionary[metric_name].update({'window': dict_metric.window})%}
 
     {% if dict_metric.type != 'expression' %}
         {% set metric_model_name = metrics.get_metric_model_name(metric_model=dict_metric.model) %}

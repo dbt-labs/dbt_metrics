@@ -12,6 +12,11 @@
             the value input into the macro is accurate -#}
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
             calendar_table.date_{{ grain }} as date_{{grain}},
+            {# Including this here for window metric filters #}
+            {% if grain != 'day' %}
+            calendar_table.date_day as date_day,
+            {% endif %}
+
             {% if secondary_calculations | length > 0 -%}
                 {%- for period in relevant_periods %}
             calendar_table.date_{{ period }},
@@ -34,7 +39,13 @@
 
         from {{ metric_dictionary.metric_model }} base_model 
         left join {{calendar_tbl}} calendar_table
+
+        {% if metric_dictionary.window is string and metric_dictionary.window != '' %}
+            on cast(base_model.{{metric_dictionary.timestamp}} as date) >= calendar_table.date_day - interval '{{metric_dictionary.window}}'
+            and cast(base_model.{{metric_dictionary.timestamp}} as date) <= calendar_table.date_day
+        {% else %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) = calendar_table.date_day
+        {% endif %}
 
         where 1=1
         

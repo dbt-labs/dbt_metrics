@@ -1,4 +1,5 @@
 version: 2 
+
 metrics:
   - name: base_sum_metric
     model: ref('fact_orders')
@@ -10,3 +11,16 @@ metrics:
     dimensions:
       - had_discount
       - order_country
+
+  - name: base_sum_metric__14_day_window
+    model: ref('fact_orders')
+    label: Order Total ($)
+    timestamp: order_date
+    time_grains: [day, week,month]
+    window: 14 days
+    type: sum
+    sql: order_total
+    dimensions:
+      - had_discount
+      - order_country
+

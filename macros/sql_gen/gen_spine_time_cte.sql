@@ -18,7 +18,7 @@
         {% endif -%}
 
         {% for calendar_dim in calendar_dimensions %}
-        , {{ calendar_dim }}
+        , calendar.{{ calendar_dim }}
         {%- endfor %}
 
         {%- for dim in dimensions %}

@@ -41,6 +41,8 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
 
     {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree) -%}
 
+    {%- do metrics.validate_window(metrics_dictionary, metric_tree['parent_set']) -%}
+
     {%- do metrics.validate_expression_metrics(metric_tree=metric_tree) -%}
 
     {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree) -%} 

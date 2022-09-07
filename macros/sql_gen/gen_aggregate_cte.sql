@@ -49,6 +49,12 @@
                 calendar_dimensions=calendar_dimensions) }}
     ) as base_query
 
+    where 1=1
+
+    {% if metric_dictionary.window is string and metric_dictionary.window != '' %}
+    and date_{{grain}} = date_day 
+    {% endif %}
+
     group by {{ metrics.gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 )
 

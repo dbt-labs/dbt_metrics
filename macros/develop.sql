@@ -78,8 +78,10 @@
     {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, metric_definition=metric_definition) %}
 
     {# ############
-    SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
+     VALIDATION - Gotta make sure the secondary calcs are good!
     ############ #}
+
+    {%- do metrics.validate_window(metrics_dictionary, metric_tree['parent_set']) -%}
 
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
         {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].type, calculation_aggregate=calc_config.aggregate) %}
