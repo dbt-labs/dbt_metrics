@@ -46,7 +46,8 @@
                 end_date=end_date, 
                 calendar_tbl=calendar_tbl, 
                 relevant_periods=relevant_periods, 
-                calendar_dimensions=calendar_dimensions) }}
+                calendar_dimensions=calendar_dimensions
+                ) }}
     ) as base_query
 
     where 1=1
