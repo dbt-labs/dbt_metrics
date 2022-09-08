@@ -8,6 +8,7 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
+    custom_calendar_sql
 )
 
 # models/base_window_metric.sql
@@ -42,8 +43,22 @@ metrics:
       - order_country
 """
 
-# seeds/base_window_metric__expected.csv
-base_window_metric__expected_csv = """
+if os.getenv('dbt_target') == 'bigquery':
+    # seeds/base_window_metric__expected.csv
+    base_window_metric__expected_csv = """
+date_week,base_window_metric
+2022-01-09,2
+2022-01-16,3
+2022-01-23,4
+2022-01-30,4
+2022-02-06,2
+2022-02-13,2
+2022-02-20,3
+2022-02-27,2
+""".lstrip()
+else: 
+    # seeds/base_window_metric__expected.csv
+    base_window_metric__expected_csv = """
 date_week,base_window_metric
 2022-01-10,2
 2022-01-17,3
@@ -61,8 +76,12 @@ class TestBaseMonthWindowMetric:
     @pytest.fixture(scope="class")
     def project_config_update(self):
         return {
-          "name": "example",
-          "models": {"+materialized": "table"}
+            "name": "example",
+            "models": {"+materialized": "table"},
+            "vars":{
+                "dbt_metrics_calendar_model": "custom_calendar",
+                "custom_calendar_dimension_list": ["is_weekend"]
+            }
         }
 
     # install current repo as package
@@ -90,7 +109,8 @@ class TestBaseMonthWindowMetric:
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
             "base_window_metric.sql": base_window_metric_sql,
-            "base_window_metric.yml": base_window_metric_yml
+            "base_window_metric.yml": base_window_metric_yml,
+            "custom_calendar.sql":custom_calendar_sql
         }
 
     def test_build_completion(self,project,):
@@ -103,7 +123,7 @@ class TestBaseMonthWindowMetric:
 
         # initial run
         results = run_dbt(["run"])
-        assert len(results) == 3
+        assert len(results) == 4
 
         # test tests
         results = run_dbt(["test"]) # expect passing test
