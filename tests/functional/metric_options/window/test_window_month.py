@@ -58,65 +58,118 @@ date_week,base_window_metric
 2022-03-07,3
 """.lstrip()
 
-class TestBaseMonthWindowMetric:
+if os.getenv('dbt_target') == 'redshift':
+    class TestBaseMonthWindowMetric:
 
-    # configuration in dbt_project.yml
-    @pytest.fixture(scope="class")
-    def project_config_update(self):
-        return {
-            "name": "example",
-            "models": {"+materialized": "table"},
-            "vars":{
-                "dbt_metrics_calendar_model": "custom_calendar",
-                "custom_calendar_dimension_list": ["is_weekend"]
+        # configuration in dbt_project.yml
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+                "name": "example",
+                "models": {"+materialized": "table"},
+                "vars":{
+                    "dbt_metrics_calendar_model": "custom_calendar",
+                    "custom_calendar_dimension_list": ["is_weekend"]
+                }
             }
-        }
 
-    # install current repo as package
-    @pytest.fixture(scope="class")
-    def packages(self):
-        return {
-            "packages": [
-                {"local": os.getcwd()}
-                ]
-        }
+        # install current repo as package
+        @pytest.fixture(scope="class")
+        def packages(self):
+            return {
+                "packages": [
+                    {"local": os.getcwd()}
+                    ]
+            }
 
 
-    # everything that goes in the "seeds" directory
-    @pytest.fixture(scope="class")
-    def seeds(self):
-        return {
-            "fact_orders_source.csv": fact_orders_source_csv,
-            "base_window_metric__expected.csv": base_window_metric__expected_csv,
-        }
+        # everything that goes in the "seeds" directory
+        @pytest.fixture(scope="class")
+        def seeds(self):
+            return {
+                "fact_orders_source.csv": fact_orders_source_csv,
+                "base_window_metric__expected.csv": base_window_metric__expected_csv,
+            }
 
-    # everything that goes in the "models" directory
-    @pytest.fixture(scope="class")
-    def models(self):
-        return {
-            "fact_orders.sql": fact_orders_sql,
-            "fact_orders.yml": fact_orders_yml,
-            "base_window_metric.sql": base_window_metric_sql,
-            "base_window_metric.yml": base_window_metric_yml,
-            "custom_calendar.sql": custom_calendar_sql
-        }
+        # everything that goes in the "models" directory
+        @pytest.fixture(scope="class")
+        def models(self):
+            return {
+                "fact_orders.sql": fact_orders_sql,
+                "fact_orders.yml": fact_orders_yml,
+                "base_window_metric.sql": base_window_metric_sql,
+                "base_window_metric.yml": base_window_metric_yml,
+                "custom_calendar.sql": custom_calendar_sql
+            }
 
-    def test_build_completion(self,project,):
-        # running deps to install package
-        results = run_dbt(["deps"])
+        def test_build_completion(self,project,):
+            # running deps to install package
+            results = run_dbt(["deps"])
+            results = run_dbt(["seed"])
 
-        # seed seeds
-        results = run_dbt(["seed"])
-        assert len(results) == 2
+            # initial run
+            results = run_dbt(["run"],expect_pass = False)
 
-        # initial run
-        results = run_dbt(["run"])
-        assert len(results) == 4
+else: 
+    class TestBaseMonthWindowMetric:
 
-        # test tests
-        results = run_dbt(["test"]) # expect passing test
-        assert len(results) == 1
+        # configuration in dbt_project.yml
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+                "name": "example",
+                "models": {"+materialized": "table"},
+                "vars":{
+                    "dbt_metrics_calendar_model": "custom_calendar",
+                    "custom_calendar_dimension_list": ["is_weekend"]
+                }
+            }
 
-        # # # validate that the results include pass
-        result_statuses = sorted(r.status for r in results)
-        assert result_statuses == ["pass"]
+        # install current repo as package
+        @pytest.fixture(scope="class")
+        def packages(self):
+            return {
+                "packages": [
+                    {"local": os.getcwd()}
+                    ]
+            }
+
+
+        # everything that goes in the "seeds" directory
+        @pytest.fixture(scope="class")
+        def seeds(self):
+            return {
+                "fact_orders_source.csv": fact_orders_source_csv,
+                "base_window_metric__expected.csv": base_window_metric__expected_csv,
+            }
+
+        # everything that goes in the "models" directory
+        @pytest.fixture(scope="class")
+        def models(self):
+            return {
+                "fact_orders.sql": fact_orders_sql,
+                "fact_orders.yml": fact_orders_yml,
+                "base_window_metric.sql": base_window_metric_sql,
+                "base_window_metric.yml": base_window_metric_yml,
+                "custom_calendar.sql": custom_calendar_sql
+            }
+
+        def test_build_completion(self,project,):
+            # running deps to install package
+            results = run_dbt(["deps"])
+
+            # seed seeds
+            results = run_dbt(["seed"])
+            assert len(results) == 2
+
+            # initial run
+            results = run_dbt(["run"])
+            assert len(results) == 4
+
+            # test tests
+            results = run_dbt(["test"]) # expect passing test
+            assert len(results) == 1
+
+            # # # validate that the results include pass
+            result_statuses = sorted(r.status for r in results)
+            assert result_statuses == ["pass"]
