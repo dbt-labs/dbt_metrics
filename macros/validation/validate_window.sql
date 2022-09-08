@@ -10,6 +10,7 @@
                 and 'year' not in metrics_dictionary[metric_name]["window"] %}
 
                 {%- do exceptions.raise_compiler_error("The window " ~ metrics_dictionary[metric_name]["window"] ~ " contains a non-supported window time. Currently supported intervals are days, weeks, months, and years.") %}
+        
             {% endif %}
         {% endif %}
 

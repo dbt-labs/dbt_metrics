@@ -43,22 +43,8 @@ metrics:
       - order_country
 """
 
-if os.getenv('dbt_target') == 'bigquery':
-    # seeds/base_window_metric__expected.csv
-    base_window_metric__expected_csv = """
-date_week,base_window_metric
-2022-01-09,2
-2022-01-16,3
-2022-01-23,4
-2022-01-30,4
-2022-02-06,2
-2022-02-13,2
-2022-02-20,3
-2022-02-27,2
-""".lstrip()
-else: 
-    # seeds/base_window_metric__expected.csv
-    base_window_metric__expected_csv = """
+# seeds/base_window_metric__expected.csv
+base_window_metric__expected_csv = """
 date_week,base_window_metric
 2022-01-10,2
 2022-01-17,3
