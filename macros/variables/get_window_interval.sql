@@ -1,7 +1,7 @@
 {%- macro get_window_interval(metric_window) %}
 
     {% set re = modules.re %}
-    {% set number_pattern = '\d+' %}
+    {% set number_pattern = '([0-9]+)' %}
 
     {% set search_object = re.search(number_pattern,metric_window) %}
 
