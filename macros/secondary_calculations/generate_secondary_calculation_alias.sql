@@ -1,6 +1,6 @@
 {% macro generate_secondary_calculation_alias(metric_name, calc_config, grain, is_multiple_metrics) %}
 
-    {{ return(adapter.dispatch('generate_secondary_calculation_alias', 'metrics')(metric_name, calc_config, grain, is_multiple_metrics)) }}
+    {{ return(adapter.dispatch('generate_secondary_calculation_alias', 'dbt_metrics')(metric_name, calc_config, grain, is_multiple_metrics)) }}
 
 {% endmacro %}
 

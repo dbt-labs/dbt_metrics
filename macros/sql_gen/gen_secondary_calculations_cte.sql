@@ -1,5 +1,5 @@
 {%- macro gen_secondary_calculation_cte(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions) -%}
-    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'metrics')(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions)) }}
+    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'dbt_metrics')(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions)) }}
 {%- endmacro -%}
 
 {% macro default__gen_secondary_calculation_cte(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions) %}

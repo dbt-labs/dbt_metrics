@@ -1,5 +1,5 @@
 {%- macro gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) -%}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary)) }}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'dbt_metrics')(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary)) }}
 {%- endmacro -%}
 
 {% macro default__gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) %}

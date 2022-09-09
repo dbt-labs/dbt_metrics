@@ -11,10 +11,10 @@
     {%- endset-%}
     
     {%- if calc_config.comparison_strategy == 'difference' -%}
-        {% do return (adapter.dispatch('metric_comparison_strategy_difference', 'metrics')(metric_name, calc_sql)) %}
+        {% do return (adapter.dispatch('metric_comparison_strategy_difference', 'dbt_metrics')(metric_name, calc_sql)) %}
     
     {%- elif calc_config.comparison_strategy == 'ratio' -%}
-        {% do return (adapter.dispatch('metric_comparison_strategy_ratio', 'metrics')(metric_name, calc_sql)) %}
+        {% do return (adapter.dispatch('metric_comparison_strategy_ratio', 'dbt_metrics')(metric_name, calc_sql)) %}
     
     {-% else -%}
         {% do exceptions.raise_compiler_error("Bad comparison_strategy for period_over_period: " ~ calc_config.comparison_strategy ~ ". calc_config: " ~ calc_config) %}

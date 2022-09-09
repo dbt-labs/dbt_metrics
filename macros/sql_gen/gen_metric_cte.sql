@@ -1,5 +1,5 @@
 {%- macro gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions) -%}
-    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions)) }}
+    {{ return(adapter.dispatch('gen_metric_cte', 'dbt_metrics')(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions)) }}
 {%- endmacro -%}
 
 {%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions) %}
