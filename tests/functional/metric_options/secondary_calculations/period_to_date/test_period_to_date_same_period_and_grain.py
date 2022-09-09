@@ -14,10 +14,10 @@ from tests.functional.fixtures import (
 same_period_and_grain_sql = """
 select *
 from 
-{{ metrics.calculate(metric('same_period_and_grain'), 
+{{ dbt_metrics.calculate(metric('same_period_and_grain'), 
     grain='day',
     secondary_calculations=[
-        metrics.period_to_date(aggregate="sum", period="day",alias="day_sum")
+        dbt_metrics.period_to_date(aggregate="sum", period="day",alias="day_sum")
     ]
     )
 }}

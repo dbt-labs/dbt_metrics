@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 multi_dimension_expression_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('multi_dimension_expression_metric'), 
+{{ dbt_metrics.calculate(metric('multi_dimension_expression_metric'), 
     grain='month',
     dimensions=['had_discount','order_country']
     )

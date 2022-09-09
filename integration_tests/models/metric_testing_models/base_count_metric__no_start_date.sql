@@ -1,6 +1,6 @@
 select *
 from 
-{{ metrics.calculate(
+{{ dbt_metrics.calculate(
     metric('base_count_metric'), 
     grain='month', 
     end_date = '2021-03-01'

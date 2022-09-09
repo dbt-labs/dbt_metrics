@@ -65,19 +65,19 @@ of the metric definition and the options selected in the macro. It can be access
 
 ```sql
 select * 
-from {{ metrics.calculate(
+from {{ dbt_metrics.calculate(
     metric('new_customers'),
     grain='week',
     dimensions=['plan', 'country'],
     secondary_calculations=[
-        metrics.period_over_period(comparison_strategy="ratio", interval=1, alias="pop_1wk"),
-        metrics.period_over_period(comparison_strategy="difference", interval=1),
+        dbt_metrics.period_over_period(comparison_strategy="ratio", interval=1, alias="pop_1wk"),
+        dbt_metrics.period_over_period(comparison_strategy="difference", interval=1),
 
-        metrics.period_to_date(aggregate="average", period="month", alias="this_month_average"),
-        metrics.period_to_date(aggregate="sum", period="year"),
+        dbt_metrics.period_to_date(aggregate="average", period="month", alias="this_month_average"),
+        dbt_metrics.period_to_date(aggregate="sum", period="year"),
 
-        metrics.rolling(aggregate="average", interval=4, alias="avg_past_4wks"),
-        metrics.rolling(aggregate="min", interval=4)
+        dbt_metrics.rolling(aggregate="average", interval=4, alias="avg_past_4wks"),
+        dbt_metrics.rolling(aggregate="min", interval=4)
     ],
     start_date='2022-01-01',
     end_date='2022-12-31',
@@ -120,7 +120,7 @@ metrics:
 {%- endset %}
 
 select * 
-from {{ metrics.develop(
+from {{ dbt_metrics.develop(
         develop_yml=my_metric_yml,
         grain='month'
         )
@@ -159,7 +159,7 @@ Column aliases are [automatically generated](#secondary-calculation-column-alias
 
 ## Period over Period ([source](/macros/secondary_calculations/secondary_calculation_period_over_period.sql))
 
-Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias])`
+Constructor: `dbt_metrics.period_over_period(comparison_strategy, interval [, alias])`
 
 - `comparison_strategy`: How to calculate the delta between the two periods. One of [`"ratio"`, `"difference"`]. Required
 - `interval`: The number of periods to look back. Required
@@ -167,7 +167,7 @@ Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias]
 
 ## Period to Date ([source](/macros/secondary_calculations/secondary_calculation_period_to_date.sql))
 
-Constructor: `metrics.period_to_date(aggregate, period [, alias])`
+Constructor: `dbt_metrics.period_to_date(aggregate, period [, alias])`
 
 - `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
 - `period`: The time grain to aggregate to. One of [`"day"`, `"week"`, `"month"`, `"quarter"`, `"year"`]. Must be at equal or lesser granularity than the metric's grain (see [Time Grains](#time-grains) below). Required
@@ -175,7 +175,7 @@ Constructor: `metrics.period_to_date(aggregate, period [, alias])`
 
 ## Rolling ([source](/macros/secondary_calculations/secondary_calculation_rolling.sql))
 
-Constructor: `metrics.rolling(aggregate, interval [, alias])`
+Constructor: `dbt_metrics.rolling(aggregate, interval [, alias])`
 
 - `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
 - `interval`: The number of periods to look back. Required
@@ -197,7 +197,7 @@ There may be instances where you want to return multiple metrics within a single
 ```sql
   select *
   from 
-  {{ metrics.calculate(
+  {{ dbt_metrics.calculate(
       [metric('base_sum_metric'), metric('base_average_metric')], 
       grain='day', 
       dimensions=['had_discount']

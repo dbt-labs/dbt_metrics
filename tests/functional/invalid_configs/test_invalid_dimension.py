@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 invalid_dimension_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_dimension'), 
+{{ dbt_metrics.calculate(metric('invalid_dimension'), 
     grain='year',
     dimensions=['invalid_dimension_name']
     )
@@ -25,7 +25,7 @@ from
 multiple_metrics_sql = """
 select *
 from 
-{{ metrics.calculate(
+{{ dbt_metrics.calculate(
     [metric('base_sum_metric'), metric('base_count_metric')],
     grain='month',
     dimensions=['invalid_dimension_name']

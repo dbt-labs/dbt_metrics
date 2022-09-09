@@ -46,7 +46,7 @@ select * from final
 base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('base_sum_metric'), 
+{{ dbt_metrics.calculate(metric('base_sum_metric'), 
     grain='month',
     dimensions=["is_not_weekend"]
     )

@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 single_dimension_base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('single_dimension_base_sum_metric'), 
+{{ dbt_metrics.calculate(metric('single_dimension_base_sum_metric'), 
     grain='month',
     dimensions=['had_discount']
     )

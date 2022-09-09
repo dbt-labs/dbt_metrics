@@ -14,13 +14,13 @@ from tests.functional.fixtures import (
 rolling_sum_sql = """
 select *
 from 
-{{ metrics.calculate(metric('rolling_sum'), 
+{{ dbt_metrics.calculate(metric('rolling_sum'), 
     grain='month',
     secondary_calculations=[
-        metrics.rolling(aggregate="min", interval=2),
-        metrics.rolling(aggregate="max", interval=2),
-        metrics.rolling(aggregate="sum", interval=2),
-        metrics.rolling(aggregate="average", interval=2)
+        dbt_metrics.rolling(aggregate="min", interval=2),
+        dbt_metrics.rolling(aggregate="max", interval=2),
+        dbt_metrics.rolling(aggregate="sum", interval=2),
+        dbt_metrics.rolling(aggregate="average", interval=2)
     ]
     )
 }}
