@@ -4,7 +4,18 @@ metrics:
     model: ref('fact_orders')
     label: Order Total ($)
     timestamp: order_date
-    time_grains: [day, week,month]
+    time_grains: [day, week, month, all_time]
+    type: sum
+    sql: order_total
+    dimensions:
+      - had_discount
+      - order_country
+
+  - name: base_test_metric
+    model: ref('fact_orders')
+    label: Order Total ($)
+    timestamp: order_date
+    time_grains: [day, week, month, all_time]
     type: sum
     sql: order_total
     dimensions:

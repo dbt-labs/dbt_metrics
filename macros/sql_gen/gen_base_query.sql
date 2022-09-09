@@ -8,22 +8,26 @@
     calculate the metric.  #}
         select 
         
-            {# This section looks at the sql aspect of the metric and ensures that 
-            the value input into the macro is accurate -#}
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
+            
+            {%- if grain != 'all_time'%}
             calendar_table.date_{{ grain }} as date_{{grain}},
+            {% endif -%}
+
             {% if secondary_calculations | length > 0 -%}
                 {%- for period in relevant_periods %}
             calendar_table.date_{{ period }},
                 {% endfor -%}
             {%- endif -%}
-            -- ALL DIMENSIONS
+
             {%- for dim in dimensions %}
                 base_model.{{ dim }},
             {%- endfor %}
+
             {%- for calendar_dim in calendar_dimensions %}
                 calendar_table.{{ calendar_dim }},
             {%- endfor %}
+
             {%- if metric_dictionary.sql and metric_dictionary.sql | replace('*', '') | trim != '' %}
                 base_model.{{ metric_dictionary.sql }} as property_to_aggregate
             {%- elif metric_dictionary.dbt.type_numeric == 'count' -%}

@@ -18,6 +18,7 @@
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
 * [Customisation](#customisation)
+   * [All_Time Grain](#all_time-grain)
    * [Expression Metrics](#expression-metrics)
    * [Multiple Metrics](#multiple-metrics)
    * [Where Clauses](#where-clauses)
@@ -28,7 +29,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Tue Aug 23 15:13:02 UTC 2022 -->
+<!-- Added by: runner, at: Tue Sep  6 16:03:30 UTC 2022 -->
 
 <!--te-->
 
@@ -183,6 +184,9 @@ Constructor: `metrics.rolling(aggregate, interval [, alias])`
 
 # Customisation
 Most behaviour in the package can be overridden or customised.
+
+## All_Time Grain
+If you're interested in returning the metric value across all time (or ignoring time bounds all together), you can include the `all_time` grain in the metric definition and then use that in the `calculate` or `develop` macro. This will return a single value for the metric (more if dimensions included) and the start/end date range for that metric calculation.
 
 ## Expression Metrics 
 Version `0.3.0` of this package, and beyond, offer support for `expression` metrics! More information around this type can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
