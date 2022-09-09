@@ -18,17 +18,17 @@ LETS SET SOME VARIABLES!
 {#- We have to break out calendar dimensions as their own list of acceptable dimensions. 
 This is because of the date-spining. If we don't do this, it creates impossible combinations
 of calendar dimension + base dimensions -#}
-{%- set calendar_dimensions = metrics.get_calendar_dimensions(dimensions) -%}
+{%- set calendar_dimensions = dbt_metrics.get_calendar_dimensions(dimensions) -%}
 
 {#- Additionally, we also have to restrict the dimensions coming in from the macro to 
 no longer include those we've designated as calendar dimensions. That way they 
 are correctly handled by the spining. We override the dimensions variable for 
 cleanliness -#}
-{%- set non_calendar_dimensions = metrics.get_non_calendar_dimension_list(dimensions, var('custom_calendar_dimension_list',[])) -%}
+{%- set non_calendar_dimensions = dbt_metrics.get_non_calendar_dimension_list(dimensions, var('custom_calendar_dimension_list',[])) -%}
 
 {#- Finally we set the relevant periods, which is a list of all time grains that need to be contained
 within the final dataset in order to accomplish base + secondary calc functionality. -#}
-{%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) -%}
+{%- set relevant_periods = dbt_metrics.get_relevent_periods(grain, secondary_calculations) -%}
 
 {# Setting a variable to denote if the user has provided any dimensions #}
 {%- if non_calendar_dimensions | length > 0 -%}
@@ -47,7 +47,7 @@ LET THE COMPOSITION BEGIN!
 
 {#- First we add the calendar table - we only need to do this once no matter how many
 metrics there are -#}
-{{ metrics.gen_calendar_cte(
+{{ dbt_metrics.gen_calendar_cte(
     calendar_tbl=calendar_tbl,
     start_date=start_date, 
     end_date=end_date) 
@@ -61,7 +61,7 @@ up the composite metric. -#}
 
 {%- for metric_name in metric_tree["parent_set"] -%}
 
-    {{ metrics.build_metric_sql(
+    {{ dbt_metrics.build_metric_sql(
         metric_dictionary=metrics_dictionary[metric_name], 
         grain=grain, 
         dimensions=non_calendar_dimensions, 
@@ -78,7 +78,7 @@ up the composite metric. -#}
 
 {%- if metric_tree["full_set"] | length > 1 -%}
 
-    {{ metrics.gen_joined_metrics_cte(
+    {{ dbt_metrics.gen_joined_metrics_cte(
         metric_tree=metric_tree,
         grain=grain, 
         dimensions=non_calendar_dimensions, 
@@ -90,7 +90,7 @@ up the composite metric. -#}
 
 {% endif -%}
 
-{{ metrics.gen_secondary_calculation_cte(
+{{ dbt_metrics.gen_secondary_calculation_cte(
     metric_tree=metric_tree,
     grain=grain, 
     dimensions=non_calendar_dimensions, 
@@ -98,7 +98,7 @@ up the composite metric. -#}
     calendar_dimensions=calendar_dimensions) 
     }}
 
-{{ metrics.gen_final_cte(
+{{ dbt_metrics.gen_final_cte(
     metric_tree=metric_tree,
     grain=grain, 
     secondary_calculations=secondary_calculations,

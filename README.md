@@ -64,19 +64,19 @@ of the metric definition and the options selected in the macro. It can be access
 
 ```sql
 select * 
-from {{ metrics.calculate(
+from {{ dbt_metrics.calculate(
     metric('new_customers'),
     grain='week',
     dimensions=['plan', 'country'],
     secondary_calculations=[
-        metrics.period_over_period(comparison_strategy="ratio", interval=1, alias="pop_1wk"),
-        metrics.period_over_period(comparison_strategy="difference", interval=1),
+        dbt_metrics.period_over_period(comparison_strategy="ratio", interval=1, alias="pop_1wk"),
+        dbt_metrics.period_over_period(comparison_strategy="difference", interval=1),
 
-        metrics.period_to_date(aggregate="average", period="month", alias="this_month_average"),
-        metrics.period_to_date(aggregate="sum", period="year"),
+        dbt_metrics.period_to_date(aggregate="average", period="month", alias="this_month_average"),
+        dbt_metrics.period_to_date(aggregate="sum", period="year"),
 
-        metrics.rolling(aggregate="average", interval=4, alias="avg_past_4wks"),
-        metrics.rolling(aggregate="min", interval=4)
+        dbt_metrics.rolling(aggregate="average", interval=4, alias="avg_past_4wks"),
+        dbt_metrics.rolling(aggregate="min", interval=4)
     ],
     start_date='2022-01-01',
     end_date='2022-12-31',
@@ -85,6 +85,10 @@ from {{ metrics.calculate(
 ```
 
 `start_date` and `end_date` are optional. When not provided, the spine will span all dates from oldest to newest in the metric's dataset. This default is likely to be correct in most cases, but you can use the arguments to either narrow the resulting table or expand it (e.g. if there was no new customers until 3 January but you want to include the first two days as well). Both values are inclusive.
+
+### Renaming the package
+In version `0.4.0` we re-named the internal package name to reflect the name of the repository. `metrics` became `dbt_metrics`. This changes the syntax used in all metrics queries from:
+- `metrics.calculate` to `dbt_metrics.calculate`
 
 ### Migration from metric to calculate
 In version `0.3.0` of the dbt_metrics package, the name of the main macro was changed from `metric` to `calculate`. This was done in order to better reflect the work being performed by the macro and match the semantic naming followed by the rest of the macros in the package (describing the action, not the output). Additionally, the `metric_name` input was changed to take a single `metric` function or multiple `metric` functions provided in a list.
@@ -119,7 +123,7 @@ metrics:
 {%- endset %}
 
 select * 
-from {{ metrics.develop(
+from {{ dbt_metrics.develop(
         develop_yml=my_metric_yml,
         grain='month'
         )
@@ -158,7 +162,7 @@ Column aliases are [automatically generated](#secondary-calculation-column-alias
 
 ## Period over Period ([source](/macros/secondary_calculations/secondary_calculation_period_over_period.sql))
 
-Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias])`
+Constructor: `dbt_metrics.period_over_period(comparison_strategy, interval [, alias])`
 
 - `comparison_strategy`: How to calculate the delta between the two periods. One of [`"ratio"`, `"difference"`]. Required
 - `interval`: The number of periods to look back. Required
@@ -166,7 +170,7 @@ Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias]
 
 ## Period to Date ([source](/macros/secondary_calculations/secondary_calculation_period_to_date.sql))
 
-Constructor: `metrics.period_to_date(aggregate, period [, alias])`
+Constructor: `dbt_metrics.period_to_date(aggregate, period [, alias])`
 
 - `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
 - `period`: The time grain to aggregate to. One of [`"day"`, `"week"`, `"month"`, `"quarter"`, `"year"`]. Must be at equal or lesser granularity than the metric's grain (see [Time Grains](#time-grains) below). Required
@@ -174,7 +178,7 @@ Constructor: `metrics.period_to_date(aggregate, period [, alias])`
 
 ## Rolling ([source](/macros/secondary_calculations/secondary_calculation_rolling.sql))
 
-Constructor: `metrics.rolling(aggregate, interval [, alias])`
+Constructor: `dbt_metrics.rolling(aggregate, interval [, alias])`
 
 - `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
 - `interval`: The number of periods to look back. Required
@@ -193,7 +197,7 @@ There may be instances where you want to return multiple metrics within a single
 ```sql
   select *
   from 
-  {{ metrics.calculate(
+  {{ dbt_metrics.calculate(
       [metric('base_sum_metric'), metric('base_average_metric')], 
       grain='day', 
       dimensions=['had_discount']

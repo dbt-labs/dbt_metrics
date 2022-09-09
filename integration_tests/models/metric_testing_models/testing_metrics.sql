@@ -1,6 +1,6 @@
 select *
 from 
-{{ metrics.calculate(metric('base_count_metric'), 
+{{ dbt_metrics.calculate(metric('base_count_metric'), 
     grain='week'
     )
 }}

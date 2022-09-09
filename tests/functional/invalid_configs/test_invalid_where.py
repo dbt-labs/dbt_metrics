@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 invalid_where_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_where'), 
+{{ dbt_metrics.calculate(metric('invalid_where'), 
     grain='month',
     dimensions=['had_discount'],
     where="order_country='Japan'"

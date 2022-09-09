@@ -1,6 +1,6 @@
 select *
 from 
-{{ metrics.calculate(
+{{ dbt_metrics.calculate(
     metric('expression_metric'), 
     grain='day', 
     start_date = '2022-01-01',

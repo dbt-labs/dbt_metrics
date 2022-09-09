@@ -4,7 +4,7 @@
 
 {% for metric_name in metric_tree.full_set %}
 
-    {% set dict_metric = metrics.get_metric_relation(metric_name) %}
+    {% set dict_metric = dbt_metrics.get_metric_relation(metric_name) %}
 
     {% do metrics_dictionary.update({metric_name:{}})%}
     {% do metrics_dictionary[metric_name].update({'name': dict_metric.name})%}
@@ -16,8 +16,8 @@
     {% do metrics_dictionary[metric_name].update({'filters': dict_metric.filters})%}
 
     {% if dict_metric.type != 'expression' %}
-        {% set metric_model_name = metrics.get_metric_model_name(metric_model=dict_metric.model) %}
-        {% do metrics_dictionary[metric_name].update({'metric_model': metrics.get_model_relation(metric_model_name, metric_name)}) %}
+        {% set metric_model_name = dbt_metrics.get_metric_model_name(metric_model=dict_metric.model) %}
+        {% do metrics_dictionary[metric_name].update({'metric_model': dbt_metrics.get_model_relation(metric_model_name, metric_name)}) %}
     {% endif %}
 
 {% endfor %}

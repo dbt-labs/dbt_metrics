@@ -22,7 +22,7 @@ easier for not having to update the working secondary calc logic -#}
             {%- for metric_name in metric_tree.base_set -%}
 
                 {%- for calc_config in secondary_calculations %}
-        , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) }} as {{ metrics.generate_secondary_calculation_alias(metric_name, calc_config, grain, true) }}
+        , {{ dbt_metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) }} as {{ dbt_metrics.generate_secondary_calculation_alias(metric_name, calc_config, grain, true) }}
 
                 {% endfor -%}
 
@@ -31,7 +31,7 @@ easier for not having to update the working secondary calc logic -#}
         {%- else -%}
 
             {%- for calc_config in secondary_calculations %}
-        , {{ metrics.perform_secondary_calculation(metric_tree.base_set, grain, dimensions, calc_config) }} as {{ metrics.generate_secondary_calculation_alias(base_set,calc_config, grain, false) }}
+        , {{ dbt_metrics.perform_secondary_calculation(metric_tree.base_set, grain, dimensions, calc_config) }} as {{ dbt_metrics.generate_secondary_calculation_alias(base_set,calc_config, grain, false) }}
 
             {%- endfor -%}
 

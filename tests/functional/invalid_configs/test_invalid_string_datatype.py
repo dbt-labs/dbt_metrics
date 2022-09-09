@@ -16,7 +16,7 @@ from tests.functional.fixtures import (
 max_string_invalid_datatype_sql = """
 select *
 from 
-{{ metrics.calculate(metric('max_string_invalid_datatype'), 
+{{ dbt_metrics.calculate(metric('max_string_invalid_datatype'), 
     grain='day'
     )
 }}

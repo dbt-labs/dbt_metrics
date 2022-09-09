@@ -14,10 +14,10 @@ from tests.functional.fixtures import (
 invalid_period_to_date_average_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_period_to_date_average'), 
+{{ dbt_metrics.calculate(metric('invalid_period_to_date_average'), 
     grain='month',
     secondary_calculations=[
-        metrics.period_to_date(aggregate="average", period="year", alias="this_year_average")
+        dbt_metrics.period_to_date(aggregate="average", period="year", alias="this_year_average")
     ]
     )
 }}

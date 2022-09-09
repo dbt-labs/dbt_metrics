@@ -19,7 +19,7 @@
 
     {# We define parent nodes as being the parent nodes that begin with metric, which lets
     us filter out model nodes #}
-    {%- set parent_metrics = metrics.get_metric_unique_id_list(metric) -%}
+    {%- set parent_metrics = dbt_metrics.get_metric_unique_id_list(metric) -%}
 
     {# We set an if condition based on if parent nodes. If there are none, then this metric
     is a leaf node and any recursive loop should end #}
@@ -45,9 +45,9 @@
                 with that metric information. You may be wondering, why are you using parent_id? Doesn't 
                 the DAG always go from parent to child? Normally, yes! With this, no! We're reversing the 
                 DAG and going up to parents to find the leaf nodes that are really parent nodes. #}
-                {%- set new_parent = metrics.get_metric_relation(parent_id) -%}
+                {%- set new_parent = dbt_metrics.get_metric_relation(parent_id) -%}
 
-                {%- set metric_tree =  metrics.update_metric_tree(new_parent,metric_tree,metric_count) -%}
+                {%- set metric_tree =  dbt_metrics.update_metric_tree(new_parent,metric_tree,metric_count) -%}
 
             {%- endfor -%}
         

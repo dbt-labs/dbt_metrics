@@ -14,13 +14,13 @@ from tests.functional.fixtures import (
 period_to_date_count_distinct_sql = """
 select *
 from 
-{{ metrics.calculate(metric('period_to_date_count_distinct'), 
+{{ dbt_metrics.calculate(metric('period_to_date_count_distinct'), 
     grain='month',
     secondary_calculations=[
-        metrics.period_to_date(aggregate="min", period="year", alias="this_year_min"),
-        metrics.period_to_date(aggregate="max", period="year"),
-        metrics.period_to_date(aggregate="sum", period="year"),
-        metrics.period_to_date(aggregate="average", period="year"),
+        dbt_metrics.period_to_date(aggregate="min", period="year", alias="this_year_min"),
+        dbt_metrics.period_to_date(aggregate="max", period="year"),
+        dbt_metrics.period_to_date(aggregate="sum", period="year"),
+        dbt_metrics.period_to_date(aggregate="average", period="year"),
     ]
     )
 }}

@@ -34,10 +34,10 @@
         
         {#- This line performs the relevant aggregation by calling the 
         gen_primary_metric_aggregate macro. Take a look at that one if you're curious -#}
-        {{ metrics.gen_primary_metric_aggregate(metric_dictionary.type, 'property_to_aggregate') }} as {{ metric_dictionary.name }},
+        {{ dbt_metrics.gen_primary_metric_aggregate(metric_dictionary.type, 'property_to_aggregate') }} as {{ metric_dictionary.name }},
         {{ dbt_utils.bool_or('metric_date_day is not null') }} as has_data
 
-    from ({{ metrics.gen_base_query(
+    from ({{ dbt_metrics.gen_base_query(
                 metric_dictionary=metric_dictionary,
                 grain=grain, 
                 dimensions=dimensions, 
@@ -49,7 +49,7 @@
                 calendar_dimensions=calendar_dimensions) }}
     ) as base_query
 
-    group by {{ metrics.gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
+    group by {{ dbt_metrics.gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 )
 
 {%- endmacro -%}

@@ -14,12 +14,12 @@ from tests.functional.fixtures import (
 period_to_date_expression_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('period_to_date_expression_metric'), 
+{{ dbt_metrics.calculate(metric('period_to_date_expression_metric'), 
     grain='month',
     secondary_calculations=[
-        metrics.period_to_date(aggregate="min", period="year", alias="this_year_min"),
-        metrics.period_to_date(aggregate="max", period="year"),
-        metrics.period_to_date(aggregate="sum", period="year")
+        dbt_metrics.period_to_date(aggregate="min", period="year", alias="this_year_min"),
+        dbt_metrics.period_to_date(aggregate="max", period="year"),
+        dbt_metrics.period_to_date(aggregate="sum", period="year")
     ]
     )
 }}

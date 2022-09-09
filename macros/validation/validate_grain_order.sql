@@ -1,5 +1,5 @@
 {% macro validate_grain_order(metric_grain, calculation_grain) %}
-    {% set grains = metrics.get_grain_order() %}
+    {% set grains = dbt_metrics.get_grain_order() %}
     
     {% if metric_grain not in grains or calculation_grain not in grains %}
         {% set comma = joiner(", ") %}

@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 multi_dimension_base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('multi_dimension_base_sum_metric'), 
+{{ metdbt_metricsrics.calculate(metric('multi_dimension_base_sum_metric'), 
     grain='month',
     dimensions=['had_discount','order_country']
     )
