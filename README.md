@@ -189,6 +189,11 @@ Constructor: `dbt_metrics.rolling(aggregate, interval [, alias])`
 # Customisation
 Most behaviour in the package can be overridden or customised.
 
+## Window Periods 
+Version `0.4.0` of this package, and beyond, offers support for the `window` attribute of the metric definition. This alters the underlying query to allow the metric definition to contain a window of time, such as the past 14 days or the past 3 months.
+
+More information can be found in the [`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+
 ## Derived Metrics 
 Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this calculation method can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
