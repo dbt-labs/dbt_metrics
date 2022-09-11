@@ -8,28 +8,33 @@
     calculate the metric.  #}
         select 
         
-            {# This section looks at the sql aspect of the metric and ensures that 
-            the value input into the macro is accurate -#}
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
+            
+            {%- if grain != 'all_time'%}
+            calendar_table.date_{{ grain }} as date_{{grain}},
+            {% endif -%}
+
             {% if grain != 'day' %}
             calendar_table.date_day as window_filter_date,
             {% endif %}
-            calendar_table.date_{{ grain }} as date_{{grain}},
+
             {% if secondary_calculations | length > 0 -%}
                 {%- for period in relevant_periods %}
             calendar_table.date_{{ period }},
                 {% endfor -%}
             {%- endif -%}
-            -- ALL DIMENSIONS
+
             {%- for dim in dimensions %}
                 base_model.{{ dim }},
             {%- endfor %}
+
             {%- for calendar_dim in calendar_dimensions %}
                 calendar_table.{{ calendar_dim }},
             {%- endfor %}
+
             {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
                 base_model.{{ metric_dictionary.expression }} as property_to_aggregate
-            {%- elif metric_dictionary.calculation_method == 'count' -%}
+            {%- elif metric_dictionary.calculation_type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
             {%- else -%}
                 {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric_dictionary.name ~ "`") -%}  
@@ -71,7 +76,6 @@
 
 {%- endmacro -%}
 
-
 {% macro bigquery__gen_base_query(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
 
     {# This is the "base" CTE which selects the fields we need to correctly 
@@ -81,13 +85,13 @@
             {# This section looks at the sql aspect of the metric and ensures that 
             the value input into the macro is accurate -#}
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
+            
+            {%- if grain != 'all_time'%}
+            calendar_table.date_{{ grain }} as date_{{grain}},
+            {% endif -%}
+
             {% if grain != 'day' %}
             calendar_table.date_day as window_filter_date,
-            {% endif %}
-            calendar_table.date_{{ grain }} as date_{{grain}},
-            {# Including this here for window metric filters #}
-            {% if grain != 'day' %}
-            calendar_table.date_day as date_day,
             {% endif %}
 
             {% if secondary_calculations | length > 0 -%}
@@ -155,13 +159,13 @@
             {# This section looks at the sql aspect of the metric and ensures that 
             the value input into the macro is accurate -#}
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
+            
+            {%- if grain != 'all_time'%}
+            calendar_table.date_{{ grain }} as date_{{grain}},
+            {% endif -%}
+            
             {% if grain != 'day' %}
             calendar_table.date_day as window_filter_date,
-            {% endif %}
-            calendar_table.date_{{ grain }} as date_{{grain}},
-            {# Including this here for window metric filters #}
-            {% if grain != 'day' %}
-            calendar_table.date_day as date_day,
             {% endif %}
 
             {% if secondary_calculations | length > 0 -%}
