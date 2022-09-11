@@ -10,11 +10,11 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/single_dimension_expression_metric.sql
-single_dimension_expression_metric_sql = """
+# models/single_dimension_derived_metric.sql
+single_dimension_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('single_dimension_expression_metric'), 
+{{ dbt_metrics.calculate(metric('single_dimension_derived_metric'), 
     grain='month',
     dimensions=['had_discount']
     )
@@ -37,36 +37,36 @@ metrics:
       - order_country
 """
 
-# models/single_dimension_expression_metric.yml
-single_dimension_expression_metric_yml = """
+# models/single_dimension_derived_metric.yml
+single_dimension_derived_metric_yml = """
 version: 2 
 models:
-  - name: single_dimension_expression_metric
+  - name: single_dimension_derived_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('single_dimension_expression_metric__expected')
+          compare_model: ref('single_dimension_derived_metric__expected')
 metrics:
-  - name: single_dimension_expression_metric
-    label: Expression ($)
+  - name: single_dimension_derived_metric
+    label: derived ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: expression
+    calculation_method: derived
     expression: "{{metric('base_sum_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/single_dimension_expression_metric__expected.csv
-single_dimension_expression_metric__expected_csv = """
-date_month,had_discount,base_sum_metric,single_dimension_expression_metric
+# seeds/single_dimension_derived_metric__expected.csv
+single_dimension_derived_metric__expected_csv = """
+date_month,had_discount,base_sum_metric,single_dimension_derived_metric
 2022-01-01,TRUE,2,3
 2022-01-01,FALSE,6,7
 2022-02-01,TRUE,4,5
 2022-02-01,FALSE,2,3
 """.lstrip()
 
-class TestSingleDimensionExpressionMetric:
+class TestSingleDimensionDerivedMetric:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 
@@ -101,7 +101,7 @@ class TestSingleDimensionExpressionMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "single_dimension_expression_metric__expected.csv": single_dimension_expression_metric__expected_csv,
+            "single_dimension_derived_metric__expected.csv": single_dimension_derived_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -110,9 +110,9 @@ class TestSingleDimensionExpressionMetric:
         return {
             "fact_orders.yml": fact_orders_yml,
             "base_sum_metric.yml": base_sum_metric_yml,
-            "single_dimension_expression_metric.yml": single_dimension_expression_metric_yml,
+            "single_dimension_derived_metric.yml": single_dimension_derived_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "single_dimension_expression_metric.sql": single_dimension_expression_metric_sql
+            "single_dimension_derived_metric.sql": single_dimension_derived_metric_sql
         }
 
     def test_build_completion(self,project,):

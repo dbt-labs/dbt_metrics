@@ -10,11 +10,11 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/end_date_expression_metric.sql
-end_date_expression_metric_sql = """
+# models/end_date_derived_metric.sql
+end_date_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('end_date_expression_metric'), 
+{{ dbt_metrics.calculate(metric('end_date_derived_metric'), 
     grain='month',
     end_date='2022-01-27'
     )
@@ -37,33 +37,33 @@ metrics:
       - order_country
 """
 
-# models/end_date_expression_metric.yml
-end_date_expression_metric_yml = """
+# models/end_date_derived_metric.yml
+end_date_derived_metric_yml = """
 version: 2 
 models:
-  - name: end_date_expression_metric
+  - name: end_date_derived_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('end_date_expression_metric__expected')
+          compare_model: ref('end_date_derived_metric__expected')
 metrics:
-  - name: end_date_expression_metric
-    label: Expression ($)
+  - name: end_date_derived_metric
+    label: derived ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: expression
+    calculation_method: derived
     expression: "{{metric('base_sum_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/end_date_expression_metric__expected.csv
-end_date_expression_metric__expected_csv = """
-date_month,base_sum_metric,end_date_expression_metric
+# seeds/end_date_derived_metric__expected.csv
+end_date_derived_metric__expected_csv = """
+date_month,base_sum_metric,end_date_derived_metric
 2022-01-01,6,7
 """.lstrip()
 
-class TestEndDateExpressionMetric:
+class TestEndDateDerivedMetric:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 
@@ -98,7 +98,7 @@ class TestEndDateExpressionMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "end_date_expression_metric__expected.csv": end_date_expression_metric__expected_csv,
+            "end_date_derived_metric__expected.csv": end_date_derived_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -107,9 +107,9 @@ class TestEndDateExpressionMetric:
         return {
             "fact_orders.yml": fact_orders_yml,
             "base_sum_metric.yml": base_sum_metric_yml,
-            "end_date_expression_metric.yml": end_date_expression_metric_yml,
+            "end_date_derived_metric.yml": end_date_derived_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "end_date_expression_metric.sql": end_date_expression_metric_sql
+            "end_date_derived_metric.sql": end_date_derived_metric_sql
         }
 
     def test_build_completion(self,project,):

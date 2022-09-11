@@ -11,11 +11,11 @@ from tests.functional.fixtures import (
 )
 
 # models/backwards_compatability_metric.sql
-backwards_compatability_expression_metric_sql = """
+backwards_compatability_derived_metric_sql = """
 select *
 from 
 {{ dbt_metrics.metric(
-    metric_name='backwards_compatability_expression_metric', 
+    metric_name='backwards_compatability_derived_metric', 
     grain='month'
     )
 }}
@@ -25,7 +25,7 @@ from
 backwards_compatability_metric_yml = """
 version: 2 
 models:
-  - name: backwards_compatability_expression_metric
+  - name: backwards_compatability_derived_metric
 
 metrics:
   - name: backwards_compatability_metric
@@ -39,18 +39,18 @@ metrics:
       - had_discount
       - order_country
 
-  - name: backwards_compatability_expression_metric
+  - name: backwards_compatability_derived_metric
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: expression
+    calculation_method: derived
     expression: "{{metric('backwards_compatability_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country
 """
 
-class TestBackwardsCompatibilityExpressionMetric:
+class TestBackwardsCompatibilityDerivedMetric:
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
@@ -82,7 +82,7 @@ class TestBackwardsCompatibilityExpressionMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "backwards_compatability_expression_metric.sql": backwards_compatability_expression_metric_sql,
+            "backwards_compatability_derived_metric.sql": backwards_compatability_derived_metric_sql,
             "backwards_compatability_metric.yml": backwards_compatability_metric_yml
         }
 

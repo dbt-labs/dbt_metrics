@@ -15,7 +15,7 @@ multiple_metrics_sql = """
 select *
 from 
 {{ dbt_metrics.calculate(
-    [metric('base_sum_metric'), metric('expression_metric')],
+    [metric('base_sum_metric'), metric('derived_metric')],
     grain='month'
     )
 }}
@@ -30,11 +30,11 @@ models:
       - dbt_utils.equality:
           compare_model: ref('multiple_metrics__expected')
 metrics:
-  - name: expression_metric
-    label: Expression ($)
+  - name: derived_metric
+    label: derived ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: expression
+    calculation_method: derived
     expression: "{{metric('base_sum_metric')}} + 1"
     dimensions:
       - had_discount
@@ -54,12 +54,12 @@ metrics:
 
 # seeds/multiple_metrics__expected.csv
 multiple_metrics__expected_csv = """
-date_month,base_sum_metric,expression_metric
+date_month,base_sum_metric,derived_metric
 2022-01-01,8,9
 2022-02-01,6,7
 """.lstrip()
 
-class TestMultipleMetricsWithExpression:
+class TestMultipleMetricsWithDerived:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 

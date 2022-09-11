@@ -10,11 +10,11 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/late_start_date_expression_metric.sql
-late_start_date_expression_metric_sql = """
+# models/late_start_date_derived_metric.sql
+late_start_date_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('late_start_date_expression_metric'), 
+{{ dbt_metrics.calculate(metric('late_start_date_derived_metric'), 
     grain='month',
     start_date='2022-02-04'
     )
@@ -37,33 +37,33 @@ metrics:
       - order_country
 """
 
-# models/late_start_date_expression_metric.yml
-late_start_date_expression_metric_yml = """
+# models/late_start_date_derived_metric.yml
+late_start_date_derived_metric_yml = """
 version: 2 
 models:
-  - name: late_start_date_expression_metric
+  - name: late_start_date_derived_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('late_start_date_expression_metric__expected')
+          compare_model: ref('late_start_date_derived_metric__expected')
 metrics:
-  - name: late_start_date_expression_metric
-    label: Expression ($)
+  - name: late_start_date_derived_metric
+    label: derived ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: expression
+    calculation_method: derived
     expression: "{{metric('base_sum_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/late_start_date_expression_metric__expected.csv
-late_start_date_expression_metric__expected_csv = """
-date_month,base_sum_metric,late_start_date_expression_metric
+# seeds/late_start_date_derived_metric__expected.csv
+late_start_date_derived_metric__expected_csv = """
+date_month,base_sum_metric,late_start_date_derived_metric
 2022-02-01,5,6
 """.lstrip()
 
-class TestStartDateExpressionMetric:
+class TestStartDateDerivedMetric:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 
@@ -98,7 +98,7 @@ class TestStartDateExpressionMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "late_start_date_expression_metric__expected.csv": late_start_date_expression_metric__expected_csv,
+            "late_start_date_derived_metric__expected.csv": late_start_date_derived_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -107,9 +107,9 @@ class TestStartDateExpressionMetric:
         return {
             "fact_orders.yml": fact_orders_yml,
             "base_sum_metric.yml": base_sum_metric_yml,
-            "late_start_date_expression_metric.yml": late_start_date_expression_metric_yml,
+            "late_start_date_derived_metric.yml": late_start_date_derived_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "late_start_date_expression_metric.sql": late_start_date_expression_metric_sql
+            "late_start_date_derived_metric.sql": late_start_date_derived_metric_sql
         }
 
     def test_build_completion(self,project,):

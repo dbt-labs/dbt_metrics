@@ -11,35 +11,35 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/invalid_expression_metric.sql
-invalid_expression_metric_sql = """
+# models/invalid_derived_metric.sql
+invalid_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('invalid_expression_metric'), 
+{{ dbt_metrics.calculate(metric('invalid_derived_metric'), 
     grain='month'
     )
 }}
 """
 
-# models/invalid_expression_metric.yml
-invalid_expression_metric_yml = """
+# models/invalid_derived_metric.yml
+invalid_derived_metric_yml = """
 version: 2 
 models:
-  - name: invalid_expression_metric
+  - name: invalid_derived_metric
 
 metrics:
-  - name: invalid_expression_metric
+  - name: invalid_derived_metric
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: expression
+    calculation_method: derived
     expression: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-class TestInvalidExpressionMetric:
+class TestInvalidDerivedMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -72,8 +72,8 @@ class TestInvalidExpressionMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "invalid_expression_metric.sql": invalid_expression_metric_sql,
-            "invalid_expression_metric.yml": invalid_expression_metric_yml
+            "invalid_derived_metric.sql": invalid_derived_metric_sql,
+            "invalid_derived_metric.yml": invalid_derived_metric_yml
         }
 
     def test_build_completion(self,project,):

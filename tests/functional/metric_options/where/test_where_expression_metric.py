@@ -10,11 +10,11 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/where_expression_metric.sql
-where_expression_metric_sql = """
+# models/where_derived_metric.sql
+where_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('where_expression_metric'), 
+{{ dbt_metrics.calculate(metric('where_derived_metric'), 
     grain='month',
     dimensions=['had_discount'],
     where="had_discount=true"
@@ -38,34 +38,34 @@ metrics:
       - order_country
 """
 
-# models/where_expression_metric.yml
-where_expression_metric_yml = """
+# models/where_derived_metric.yml
+where_derived_metric_yml = """
 version: 2 
 models:
-  - name: where_expression_metric
+  - name: where_derived_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('where_expression_metric__expected')
+          compare_model: ref('where_derived_metric__expected')
 metrics:
-  - name: where_expression_metric
-    label: Expression ($)
+  - name: where_derived_metric
+    label: derived ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: expression
+    calculation_method: derived
     expression: "{{metric('base_sum_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/where_expression_metric__expected.csv
-where_expression_metric__expected_csv = """
-date_month,had_discount,base_sum_metric,where_expression_metric
+# seeds/where_derived_metric__expected.csv
+where_derived_metric__expected_csv = """
+date_month,had_discount,base_sum_metric,where_derived_metric
 2022-01-01,TRUE,2,3
 2022-02-01,TRUE,4,5
 """.lstrip()
 
-class TestWhereExpressionMetric:
+class TestWhereDerivedMetric:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 
@@ -100,7 +100,7 @@ class TestWhereExpressionMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "where_expression_metric__expected.csv": where_expression_metric__expected_csv,
+            "where_derived_metric__expected.csv": where_derived_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -109,9 +109,9 @@ class TestWhereExpressionMetric:
         return {
             "fact_orders.yml": fact_orders_yml,
             "base_sum_metric.yml": base_sum_metric_yml,
-            "where_expression_metric.yml": where_expression_metric_yml,
+            "where_derived_metric.yml": where_derived_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "where_expression_metric.sql": where_expression_metric_sql
+            "where_derived_metric.sql": where_derived_metric_sql
         }
 
     def test_build_completion(self,project,):
