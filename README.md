@@ -7,6 +7,7 @@
    * [Installation Instructions](#installation-instructions)
 * [Macros](#macros)
    * [Calculate](#calculate)
+      * [Renaming the package](#renaming-the-package)
       * [Migration from metric to calculate](#migration-from-metric-to-calculate)
    * [Develop](#develop)
 * [Use cases and examples](#use-cases-and-examples)
@@ -28,7 +29,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Tue Aug 23 15:13:02 UTC 2022 -->
+<!-- Added by: runner, at: Sun Sep 11 16:07:42 UTC 2022 -->
 
 <!--te-->
 
