@@ -1,7 +1,7 @@
 {% macro get_base_metrics(metric) %}
 
     -- this checks whether it is a relation or a list
-    {%- if (metric is mapping and metric.get('metadata', {}).get('type', '').endswith('Relation')) %}
+    {%- if (metric is mapping and metric.get('metadata', {}).get('calculation_method', '').endswith('Relation')) %}
 
         {%- for child in metric recursive -%}
 

@@ -43,16 +43,16 @@
         {%- do exceptions.raise_compiler_error("The selected grain is missing from the metric definition yml") -%}
     {%- endif %}
 
-    {%- if not metric_definition.type %}
-        {%- do exceptions.raise_compiler_error("The provided yml is missing a metric type") -%}
+    {%- if not metric_definition.calculation_method %}
+        {%- do exceptions.raise_compiler_error("The provided yml is missing a metric calculation_method") -%}
     {%- endif %}
 
-    {%- if metric_definition.type == 'derived' %}
+    {%- if metric_definition.calculation_method == 'derived' %}
         {%- do exceptions.raise_compiler_error("The develop macro does not support derived metrics") -%}
     {%- endif %}
 
-    {%- if not metric_definition.sql %}
-        {%- do exceptions.raise_compiler_error("The provided yml is missing a sql field") -%}
+    {%- if not metric_definition.expression %}
+        {%- do exceptions.raise_compiler_error("The provided yml is missing an expression field") -%}
     {%- endif %}
 
     {%- for dim in dimensions -%}
@@ -82,7 +82,7 @@
     ############ #}
 
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {%- do dbt_metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].type, calculation_aggregate=calc_config.aggregate) %}
+        {%- do dbt_metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].calculation_method, calculation_aggregate=calc_config.aggregate) %}
     {%- endfor %}
 
     {%- for calc_config in secondary_calculations if calc_config.period -%}

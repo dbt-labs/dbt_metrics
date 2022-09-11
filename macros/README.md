@@ -21,8 +21,8 @@ Once these macros are called, they both go through two logical steps albeit in s
 
 **Metrics Dictionary**: This object is a dictionary that contains all of the attributes for each metric in the full_set. It was implemented in v0.3.2 to support the same input provided to `get_metric_sql` from both develop and calculate. It must contain the:
 - Metric name
-- Metric type
-- Metric sql
+- Metric calculation method
+- Metric expression
 - Metric timestamp
 - Metric time grains
 - Metric dimensions

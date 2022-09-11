@@ -51,7 +51,7 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
 
     {%- for metric_name in metric_tree.base_set %}
         {%- for calc_config in secondary_calculations if calc_config.aggregate -%}
-            {%- do dbt_metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[metric_name].type, calculation_aggregate=calc_config.aggregate) -%}
+            {%- do dbt_metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[metric_name].calculation_method, calculation_aggregate=calc_config.aggregate) -%}
         {%- endfor -%}
     {%- endfor -%}
 

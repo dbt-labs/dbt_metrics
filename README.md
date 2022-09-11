@@ -35,7 +35,7 @@
 
 
 # About
-This dbt package generates queries based on [metrics](https://docs.getdbt.com/docs/building-a-dbt-project/metrics), introduced to dbt Core in v1.0. For more information on metrics, such as available types, properties, and other definition parameters, please reference the documentation linked above.
+This dbt package generates queries based on [metrics](https://docs.getdbt.com/docs/building-a-dbt-project/metrics), introduced to dbt Core in v1.0. For more information on metrics, such as available calculation_methods, properties, and other definition parameters, please reference the documentation linked above.
 
 ## Tenets
 The tenets of `dbt_metrics`, which should be considered during development, issues, and contributions, are:
@@ -189,7 +189,7 @@ Constructor: `dbt_metrics.rolling(aggregate, interval [, alias])`
 Most behaviour in the package can be overridden or customised.
 
 ## Derived Metrics 
-Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this type can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this calculation method can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
 ## Multiple Metrics
 There may be instances where you want to return multiple metrics within a single macro. This is possible by providing a list of metrics instead of a single metric. See example below:
@@ -243,7 +243,7 @@ The `is_weekend` field can now be used by your metrics.
 The package protects against nonsensical secondary calculations, such as a month-to-date aggregate of data which has been rolled up to the quarter. If you customise your calendar (for example by adding a [4-5-4 retail calendar](https://calogica.com/sql/dbt/2018/11/15/retail-calendar-in-sql.html) month), you will need to override the [`get_grain_order()`](/macros/secondary_calculations/validate_grain_order.sql) macro. In that case, you might remove `month` and replace it with `month_4_5_4`. All date columns must be prefixed with `date_` in the table. Do not include the prefix when defining your metric, it will be added automatically.
 
 ## Custom aggregations 
-To create a custom primary aggregation (as exposed through the `type` config of a metric), create a macro of the form `metric_my_aggregate(expression)`, then override the [`gen_primary_metric_aggregate()`](/macros/sql_gen/gen_primary_metric_aggregate.sql) macro to add it to the dispatch list. The package also protects against nonsensical secondary calculations such as an average of an average; you will need to override the [`get_metric_allowlist()`](/macros/secondary_calculations/validate_aggregate_coherence.sql)  macro to both add your new aggregate to to the existing aggregations' allowlists, and to make an allowlist for your new aggregation:
+To create a custom primary aggregation (as exposed through the `calculation_method` config of a metric), create a macro of the form `metric_my_aggregate(expression)`, then override the [`gen_primary_metric_aggregate()`](/macros/sql_gen/gen_primary_metric_aggregate.sql) macro to add it to the dispatch list. The package also protects against nonsensical secondary calculations such as an average of an average; you will need to override the [`get_metric_allowlist()`](/macros/secondary_calculations/validate_aggregate_coherence.sql)  macro to both add your new aggregate to to the existing aggregations' allowlists, and to make an allowlist for your new aggregation:
 ```
     {% do return ({
         "average": ['max', 'min'],
