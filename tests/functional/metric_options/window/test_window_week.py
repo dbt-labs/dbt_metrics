@@ -38,7 +38,7 @@ metrics:
     calculation_method: sum
     window:
         count: 2 
-        period: weeks
+        period: week
     expression: discount_total
     dimensions:
       - had_discount
