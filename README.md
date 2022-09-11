@@ -33,6 +33,7 @@
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 <!-- Added by: runner, at: Sun Sep 11 20:23:13 UTC 2022 -->
 
+
 <!--te-->
 
 
@@ -205,6 +206,7 @@ More information can be found in the [`metrics` page of dbt docs](https://docs.g
 __Note: In version `0.4.0`, `expression` metrics were renamed to `derived`__
 
 Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this calculation_method can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+
 
 ## Multiple Metrics
 There may be instances where you want to return multiple metrics within a single macro. This is possible by providing a list of metrics instead of a single metric. See example below:

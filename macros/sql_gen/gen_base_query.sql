@@ -84,6 +84,7 @@
 
             {# This section looks at the sql aspect of the metric and ensures that 
             the value input into the macro is accurate -#}
+
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
             
             {%- if grain != 'all_time'%}
@@ -99,16 +100,19 @@
             calendar_table.date_{{ period }},
                 {% endfor -%}
             {%- endif -%}
-            -- ALL DIMENSIONS
+
             {%- for dim in dimensions %}
                 base_model.{{ dim }},
             {%- endfor %}
+
             {%- for calendar_dim in calendar_dimensions %}
                 calendar_table.{{ calendar_dim }},
             {%- endfor %}
+
             {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
                 base_model.{{ metric_dictionary.expression }} as property_to_aggregate
             {%- elif metric_dictionary.calculation_method == 'count' -%}
+
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
             {%- else -%}
                 {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric_dictionary.name ~ "`") -%}  
