@@ -11,46 +11,54 @@ from tests.functional.fixtures import (
     custom_calendar_sql
 )
 
-# models/base_sum_metric.sql
-base_sum_metric_sql = """
+# models/base_window_metric.sql
+base_window_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('base_sum_metric'), 
-    grain='month',
-    dimensions=["is_weekend"]
+{{ dbt_metrics.calculate(metric('base_window_metric'), 
+    grain='week'
     )
 }}
 """
 
-# models/base_sum_metric.yml
-base_sum_metric_yml = """
+# models/base_window_metric.yml
+base_window_metric_yml = """
 version: 2 
 models:
-  - name: base_sum_metric
+  - name: base_window_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('base_sum_metric__expected')
+          compare_model: ref('base_window_metric__expected')
 metrics:
-  - name: base_sum_metric
+  - name: base_window_metric
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
     calculation_method: sum
-    expression: order_total
+    expression: discount_total
+    window: 
+        count: 14
+        period: day
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/base_sum_metric__expected.csv
-base_sum_metric__expected_csv = """
-date_month,is_weekend,base_sum_metric
-2022-01-01,true,8
-2022-02-01,true,6
+# seeds/base_window_metric__expected.csv
+base_window_metric__expected_csv = """
+date_week,base_window_metric
+2022-01-10,2
+2022-01-17,3
+2022-01-24,4
+2022-01-31,4
+2022-02-07,2
+2022-02-14,2
+2022-02-21,3
+2022-02-28,2
 """.lstrip()
 
-class TestCustomCalendarDimensionsMetric:
+class TestBaseDayWindowMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -73,12 +81,13 @@ class TestCustomCalendarDimensionsMetric:
                 ]
         }
 
+
     # everything that goes in the "seeds" directory
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "base_sum_metric__expected.csv": base_sum_metric__expected_csv,
+            "base_window_metric__expected.csv": base_window_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -87,9 +96,9 @@ class TestCustomCalendarDimensionsMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "custom_calendar.sql": custom_calendar_sql,
-            "base_sum_metric.sql": base_sum_metric_sql,
-            "base_sum_metric.yml": base_sum_metric_yml
+            "base_window_metric.sql": base_window_metric_sql,
+            "base_window_metric.yml": base_window_metric_yml,
+            "custom_calendar.sql": custom_calendar_sql
         }
 
     def test_build_completion(self,project,):
@@ -103,8 +112,6 @@ class TestCustomCalendarDimensionsMetric:
         # initial run
         results = run_dbt(["run"])
         assert len(results) == 4
-
-        # breakpoint()
 
         # test tests
         results = run_dbt(["test"]) # expect passing test

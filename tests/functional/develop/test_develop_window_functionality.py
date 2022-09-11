@@ -8,60 +8,64 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
-    custom_calendar_sql
 )
 
-# models/base_sum_metric.sql
-base_sum_metric_sql = """
-select *
-from 
-{{ dbt_metrics.calculate(metric('base_sum_metric'), 
-    grain='month',
-    dimensions=["is_weekend"]
-    )
-}}
-"""
-
-# models/base_sum_metric.yml
-base_sum_metric_yml = """
-version: 2 
-models:
-  - name: base_sum_metric
-    tests: 
-      - dbt_utils.equality:
-          compare_model: ref('base_sum_metric__expected')
+# models/develop_metric.sql
+develop_metric_sql = """
+{% set my_metric_yml -%}
 metrics:
-  - name: base_sum_metric
+  - name: develop_metric
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
     calculation_method: sum
-    expression: order_total
+    expression: discount_total
+    window: 
+        count: 14 
+        period: day
     dimensions:
       - had_discount
       - order_country
+{%- endset %}
+select * 
+from {{ metrics.develop(
+        develop_yml=my_metric_yml,
+        grain='week'
+        )
+    }}
 """
 
-# seeds/base_sum_metric__expected.csv
-base_sum_metric__expected_csv = """
-date_month,is_weekend,base_sum_metric
-2022-01-01,true,8
-2022-02-01,true,6
+# models/develop_metric.yml
+develop_metric_yml = """
+version: 2 
+models:
+  - name: develop_metric
+    tests: 
+      - dbt_utils.equality:
+          compare_model: ref('develop_metric__expected')
+"""
+
+# seeds/develop_metric__expected.csv
+develop_metric__expected_csv = """
+date_week,develop_metric
+2022-01-10,2
+2022-01-17,3
+2022-01-24,4
+2022-01-31,4
+2022-02-07,2
+2022-02-14,2
+2022-02-21,3
+2022-02-28,2
 """.lstrip()
 
-class TestCustomCalendarDimensionsMetric:
-
+class TestDevelopMetricWindow:
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
         return {
-            "name": "example",
-            "models": {"+materialized": "table"},
-            "vars":{
-                "dbt_metrics_calendar_model": "custom_calendar",
-                "custom_calendar_dimension_list": ["is_weekend"]
-            }
+          "name": "example",
+          "models": {"+materialized": "table"}
         }
 
     # install current repo as package
@@ -73,12 +77,13 @@ class TestCustomCalendarDimensionsMetric:
                 ]
         }
 
+
     # everything that goes in the "seeds" directory
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "base_sum_metric__expected.csv": base_sum_metric__expected_csv,
+            "develop_metric__expected.csv": develop_metric__expected_csv
         }
 
     # everything that goes in the "models" directory
@@ -87,9 +92,8 @@ class TestCustomCalendarDimensionsMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "custom_calendar.sql": custom_calendar_sql,
-            "base_sum_metric.sql": base_sum_metric_sql,
-            "base_sum_metric.yml": base_sum_metric_yml
+            "develop_metric.sql": develop_metric_sql,
+            "develop_metric.yml": develop_metric_yml
         }
 
     def test_build_completion(self,project,):
@@ -102,9 +106,7 @@ class TestCustomCalendarDimensionsMetric:
 
         # initial run
         results = run_dbt(["run"])
-        assert len(results) == 4
-
-        # breakpoint()
+        assert len(results) == 3
 
         # test tests
         results = run_dbt(["test"]) # expect passing test

@@ -14,7 +14,13 @@
 
     {% set metric_model_name = dbt_metrics.get_metric_model_name(metric_model=metric_definition.model) %}
     {% do metrics_dictionary[metric_name].update({'metric_model': dbt_metrics.get_model_relation(metric_model_name, metric_name)}) %}
-    
+
+    {% if metric_definition.window %}
+        {% do metrics_dictionary[metric_name].update({'window': metric_definition.window}) %}
+    {% else %}
+        {% do metrics_dictionary[metric_name].update({'window': None}) %}
+    {% endif %}
+
 {% endfor %}
 
 {% do return(metrics_dictionary) %}

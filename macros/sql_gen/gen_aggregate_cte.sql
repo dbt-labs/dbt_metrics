@@ -49,6 +49,12 @@
                 calendar_dimensions=calendar_dimensions) }}
     ) as base_query
 
+    where 1=1
+
+    {% if metric_dictionary.window is not none %}
+    and date_{{grain}} = window_filter_date 
+    {% endif %}
+
     group by {{ dbt_metrics.gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 )
 
