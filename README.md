@@ -19,6 +19,7 @@
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
 * [Customisation](#customisation)
+   * [All_Time Grain](#all_time-grain)
    * [Window Periods](#window-periods)
    * [Derived Metrics](#derived-metrics)
    * [Multiple Metrics](#multiple-metrics)
@@ -30,14 +31,14 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Sun Sep 11 19:42:50 UTC 2022 -->
+<!-- Added by: runner, at: Sun Sep 11 20:22:41 UTC 2022 -->
 
 <!--te-->
 
 
 
 # About
-This dbt package generates queries based on [metrics](https://docs.getdbt.com/docs/building-a-dbt-project/metrics), introduced to dbt Core in v1.0. For more information on metrics, such as available calculation_methods, properties, and other definition parameters, please reference the documentation linked above.
+This dbt package generates queries based on [metrics](https://docs.getdbt.com/docs/building-a-dbt-project/metrics), introduced to dbt Core in v1.0. For more information on metrics, such as available calculation methods, properties, and other definition parameters, please reference the documentation linked above.
 
 ## Tenets
 The tenets of `dbt_metrics`, which should be considered during development, issues, and contributions, are:
@@ -89,7 +90,7 @@ from {{ dbt_metrics.calculate(
 `start_date` and `end_date` are optional. When not provided, the spine will span all dates from oldest to newest in the metric's dataset. This default is likely to be correct in most cases, but you can use the arguments to either narrow the resulting table or expand it (e.g. if there was no new customers until 3 January but you want to include the first two days as well). Both values are inclusive.
 
 ### Renaming the package
-In version `0.4.0` we re-named the internal package name to reflect the name of the repository. `metrics` became `dbt_metrics`. This changes the syntax used in all metrics queries from:
+In version `0.4.0` we re-named the internal package name to reflect the name of the repository. `metrics` became `dbt_metrics`. This changes the syntax used in all metrics queries, as shown in the following example:
 - `metrics.calculate` to `dbt_metrics.calculate`
 
 ### Migration from metric to calculate
@@ -190,13 +191,20 @@ Constructor: `dbt_metrics.rolling(aggregate, interval [, alias])`
 # Customisation
 Most behaviour in the package can be overridden or customised.
 
+## All_Time Grain
+Version `0.4.0` of this package added support for the `all_time` grain to be defined in the metric. 
+
+If you're interested in returning the metric value across all time (or ignoring time bounds all together), you can include the `all_time` grain in the metric definition and then use that in the `calculate` or `develop` macro. This will return a single value for the metric (more if dimensions included) and the start/end date range for that metric calculation.
+
 ## Window Periods 
 Version `0.4.0` of this package, and beyond, offers support for the `window` attribute of the metric definition. This alters the underlying query to allow the metric definition to contain a window of time, such as the past 14 days or the past 3 months.
 
 More information can be found in the [`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
 ## Derived Metrics 
-Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this calculation method can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+__Note: In version `0.4.0`, `expression` metrics were renamed to `derived`__
+
+Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this calculation_method can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
 ## Multiple Metrics
 There may be instances where you want to return multiple metrics within a single macro. This is possible by providing a list of metrics instead of a single metric. See example below:
