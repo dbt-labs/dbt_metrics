@@ -1,7 +1,7 @@
 version: 2 
 
 metrics:
-  - name: expression_metric__alternative
+  - name: derived_metric__alternative
     label: Profit ($)
     timestamp: order_date
     time_grains: [day, week]
