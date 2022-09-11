@@ -30,8 +30,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: sum
-    sql: order_total
+    calculation_method: sum
+    expression: order_total
     dimensions:
       - had_discount
       - order_country
@@ -50,8 +50,8 @@ metrics:
     label: Expression ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: expression
-    sql: "{{metric('base_sum_metric')}} + 1"
+    calculation_method: expression
+    expression: "{{metric('base_sum_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country

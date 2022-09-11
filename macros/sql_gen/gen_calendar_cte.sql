@@ -1,5 +1,5 @@
 {%- macro gen_calendar_cte(calendar_tbl, start_date, end_date) -%}
-    {{ return(adapter.dispatch('gen_calendar_cte', 'metrics')(calendar_tbl, start_date, end_date)) }}
+    {{ return(adapter.dispatch('gen_calendar_cte', 'dbt_metrics')(calendar_tbl, start_date, end_date)) }}
 {%- endmacro -%}
 
 {%- macro default__gen_calendar_cte(calendar_tbl, start_date, end_date) %}

@@ -18,7 +18,7 @@
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
 * [Customisation](#customisation)
-   * [Expression Metrics](#expression-metrics)
+   * [Derived Metrics](#derived-metrics)
    * [Multiple Metrics](#multiple-metrics)
    * [Where Clauses](#where-clauses)
    * [Calendar](#calendar)
@@ -103,7 +103,7 @@ There are times when you want to test what a metric might look like before defin
 
 **Limitations:**
 - The provided yml can only contain one metric
-- The metric in question cannot be an expression metric
+- The metric in question cannot be an derived metric
 
 ```sql
 {% set my_metric_yml -%}
@@ -114,8 +114,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: average
-    sql: discount_total
+    calculation_method: average
+    expression: discount_total
     dimensions:
       - had_discount
       - order_country
@@ -188,8 +188,8 @@ Constructor: `dbt_metrics.rolling(aggregate, interval [, alias])`
 # Customisation
 Most behaviour in the package can be overridden or customised.
 
-## Expression Metrics 
-Version `0.3.0` of this package, and beyond, offer support for `expression` metrics! More information around this type can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+## Derived Metrics 
+Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this type can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
 ## Multiple Metrics
 There may be instances where you want to return multiple metrics within a single macro. This is possible by providing a list of metrics instead of a single metric. See example below:

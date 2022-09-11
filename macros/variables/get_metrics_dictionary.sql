@@ -15,7 +15,7 @@
     {% do metrics_dictionary[metric_name].update({'dimensions': dict_metric.dimensions})%}
     {% do metrics_dictionary[metric_name].update({'filters': dict_metric.filters})%}
 
-    {% if dict_metric.type != 'expression' %}
+    {% if dict_metric.type != 'derived' %}
         {% set metric_model_name = dbt_metrics.get_metric_model_name(metric_model=dict_metric.model) %}
         {% do metrics_dictionary[metric_name].update({'metric_model': dbt_metrics.get_model_relation(metric_model_name, metric_name)}) %}
     {% endif %}

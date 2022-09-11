@@ -19,8 +19,8 @@ metrics:
     model: ref('fact_orders')
     label: develop metric dimensions
     time_grains: [day, week, month]
-    type: sum
-    sql: order_total
+    calculation_method: sum
+    expression: order_total
     dimensions:
       - had_discount
       - order_country

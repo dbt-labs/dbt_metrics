@@ -1,5 +1,5 @@
 {%- macro gen_final_cte(metric_tree, grain, secondary_calculations, where) -%}
-    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(metric_tree, grain, secondary_calculations, where)) }}
+    {{ return(adapter.dispatch('gen_final_cte', 'dbt_metrics')(metric_tree, grain, secondary_calculations, where)) }}
 {%- endmacro -%}
 
 {% macro default__gen_final_cte(metric_tree, grain, secondary_calculations, where) %}

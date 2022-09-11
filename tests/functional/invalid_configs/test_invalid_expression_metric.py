@@ -32,8 +32,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: expression
-    sql: order_total
+    calculation_method: expression
+    expression: order_total
     dimensions:
       - had_discount
       - order_country

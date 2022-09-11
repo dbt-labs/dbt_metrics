@@ -33,8 +33,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: average
-    sql: discount_total
+    calculation_method: average
+    expression: discount_total
     dimensions:
       - had_discount
       - order_country
@@ -43,8 +43,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: expression
-    sql: "{{metric('backwards_compatability_metric')}} + 1"
+    calculation_method: expression
+    expression: "{{metric('backwards_compatability_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country

@@ -1,5 +1,5 @@
 {%- macro develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
-    {{ return(adapter.dispatch('develop', 'metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
+    {{ return(adapter.dispatch('develop', 'dbt_metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
 {%- endmacro -%}
 
 
@@ -47,8 +47,8 @@
         {%- do exceptions.raise_compiler_error("The provided yml is missing a metric type") -%}
     {%- endif %}
 
-    {%- if metric_definition.type == 'expression' %}
-        {%- do exceptions.raise_compiler_error("The develop macro does not support expression metrics") -%}
+    {%- if metric_definition.type == 'derived' %}
+        {%- do exceptions.raise_compiler_error("The develop macro does not support derived metrics") -%}
     {%- endif %}
 
     {%- if not metric_definition.sql %}

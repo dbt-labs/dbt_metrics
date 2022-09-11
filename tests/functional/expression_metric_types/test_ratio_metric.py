@@ -29,8 +29,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: sum
-    sql: order_total
+    calculation_method: sum
+    expression: order_total
     dimensions:
       - had_discount
       - order_country
@@ -45,8 +45,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: average
-    sql: discount_total
+    calculation_method: average
+    expression: discount_total
     dimensions:
       - had_discount
       - order_country     
@@ -65,8 +65,8 @@ metrics:
     label: Ratio ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: expression
-    sql: "{{metric('base_sum_metric')}} / {{metric('base_average_metric')}}"
+    calculation_method: expression
+    expression: "{{metric('base_sum_metric')}} / {{metric('base_average_metric')}}"
     dimensions:
       - had_discount
       - order_country

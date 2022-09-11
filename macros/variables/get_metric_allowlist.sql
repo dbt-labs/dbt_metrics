@@ -1,5 +1,5 @@
 {% macro get_metric_allowlist() %}
-    {{ return(adapter.dispatch('get_metric_allowlist', 'metrics')()) }}
+    {{ return(adapter.dispatch('get_metric_allowlist', 'dbt_metrics')()) }}
 {% endmacro %}
 
 {% macro default__get_metric_allowlist() %}
@@ -11,6 +11,6 @@
         "sum": ['min', 'max', 'sum', 'average'],
         "max": ['min', 'max', 'sum', 'average'],
         "min": ['min', 'max', 'sum', 'average'],
-        "expression": ['min', 'max', 'sum'],
+        "derived": ['min', 'max', 'sum'],
     }) %}
 {% endmacro %}

@@ -20,8 +20,8 @@ metrics:
     label: develop metric dimensions
     timestamp: order_date
     time_grains: [day, week, month]
-    type: median
-    sql: order_total
+    calculation_method: median
+    expression: order_total
     dimensions:
       - had_discount
       - order_country

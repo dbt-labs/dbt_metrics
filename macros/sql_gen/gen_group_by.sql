@@ -1,5 +1,5 @@
 {%- macro gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) -%}
-    {{ return(adapter.dispatch('gen_group_by', 'metrics')(grain, dimensions, calendar_dimensions, relevant_periods)) }}
+    {{ return(adapter.dispatch('gen_group_by', 'dbt_metrics')(grain, dimensions, calendar_dimensions, relevant_periods)) }}
 {%- endmacro -%}
 
 {% macro default__gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) %}

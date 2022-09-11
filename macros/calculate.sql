@@ -1,5 +1,5 @@
 l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) %}
-    {{ return(adapter.dispatch('calculate', 'metrics')(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
+    {{ return(adapter.dispatch('calculate', 'dbt_metrics')(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
 {% endmacro %}
 
 
@@ -41,7 +41,7 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
 
     {%- do dbt_metrics.validate_grain(grain=grain, metric_tree=metric_tree) -%}
 
-    {%- do dbt_metrics.validate_expression_metrics(metric_tree=metric_tree) -%}
+    {%- do dbt_metrics.validate_derived_metrics(metric_tree=metric_tree) -%}
 
     {%- do dbt_metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree) -%} 
 

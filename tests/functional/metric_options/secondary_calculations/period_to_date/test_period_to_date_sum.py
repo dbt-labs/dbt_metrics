@@ -40,8 +40,8 @@ metrics:
     label: sum value
     timestamp: order_date
     time_grains: [day, week, month]
-    type: sum
-    sql: customer_id
+    calculation_method: sum
+    expression: customer_id
     dimensions:
       - had_discount
       - order_country

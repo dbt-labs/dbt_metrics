@@ -40,8 +40,8 @@ metrics:
     label: max value
     timestamp: order_date
     time_grains: [day, week, month]
-    type: max
-    sql: customer_id
+    calculation_method: max
+    expression: customer_id
     dimensions:
       - had_discount
       - order_country

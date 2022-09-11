@@ -40,8 +40,8 @@ metrics:
     label: min value
     timestamp: order_date
     time_grains: [day, week, month]
-    type: min
-    sql: customer_id
+    calculation_method: min
+    expression: customer_id
     dimensions:
       - had_discount
       - order_country

@@ -1,6 +1,6 @@
 {% macro default__secondary_calculation_rolling(metric_name, grain, dimensions, calc_config) %}
     {% set calc_sql %}
-        {{ adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(calc_config.aggregate, metric_name) }}
+        {{ adapter.dispatch('gen_primary_metric_aggregate', 'dbt_metrics')(calc_config.aggregate, metric_name) }}
         over (
             {% if dimensions -%}
                 partition by {{ dimensions | join(", ") }} 

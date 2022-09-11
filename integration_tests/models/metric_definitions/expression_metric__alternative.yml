@@ -5,8 +5,8 @@ metrics:
     label: Profit ($)
     timestamp: order_date
     time_grains: [day, week]
-    type: expression
-    sql: "{{metric('base_sum_metric')}} - {{metric('base_average_metric')}} + 5"
+    calculation_method: derived
+    expression: "{{metric('base_sum_metric')}} - {{metric('base_average_metric')}} + 5"
     dimensions:
       - had_discount
       - order_country

@@ -1,30 +1,30 @@
 
 --TODO: Do we have a list of aggregations that we're supporting on day one? 
 {%- macro gen_primary_metric_aggregate(aggregate, expression) -%}
-    {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(aggregate, expression)) }}
+    {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'dbt_metrics')(aggregate, expression)) }}
 {%- endmacro -%}
 
 {%- macro default__gen_primary_metric_aggregate(aggregate, expression) -%}
     {%- if aggregate == 'count' -%}
-        {{ return(adapter.dispatch('metric_count', 'metrics')(expression)) }}
+        {{ return(adapter.dispatch('metric_count', 'dbt_metrics')(expression)) }}
     
     {%- elif aggregate == 'count_distinct' -%}
-        {{ return(adapter.dispatch('metric_count_distinct', 'metrics')(expression)) }}
+        {{ return(adapter.dispatch('metric_count_distinct', 'dbt_metrics')(expression)) }}
     
     {%- elif aggregate == 'average' -%}
-        {{ return(adapter.dispatch('metric_average', 'metrics')(expression)) }}
+        {{ return(adapter.dispatch('metric_average', 'dbt_metrics')(expression)) }}
     
     {%- elif aggregate == 'max' -%}
-        {{ return(adapter.dispatch('metric_max', 'metrics')(expression)) }}
+        {{ return(adapter.dispatch('metric_max', 'dbt_metrics')(expression)) }}
        
     {%- elif aggregate == 'min' -%}
-        {{ return(adapter.dispatch('metric_min', 'metrics')(expression)) }}
+        {{ return(adapter.dispatch('metric_min', 'dbt_metrics')(expression)) }}
     
     {%- elif aggregate == 'sum' -%}
-        {{ return(adapter.dispatch('metric_sum', 'metrics')(expression)) }}
+        {{ return(adapter.dispatch('metric_sum', 'dbt_metrics')(expression)) }}
 
     {%- elif aggregate == 'expression' -%}
-        {{ return(adapter.dispatch('metric_expression', 'metrics')(expression)) }}
+        {{ return(adapter.dispatch('metric_expression', 'dbt_metrics')(expression)) }}
 
     {%- else -%}
         {%- do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) -%}  
