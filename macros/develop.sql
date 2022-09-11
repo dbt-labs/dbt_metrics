@@ -81,6 +81,8 @@
     SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
     ############ #}
 
+    {%- do dbt_metrics.validate_develop_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
+
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
         {%- do dbt_metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].calculation_method, calculation_aggregate=calc_config.aggregate) %}
     {%- endfor %}
