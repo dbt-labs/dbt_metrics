@@ -53,7 +53,7 @@
     {%- for dim in dimensions %}
         , coalesce(
         {%- for metric_name in metric_tree.parent_set %}
-            {{metric_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}z
+            {{metric_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
             {%- if metric_tree.parent_set | length == 1 %}
             , NULL
             {%- endif -%}

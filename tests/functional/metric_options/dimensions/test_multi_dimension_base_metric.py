@@ -50,9 +50,9 @@ date_month,had_discount,order_country,multi_dimension_base_sum_metric
 2022-01-01,FALSE,France,4
 2022-01-01,FALSE,Japan,2
 2022-02-01,TRUE,France,4
-2022-02-01,FALSE,France,0
+2022-02-01,FALSE,France,
 2022-02-01,FALSE,Japan,2
-2022-02-01,TRUE,Japan,0
+2022-02-01,TRUE,Japan,
 """.lstrip()
 
 class TestMultiDimensionBaseSumMetric:
