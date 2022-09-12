@@ -10,7 +10,7 @@ metrics:
     expression: discount_total
     window: 
         count: 14 
-        period: days
+        period: day
     dimensions:
       - had_discount
       - order_country

@@ -29,7 +29,7 @@ metrics:
     model: ref('fact_orders')
     label: Order Total ($)
     timestamp: order_date
-    time_grains: [day, week, month, all_time]
+    time_grains: [day, week, month, all_time] 
     calculation_method: sum
     expression: order_total
     dimensions:

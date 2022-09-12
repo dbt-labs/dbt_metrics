@@ -20,10 +20,10 @@
             {%- do exceptions.raise_compiler_error("The selected grain - all_time - does not support secondary calculations.") %}
         {% endif %}
 
-        {% for metric in metrics_dictionary %}
-            {% if metric.window is not none %}
+        {% for metric_name in metric_tree.full_set %}
+            {% if metrics_dictionary[metric_name].window is not none%}
                 {%- do exceptions.raise_compiler_error("The selected grain - all_time - does not support metrics with window definitions.") %}
-            {% endif %}
+            {% endif%}
         {% endfor%}
 
     {% endif %}

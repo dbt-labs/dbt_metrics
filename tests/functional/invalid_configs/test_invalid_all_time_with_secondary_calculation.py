@@ -14,10 +14,10 @@ from tests.functional.fixtures import (
 base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('base_sum_metric'), 
+{{ dbt_metrics.calculate(metric('base_sum_metric'), 
     grain='all_time',
     secondary_calculations=[
-        metrics.period_over_period(comparison_strategy="difference", interval=1, alias = "1mth")
+        dbt_metrics.period_over_period(comparison_strategy="difference", interval=1, alias = "1mth")
     ]
     )
 }}
@@ -33,8 +33,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month, all_time]
-    type: sum
-    sql: order_total
+    calculation_method: sum
+    expression: order_total
     dimensions:
       - had_discount
       - order_country

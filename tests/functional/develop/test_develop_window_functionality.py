@@ -29,7 +29,7 @@ metrics:
       - order_country
 {%- endset %}
 select * 
-from {{ metrics.develop(
+from {{ dbt_metrics.develop(
         develop_yml=my_metric_yml,
         grain='week'
         )
