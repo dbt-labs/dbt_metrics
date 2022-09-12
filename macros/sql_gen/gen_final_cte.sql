@@ -1,10 +1,10 @@
-{%- macro gen_final_cte(base_set,grain,full_set,secondary_calculations, where) -%}
-    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(base_set,grain,full_set,secondary_calculations, where)) }}
+{%- macro gen_final_cte(metric_tree, grain, secondary_calculations, where) -%}
+    {{ return(adapter.dispatch('gen_final_cte', 'metrics')(metric_tree, grain, secondary_calculations, where)) }}
 {%- endmacro -%}
 
-{% macro default__gen_final_cte(base_set,grain,full_set,secondary_calculations, where) %}
+{% macro default__gen_final_cte(metric_tree, grain, secondary_calculations, where) %}
 
-{%- if full_set | length > 1 %}
+{%- if metric_tree.full_set | length > 1 %}
 
     {%- if secondary_calculations | length > 0 -%}
 
@@ -57,7 +57,7 @@ where {{ where }}
 
 -- single metric without secondary calculations
 
-select * from {{base_set[0]}}__final 
+select * from {{metric_tree.base_set[0]}}__final 
 
 
 {#- metric where clauses -#}

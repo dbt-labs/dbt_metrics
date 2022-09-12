@@ -1,8 +1,8 @@
-{%- macro gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) -%}
-    {{ return(adapter.dispatch('gen_group_by', 'metrics')(grain,dimensions,calendar_dimensions,relevant_periods)) }}
+{%- macro gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) -%}
+    {{ return(adapter.dispatch('gen_group_by', 'metrics')(grain, dimensions, calendar_dimensions, relevant_periods)) }}
 {%- endmacro -%}
 
-{% macro default__gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) %}
+{% macro default__gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) %}
 
 {#- This model exclusively exists because dynamic group by counts based on range 
 were too funky when we hardcoded values for 1+1. So we're getting around it by
@@ -19,8 +19,18 @@ remove the grain from the list of relevant periods so it isnt double counted -#}
     {%- set period_length = relevant_periods | length -%}
     {%- set total_length = dimension_length + period_length + calendar_dimension_length -%}
 
-    {% for number in range(1,total_length+2) -%}
-        {{ number }} {%- if not loop.last -%}, {% endif -%}
-    {% endfor -%}
+    {% if grain == 'all_time' %}
+        {% if total_length > 0%}
+            group by
+            {% for number in range(1,total_length+1) -%}
+                {{ number }} {%- if not loop.last -%}, {% endif -%}
+            {% endfor -%}
+        {% endif %}
+    {% else %}
+        group by
+        {% for number in range(1,total_length+2) -%}
+            {{ number }} {%- if not loop.last -%}, {% endif -%}
+        {% endfor -%}
+    {% endif %}
 
 {% endmacro %}

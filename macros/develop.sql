@@ -17,46 +17,46 @@
     VALIDATION OF PROVIDED YML - Gotta make sure the metric looks good!
     ############ #}
 
-    {%- if develop_yml["metrics"] | length > 1 -%}
+    {%- if develop_yml.metrics | length > 1 -%}
         {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") -%}
     {%- endif -%}
 
-    {%- set metric_definition = develop_yml["metrics"][0] -%}
+    {%- set metric_definition = develop_yml.metrics[0] -%}
 
-    {%- if not metric_definition["name"] %}
+    {%- if not metric_definition.name %}
         {%- do exceptions.raise_compiler_error("The provided yml is missing a name") -%}
     {%- endif %}
 
-    {%- if not metric_definition["model"] %}
+    {%- if not metric_definition.model %}
         {%- do exceptions.raise_compiler_error("The provided yml is missing a model") -%}
     {%- endif %}
 
-    {%- if not metric_definition["timestamp"] %}
+    {%- if not metric_definition.timestamp %}
         {%- do exceptions.raise_compiler_error("The provided yml is missing a timestamp") -%}
     {%- endif %}
 
-    {%- if not metric_definition["time_grains"] %}
+    {%- if not metric_definition.time_grains %}
         {%- do exceptions.raise_compiler_error("The provided yml is missing time grains") -%}
     {%- endif %}
 
-    {%- if grain not in metric_definition["time_grains"] %}
+    {%- if grain not in metric_definition.time_grains %}
         {%- do exceptions.raise_compiler_error("The selected grain is missing from the metric definition yml") -%}
     {%- endif %}
 
-    {%- if not metric_definition["type"] %}
+    {%- if not metric_definition.type %}
         {%- do exceptions.raise_compiler_error("The provided yml is missing a metric type") -%}
     {%- endif %}
 
-    {%- if metric_definition["type"] == 'expression' %}
+    {%- if metric_definition.type == 'expression' %}
         {%- do exceptions.raise_compiler_error("The develop macro does not support expression metrics") -%}
     {%- endif %}
 
-    {%- if not metric_definition["sql"] %}
+    {%- if not metric_definition.sql %}
         {%- do exceptions.raise_compiler_error("The provided yml is missing a sql field") -%}
     {%- endif %}
 
     {%- for dim in dimensions -%}
-        {% if dim not in metric_definition["dimensions"] -%}
+        {% if dim not in metric_definition.dimensions -%}
             {%- do exceptions.raise_compiler_error("The macro provided dimension is missing from the metric definition") %}
         {% endif %}
     {%- endfor -%}
@@ -73,20 +73,20 @@
     VARIABLE SETTING - Creating the faux metric tree and faux metric list. The faux fur of 2022
     ############ #}
 
-    {% set metric_list = [metric_definition["name"]] %}
-    {% set metric_tree = metrics.get_faux_metric_tree(metric_list) %}
-    {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree, metric_definition) %}
+    {% set metric_list = [metric_definition.name] %}
+    {% set metric_tree = metrics.get_faux_metric_tree(metric_list=metric_list) %}
+    {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, metric_definition=metric_definition) %}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
     ############ #}
 
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {%- do metrics.validate_aggregate_coherence(metrics_dictionary[0]['type'], calc_config.aggregate) %}
+        {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].type, calculation_aggregate=calc_config.aggregate) %}
     {%- endfor %}
 
     {%- for calc_config in secondary_calculations if calc_config.period -%}
-        {%- do metrics.validate_grain_order(grain, calc_config.period) -%}
+        {%- do metrics.validate_grain_order(metric_grain=grain, calculation_grain=calc_config.period) -%}
     {%- endfor -%}
 
     {# ############

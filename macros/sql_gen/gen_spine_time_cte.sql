@@ -1,8 +1,8 @@
-{%- macro gen_spine_time_cte(metric_name,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions,dimensions_provided) -%}
-    {{ return(adapter.dispatch('gen_spine_time_cte', 'metrics')(metric_name,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions,dimensions_provided)) }}
+{%- macro gen_spine_time_cte(metric_name, grain, dimensions, secondary_calculations, relevant_periods, calendar_dimensions, dimensions_provided) -%}
+    {{ return(adapter.dispatch('gen_spine_time_cte', 'metrics')(metric_name, grain, dimensions, secondary_calculations, relevant_periods, calendar_dimensions, dimensions_provided)) }}
 {%- endmacro -%}
 
-{% macro default__gen_spine_time_cte(metric_name,grain,dimensions,secondary_calculations,relevant_periods,calendar_dimensions,dimensions_provided) %}
+{% macro default__gen_spine_time_cte(metric_name, grain, dimensions, secondary_calculations, relevant_periods, calendar_dimensions, dimensions_provided) %}
 
 , {{metric_name}}__spine_time as (
 
@@ -29,7 +29,7 @@
     {%- if dimensions_provided %}
     cross join {{metric_name}}__dims
     {%- endif %}
-    group by {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
+    {{ metrics.gen_group_by(grain,dimensions,calendar_dimensions,relevant_periods) }}
 
 )
 {%- endmacro -%}

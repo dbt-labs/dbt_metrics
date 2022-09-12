@@ -1,33 +1,37 @@
-{%- macro gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) -%}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary)) }}
+{%- macro gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) -%}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary)) }}
 {%- endmacro -%}
 
-{% macro default__gen_joined_metrics_cte(leaf_set,expression_set,ordered_expression_set,grain,dimensions,calendar_dimensions,secondary_calculations,relevant_periods, metrics_dictionary) %}
+{% macro default__gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary) %}
 
 {#- This section is a hacky workaround to account for postgres changes -#}
 {%- set cte_numbers = [] -%}
 {%- set unique_cte_numbers = [] -%}
 {#- the cte numbers are more representative of node depth -#}
-{%- if expression_set | length > 0 -%}
-    {%- for metric in ordered_expression_set -%}
-        {%- do cte_numbers.append(ordered_expression_set[metric]) -%}
+{%- if metric_tree.expression_set | length > 0 -%}
+    {%- for metric_name in metric_tree.ordered_expression_set -%}
+        {%- do cte_numbers.append(metric_tree.ordered_expression_set[metric_name]) -%}
     {%- endfor -%}
     {%- for cte_num in cte_numbers|unique -%}
         {%- do unique_cte_numbers.append(cte_num) -%}
     {%- endfor -%}
 {%- endif -%}
 
+{% set dimension_count = (dimensions | length + calendar_dimensions | length) | int %}
 
 , first_join_metrics as (
 
     select
+        {% if grain != 'all_time'-%}
         date_{{grain}}
-
+        {%- else -%}
+        1 as comma_placeholder
+        {%- endif -%}
         {%- for calendar_dim in calendar_dimensions %}
         , coalesce(
-            {%- for metric_name in leaf_set %}
+            {%- for metric_name in metric_tree.parent_set %}
                 {{metric_name}}__final.{{ calendar_dim }}{%- if not loop.last -%},{% endif %}
-                {%- if leaf_set | length == 1 -%}
+                {%- if metric_tree.parent_set | length == 1 -%}
                 , NULL
                 {%- endif -%}
             {% endfor %}
@@ -36,9 +40,9 @@
 
     {%- for period in relevant_periods %}
         , coalesce(
-        {%- for metric_name in leaf_set %}
+        {%- for metric_name in metric_tree.parent_set %}
             {{metric_name}}__final.date_{{ period }} {%- if not loop.last -%},{% endif %}
-            {%- if leaf_set | length == 1 %}
+            {%- if metric_tree.parent_set | length == 1 %}
             , NULL
             {%- endif -%}
         {% endfor %}
@@ -48,37 +52,77 @@
 
     {%- for dim in dimensions %}
         , coalesce(
-        {%- for metric_name in leaf_set %}
-            {{metric_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
-            {%- if leaf_set | length == 1 %}
+        {%- for metric_name in metric_tree.parent_set %}
+            {{metric_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}z
+            {%- if metric_tree.parent_set | length == 1 %}
             , NULL
             {%- endif -%}
         {% endfor %}
         ) as {{dim}}
     {%- endfor %}
-    {% for metric_name in leaf_set %}
+    {% for metric_name in metric_tree.parent_set %}
         , {{metric_name}} as {{metric_name}}
     {%- endfor %}  
 
+    {%- if grain == 'all_time' %}
+    
+        , coalesce(
+            {%- for metric_name in metric_tree.parent_set %}
+            {{metric_name}}__final.metric_start_date {%- if not loop.last -%},{% endif %}
+                {%- if metric_tree.parent_set | length == 1 %}
+            , NULL
+                {%- endif -%}
+            {% endfor %}
+        ) as metric_start_date
+
+        , coalesce(
+            {%- for metric_name in metric_tree.parent_set %}
+            {{metric_name}}__final.metric_end_date {%- if not loop.last -%},{% endif %}
+                {%- if metric_tree.parent_set | length == 1 %}
+            , NULL
+                {%- endif -%}
+            {% endfor %}
+        ) as metric_end_date
+
+    {%- endif %}
+
     from 
         {#- Loop through leaf metric list -#}
-        {%- for metric_name in leaf_set -%}
+        {%- for metric_name in metric_tree.parent_set -%}
             {%- if loop.first %}
         {{ metric_name }}__final
             {%- else %}
-        left outer join {{metric_name}}__final 
-            using (
-                date_{{grain}}
-                {%- for calendar_dim in calendar_dimensions %}
-                , {{ calendar_dim }}
-                {%- endfor %}
-                {%- for dim in dimensions %}
-                , {{ dim }}
-                {%- endfor %}
+                {%- if grain != 'all_time'%}
+        left outer join {{metric_name}}__final
+                using (
+                    date_{{grain}}
+                    {%- for calendar_dim in calendar_dimensions %}
+                    , {{ calendar_dim }}
+                    {% endfor %}
+                    {%- for dim in dimensions %}
+                    , {{ dim }}
+                    {%- endfor %}
                 )
+                {%- else -%}
+                    {% if dimension_count != 0 %}
+        left outer join {{metric_name}}__final
+                    using (
+                        {%- for calendar_dim in calendar_dimensions %}
+                            {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
+                        {% endfor -%}
+
+                        {%- for dim in dimensions %}
+                            {%- if loop.first and calendar_dimensions | length == 0 -%}{{ dim }}{%- endif -%}
+                        , {{ dim }}
+                        {%- endfor -%}
+                    )
+                    {%- elif dimension_count == 0 %}
+        cross join {{metric_name}}__final
+                    {%- endif %}
+                {%- endif %}
             {%- endif -%}
         {%- endfor %} 
-    )
+)
 
 {%- for cte_number in cte_numbers | unique | sort %}
     {% set previous_cte_number = cte_number - 1 %}
@@ -90,9 +134,9 @@
     {%- else %}
         join_metrics__{{previous_cte_number}}.*
     {%- endif %}
-    {%- for metric in ordered_expression_set %}
-        {%- if ordered_expression_set[metric] == cte_number %}
-            {%- set metric_definition = metrics_dictionary[metric]['sql'] %}
+    {%- for metric in metric_tree.expression_set %}
+        {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
+            {%- set metric_definition = metrics_dictionary[metric].sql %}
             {%- if "/" in metric_definition -%}
                 {%- set split_division_metric = metric_definition.split('/') -%}
                 {%- set dividend = split_division_metric[0] -%}
@@ -101,9 +145,10 @@
             {%- else -%}
                 {%- set expression = metric_definition -%}
             {%- endif %}
-        , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric]['name'] }}
+        , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric].name }}
         {%- endif -%}
-    {%- endfor %}
+    {%- endfor -%}
+
     {% if loop.first %}
     from first_join_metrics
     {%- else %}
@@ -118,37 +163,36 @@
 , joined_metrics as (
 
     select 
-        first_join_metrics.date_{{grain}}
+
+        {%- if grain != 'all_time' %}
+        date_{{grain}}
+        {% else %}
+        metric_start_date
+        , metric_end_date
+        {%- endif -%}
         {%- for period in relevant_periods %}
-        ,first_join_metrics.date_{{ period }}
+        ,date_{{ period }}
         {%- endfor %}
         {%- for calendar_dim in calendar_dimensions %}
-        , first_join_metrics.{{ calendar_dim }}
+        , {{ calendar_dim }}
         {%- endfor %}
         {%- for dim in dimensions %}
-        , first_join_metrics.{{ dim }}
+        , {{ dim }}
         {%- endfor %}
-        {%- for metric_name in leaf_set %}
-        , coalesce(first_join_metrics.{{metric_name}},0) as {{metric_name}}
+        {%- for metric_name in metric_tree.parent_set %}
+        , {{metric_name}}
         {%- endfor %}  
-        {%- for metric in ordered_expression_set%}
-        , coalesce({{ metric }}, 0) as {{ metric }}
-        {%- endfor %}
-
+        {%- for metric in metric_tree.expression_set %}
+        {#- should this me ordered expression set? -#}
+        , {{ metric }}
+        {% endfor -%}
+    
+    {% if metric_tree.expression_set | length == 0 %}
     from first_join_metrics
-    {% if expression_set | length > 0 %}
-    {#- TODO check sort logic -#}
-    left join join_metrics__999
-        using ( 
-            date_{{grain}}
-            {%- for calendar_dim in calendar_dimensions %}
-            , {{ calendar_dim }}
-            {%- endfor %}
-            {%- for dim in dimensions %}
-            , {{ dim }}
-            {%- endfor %}
-        )
-    {%- endif %}
+    {% else %}
+    from join_metrics__999
+    {% endif %}
+
 )
 
 {% endmacro %}
