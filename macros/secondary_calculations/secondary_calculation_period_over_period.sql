@@ -23,13 +23,12 @@
 {% endmacro %}
 
 {% macro default__metric_comparison_strategy_difference(metric_name, calc_sql) -%}
-    coalesce({{ metric_name }}, 0) - coalesce(
-        {{ calc_sql }}
-        , 0)
+    {{ metric_name }} - {{ calc_sql }}
+        
 {%- endmacro -%}
 
 {% macro default__metric_comparison_strategy_ratio(metric_name, calc_sql) -%}
-    cast(coalesce({{ metric_name }}, 0) as {{ type_float() }}) / nullif(
+    cast({{ metric_name }} as {{ type_float() }}) / nullif(
         {{ calc_sql }}
         , 0) 
 {%- endmacro %}
