@@ -110,10 +110,15 @@
                         {%- for calendar_dim in calendar_dimensions %}
                             {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
                         {% endfor -%}
-
+                        
                         {%- for dim in dimensions %}
-                            {%- if loop.first and calendar_dimensions | length == 0 -%}{{ dim }}{%- endif -%}
+                            {%- if loop.first and calendar_dimensions | length == 0 -%}
+                        {{ dim }}
+                            {%- elif not loop.first and calendar_dimensions | length == 0 -%}
                         , {{ dim }}
+                            {%- else -%}
+                        , {{ dim }}
+                            {%- endif -%}
                         {%- endfor -%}
                     )
                     {%- elif dimension_count == 0 %}
