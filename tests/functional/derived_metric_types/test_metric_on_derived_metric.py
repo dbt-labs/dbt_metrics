@@ -131,3 +131,81 @@ class TestMetricOnDerivedMetric:
         # # # # validate that the results include pass
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["pass"]
+
+
+# models/metric_on_expression_metric.sql
+all_time_dimension_metric_sql = """
+select *
+from 
+{{ metrics.calculate(metric('metric_on_expression_metric'), 
+    grain='all_time',
+    dimensions=['had_discount']
+    )
+}}
+"""
+
+# seeds/metric_on_expression_metric__expected.csv
+all_time_dimension_metric__expected_csv = """
+metric_start_date,metric_end_date,had_discount,base_sum_metric,metric_on_expression_metric,expression_metric
+2022-01-06,2022-02-15,true,6,8,7
+2022-01-08,2022-02-13,false,8,10,9
+""".lstrip()
+
+class TestAllTimeWithDimension:
+
+    # configuration in dbt_project.yml
+    @pytest.fixture(scope="class")
+    def project_config_update(self):
+        return {
+          "name": "example",
+          "models": {"+materialized": "table"}
+        }
+
+    # install current repo as package
+    @pytest.fixture(scope="class")
+    def packages(self):
+        return {
+            "packages": [
+                {"local": os.getcwd()}
+                ]
+        }
+
+
+    # everything that goes in the "seeds" directory
+    @pytest.fixture(scope="class")
+    def seeds(self):
+        return {
+            "fact_orders_source.csv": fact_orders_source_csv,
+            "metric_on_expression_metric__expected.csv": all_time_dimension_metric__expected_csv,
+        }
+
+    # everything that goes in the "models" directory
+    @pytest.fixture(scope="class")
+    def models(self):
+        return {
+            "fact_orders.yml": fact_orders_yml,
+            "base_sum_metric.yml": base_sum_metric_yml,
+            "metric_on_expression_metric.yml": metric_on_expression_metric_yml,
+            "fact_orders.sql": fact_orders_sql,
+            "metric_on_expression_metric.sql": all_time_dimension_metric_sql
+        }
+
+    def test_build_completion(self,project,):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
+        # seed seeds
+        results = run_dbt(["seed"])
+        assert len(results) == 2
+
+        # initial run
+        results = run_dbt(["run"])
+        assert len(results) == 3
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == 1
+
+        # # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]
