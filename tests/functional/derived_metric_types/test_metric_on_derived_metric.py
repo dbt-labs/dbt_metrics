@@ -28,7 +28,7 @@ metrics:
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
-    time_grains: [day, week, month]
+    time_grains: [day, week, month, all_time]
     calculation_method: sum
     expression: order_total
     dimensions:
@@ -48,7 +48,7 @@ metrics:
   - name: derived_metric
     label: derived ($)
     timestamp: order_date
-    time_grains: [day, week, month]
+    time_grains: [day, week, month, all_time]
     calculation_method: derived
     expression: "{{metric('base_sum_metric')}} + 1"
     dimensions:
@@ -58,7 +58,7 @@ metrics:
   - name: metric_on_derived_metric
     label: derived ($)
     timestamp: order_date
-    time_grains: [day, week, month]
+    time_grains: [day, week, month, all_time]
     calculation_method: derived
     expression: "{{metric('derived_metric')}} + 1"
     dimensions:
@@ -133,11 +133,11 @@ class TestMetricOnDerivedMetric:
         assert result_statuses == ["pass"]
 
 
-# models/metric_on_expression_metric.sql
+# models/metric_on_derived_metric.sql
 all_time_dimension_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('metric_on_expression_metric'), 
+{{ dbt_metrics.calculate(metric('metric_on_derived_metric'), 
     grain='all_time',
     dimensions=['had_discount']
     )
@@ -146,7 +146,7 @@ from
 
 # seeds/metric_on_expression_metric__expected.csv
 all_time_dimension_metric__expected_csv = """
-metric_start_date,metric_end_date,had_discount,base_sum_metric,metric_on_expression_metric,expression_metric
+metric_start_date,metric_end_date,had_discount,base_sum_metric,metric_on_derived_metric,derived_metric
 2022-01-06,2022-02-15,true,6,8,7
 2022-01-08,2022-02-13,false,8,10,9
 """.lstrip()
@@ -176,7 +176,7 @@ class TestAllTimeWithDimension:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "metric_on_expression_metric__expected.csv": all_time_dimension_metric__expected_csv,
+            "metric_on_derived_metric__expected.csv": all_time_dimension_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -185,9 +185,9 @@ class TestAllTimeWithDimension:
         return {
             "fact_orders.yml": fact_orders_yml,
             "base_sum_metric.yml": base_sum_metric_yml,
-            "metric_on_expression_metric.yml": metric_on_expression_metric_yml,
+            "metric_on_derived_metric.yml": metric_on_derived_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "metric_on_expression_metric.sql": all_time_dimension_metric_sql
+            "metric_on_derived_metric.sql": all_time_dimension_metric_sql
         }
 
     def test_build_completion(self,project,):
