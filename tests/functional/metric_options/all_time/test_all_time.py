@@ -10,12 +10,12 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/metric_on_derived_metric.sql
-metric_on_derived_metric_sql = """
+# models/metric_on_expression_metric.sql
+metric_on_expression_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('metric_on_derived_metric'), 
-    grain='month'
+{{ metrics.calculate(metric('metric_on_expression_metric'), 
+    grain='all_time'
     )
 }}
 """
@@ -28,52 +28,51 @@ metrics:
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
-    time_grains: [day, week, month]
-    calculation_method: sum
-    expression: order_total
+    time_grains: [day, week, month, all_time]
+    type: sum
+    sql: order_total
     dimensions:
       - had_discount
       - order_country
 """
 
-# models/derived_metric.yml
-metric_on_derived_metric_yml = """
+# models/expression_metric.yml
+metric_on_expression_metric_yml = """
 version: 2 
 models:
-  - name: metric_on_derived_metric
+  - name: metric_on_expression_metric
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('metric_on_derived_metric__expected')
+          compare_model: ref('metric_on_expression_metric__expected')
 metrics:
-  - name: derived_metric
-    label: derived ($)
+  - name: expression_metric
+    label: Expression ($)
     timestamp: order_date
-    time_grains: [day, week, month]
-    calculation_method: derived
-    expression: "{{metric('base_sum_metric')}} + 1"
+    time_grains: [day, week, month, all_time]
+    type: expression
+    sql: "{{metric('base_sum_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country
 
-  - name: metric_on_derived_metric
-    label: derived ($)
+  - name: metric_on_expression_metric
+    label: Expression ($)
     timestamp: order_date
-    time_grains: [day, week, month]
-    calculation_method: derived
-    expression: "{{metric('derived_metric')}} + 1"
+    time_grains: [day, week, month, all_time]
+    type: expression
+    sql: "{{metric('expression_metric')}} + 1"
     dimensions:
       - had_discount
       - order_country
 """
 
-# seeds/metric_on_derived_metric__expected.csv
-metric_on_derived_metric__expected_csv = """
-date_month,base_sum_metric,derived_metric,metric_on_derived_metric
-2022-02-01,6,7,8
-2022-01-01,8,9,10
+# seeds/metric_on_expression_metric__expected.csv
+metric_on_expression_metric__expected_csv = """
+metric_start_date,metric_end_date,base_sum_metric,metric_on_expression_metric,expression_metric
+2022-01-06,2022-02-15,14,16,15
 """.lstrip()
 
-class TestMetricOnDerivedMetric:
+class TestAllTimeMetricOnExpressionMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -98,7 +97,7 @@ class TestMetricOnDerivedMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "metric_on_derived_metric__expected.csv": metric_on_derived_metric__expected_csv,
+            "metric_on_expression_metric__expected.csv": metric_on_expression_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -107,9 +106,9 @@ class TestMetricOnDerivedMetric:
         return {
             "fact_orders.yml": fact_orders_yml,
             "base_sum_metric.yml": base_sum_metric_yml,
-            "metric_on_derived_metric.yml": metric_on_derived_metric_yml,
+            "metric_on_expression_metric.yml": metric_on_expression_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "metric_on_derived_metric.sql": metric_on_derived_metric_sql
+            "metric_on_expression_metric.sql": metric_on_expression_metric_sql
         }
 
     def test_build_completion(self,project,):
