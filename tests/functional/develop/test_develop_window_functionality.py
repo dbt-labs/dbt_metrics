@@ -8,6 +8,7 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
+    custom_calendar_sql
 )
 
 # models/develop_metric.sql
@@ -64,8 +65,12 @@ class TestDevelopMetricWindow:
     @pytest.fixture(scope="class")
     def project_config_update(self):
         return {
-          "name": "example",
-          "models": {"+materialized": "table"}
+            "name": "example",
+            "models": {"+materialized": "table"},
+            "vars":{
+                "dbt_metrics_calendar_model": "custom_calendar",
+                "custom_calendar_dimension_list": ["is_weekend"]
+            }
         }
 
     # install current repo as package
@@ -93,7 +98,8 @@ class TestDevelopMetricWindow:
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
             "develop_metric.sql": develop_metric_sql,
-            "develop_metric.yml": develop_metric_yml
+            "develop_metric.yml": develop_metric_yml,
+            "custom_calendar.sql": custom_calendar_sql
         }
 
     def test_build_completion(self,project,):
@@ -106,7 +112,7 @@ class TestDevelopMetricWindow:
 
         # initial run
         results = run_dbt(["run"])
-        assert len(results) == 3
+        assert len(results) == 4
 
         # test tests
         results = run_dbt(["test"]) # expect passing test
