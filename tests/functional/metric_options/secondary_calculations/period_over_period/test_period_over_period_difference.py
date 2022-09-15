@@ -14,10 +14,10 @@ from tests.functional.fixtures import (
 period_over_period_difference_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('period_over_period_difference'), 
+{{ metrics.calculate(metric('period_over_period_difference'), 
     grain='month',
     secondary_calculations=[
-        dbt_metrics.period_over_period(comparison_strategy="difference", interval=1, alias = "1mth")
+        metrics.period_over_period(comparison_strategy="difference", interval=1, alias = "1mth")
     ]
     )
 }}

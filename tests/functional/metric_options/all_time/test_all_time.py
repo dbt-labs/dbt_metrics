@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 metric_on_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('metric_on_derived_metric'), 
+{{ metrics.calculate(metric('metric_on_derived_metric'), 
     grain='all_time'
     )
 }}
@@ -136,7 +136,7 @@ class TestAllTimeMetricOnderivedMetric:
 all_time_dimension_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('metric_on_derived_metric'), 
+{{ metrics.calculate(metric('metric_on_derived_metric'), 
     grain='all_time',
     dimensions=['had_discount']
     )

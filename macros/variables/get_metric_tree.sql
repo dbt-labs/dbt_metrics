@@ -27,7 +27,7 @@ are one depth upstream #}
 {% for metric in metric_list %}
     {%- do base_set_list.append(metric.name) -%}
     {# TODO #47 its not really GETTING the metric tree as much as operating. re-name that  #}
-    {%- set metric_tree = dbt_metrics.update_metric_tree(metric ,metric_tree) -%}
+    {%- set metric_tree = metrics.update_metric_tree(metric ,metric_tree) -%}
 {% endfor %}
 {%- do metric_tree.update({'base_set':base_set_list}) -%}
 

@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 backwards_compatability_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.metric(
+{{ metrics.metric(
     metric_name='backwards_compatability_derived_metric', 
     grain='month'
     )

@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 where_derived_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('where_derived_metric'), 
+{{ metrics.calculate(metric('where_derived_metric'), 
     grain='month',
     dimensions=['had_discount'],
     where="had_discount=true"

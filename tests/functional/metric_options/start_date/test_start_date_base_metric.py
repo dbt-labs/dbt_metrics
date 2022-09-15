@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 start_date_base_sum_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('start_date_base_sum_metric'), 
+{{ metrics.calculate(metric('start_date_base_sum_metric'), 
     grain='month',
     start_date='2022-02-01'
     )

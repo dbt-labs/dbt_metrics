@@ -1,6 +1,6 @@
 select *
 from 
-{{ dbt_metrics.calculate(
+{{ metrics.calculate(
     metric('metric_on_derived_metric'), 
     grain='day', 
     dimensions=['had_discount','order_country','is_weekend'],

@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 double_quote_ref_metrics_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(
+{{ metrics.calculate(
     metric('base_count_metric'),
     grain='month',
     dimensions=['had_discount']

@@ -14,7 +14,7 @@ from tests.functional.fixtures import (
 invalid_time_grain_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('invalid_time_grain'), 
+{{ metrics.calculate(metric('invalid_time_grain'), 
     grain='year'
     )
 }}
@@ -24,7 +24,7 @@ from
 multiple_metrics_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(
+{{ metrics.calculate(
     [metric('base_sum_metric'), metric('base_count_metric')],
     grain='year'
     )

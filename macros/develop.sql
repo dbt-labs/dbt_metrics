@@ -74,28 +74,28 @@
     ############ #}
 
     {% set metric_list = [metric_definition.name] %}
-    {% set metric_tree = dbt_metrics.get_faux_metric_tree(metric_list=metric_list) %}
-    {% set metrics_dictionary = dbt_metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, metric_definition=metric_definition) %}
+    {% set metric_tree = metrics.get_faux_metric_tree(metric_list=metric_list) %}
+    {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, metric_definition=metric_definition) %}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
     ############ #}
 
-    {%- do dbt_metrics.validate_develop_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
+    {%- do metrics.validate_develop_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
 
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
-        {%- do dbt_metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].calculation_method, calculation_aggregate=calc_config.aggregate) %}
+        {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].calculation_method, calculation_aggregate=calc_config.aggregate) %}
     {%- endfor %}
 
     {%- for calc_config in secondary_calculations if calc_config.period -%}
-        {%- do dbt_metrics.validate_grain_order(metric_grain=grain, calculation_grain=calc_config.period) -%}
+        {%- do metrics.validate_grain_order(metric_grain=grain, calculation_grain=calc_config.period) -%}
     {%- endfor -%}
 
     {# ############
     SQL GENERATION - Lets build that SQL!
     ############ -#}
 
-    {%- set sql = dbt_metrics.get_metric_sql(
+    {%- set sql = metrics.get_metric_sql(
         metrics_dictionary=metrics_dictionary,
         grain=grain,
         dimensions=dimensions,

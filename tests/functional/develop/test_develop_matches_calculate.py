@@ -29,7 +29,7 @@ metrics:
 {%- endset %}
 
 select * 
-from {{ dbt_metrics.develop(
+from {{ metrics.develop(
         develop_yml=my_metric_yml,
         grain='month'
         )
@@ -57,7 +57,7 @@ metrics:
 testing_metric_calculate_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('testing_metric'), 
+{{ metrics.calculate(metric('testing_metric'), 
     grain='month'
     )
 }}

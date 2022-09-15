@@ -15,7 +15,7 @@ from tests.functional.fixtures import (
 base_window_metric_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('base_window_metric'), 
+{{ metrics.calculate(metric('base_window_metric'), 
     grain='week'
     )
 }}

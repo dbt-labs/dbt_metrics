@@ -35,7 +35,7 @@ metrics:
 invalid_window_all_time_sql = """
 select *
 from 
-{{ dbt_metrics.calculate(metric('invalid_window_all_time'), 
+{{ metrics.calculate(metric('invalid_window_all_time'), 
     grain='all_time'
     )
 }}
@@ -106,7 +106,7 @@ metrics:
 {%- endset %}
 
 select * 
-from {{ dbt_metrics.develop(
+from {{ metrics.develop(
         develop_yml=my_metric_yml,
         grain='all_time'
         )
