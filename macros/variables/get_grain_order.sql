@@ -1,5 +1,5 @@
 {% macro get_grain_order() %}
-    {{ return(adapter.dispatch('get_grain_order', 'dbt_metrics')()) }}
+    {{ return(adapter.dispatch('get_grain_order', 'metrics')()) }}
 {% endmacro %}
 
 {% macro default__get_grain_order() %}

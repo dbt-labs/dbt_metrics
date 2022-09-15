@@ -1,5 +1,5 @@
 {% macro get_metric_allowlist() %}
-    {{ return(adapter.dispatch('get_metric_allowlist', 'dbt_metrics')()) }}
+    {{ return(adapter.dispatch('get_metric_allowlist', 'metrics')()) }}
 {% endmacro %}
 
 {% macro default__get_metric_allowlist() %}

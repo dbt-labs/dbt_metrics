@@ -1,5 +1,5 @@
 l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) %}
-    {{ return(adapter.dispatch('calculate', 'dbt_metrics')(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
+    {{ return(adapter.dispatch('calculate', 'metrics')(metric_list, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
 {% endmacro %}
 
 

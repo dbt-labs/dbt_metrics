@@ -1,5 +1,5 @@
 {%- macro develop(develop_yml, grain, dimensions=[], secondary_calculations=[], start_date=None, end_date=None, where=None) -%}
-    {{ return(adapter.dispatch('develop', 'dbt_metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
+    {{ return(adapter.dispatch('develop', 'metrics')(develop_yml, grain, dimensions, secondary_calculations, start_date, end_date, where)) }}
 {%- endmacro -%}
 
 
