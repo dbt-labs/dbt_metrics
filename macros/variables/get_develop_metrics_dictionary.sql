@@ -1,8 +1,10 @@
-{% macro get_develop_metrics_dictionary(metric_tree, metric_definition) %}
+{% macro get_develop_metrics_dictionary(metric_tree, develop_yml) %}
 
 {% set metrics_dictionary = {} %}
 
 {% for metric_name in metric_tree.full_set %}
+    {% set metric_definition = develop_yml[metric_name]%}
+    
     {% do metrics_dictionary.update({metric_definition.name:{}})%}
     {% do metrics_dictionary[metric_name].update({'name': metric_definition.name})%}
     {% do metrics_dictionary[metric_name].update({'calculation_method': metric_definition.calculation_method})%}
