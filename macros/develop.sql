@@ -21,6 +21,13 @@
     VALIDATION OF PROVIDED YML - Gotta make sure the metric looks good!
     ############ #}
 
+    {# {%- if develop_yml.metrics | length > 1 -%}
+        {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") -%}
+    {%- endif -%} #}
+
+
+    {% do print(develop_yml.metrics) %}
+
     {% for metric_definition in develop_yml.metrics %}
 
         {%- if not metric_definition.name %}
