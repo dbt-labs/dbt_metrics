@@ -13,8 +13,8 @@
                 "type":"string"
             }
         },
-        "type": { "type": "string"},
-        "sql": { "type": "string"},
+        "calculation_method": { "type": "string"},
+        "expression": { "type": "string"},
         "dimensions": { 
             "type": "array",
             "items":{

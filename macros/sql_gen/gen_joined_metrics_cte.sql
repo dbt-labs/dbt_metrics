@@ -141,7 +141,7 @@
     {%- endif %}
     {%- for metric in metric_tree.ordered_expression_set %}
         {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
-        ,({{metrics_dictionary[metric].sql | replace(".metric_value","")}}) as {{metrics_dictionary[metric].name}}
+        ,({{metrics_dictionary[metric].expression | replace(".metric_value","")}}) as {{metrics_dictionary[metric].name}}
         {%- endif -%}
     {%- endfor %}
     {% if loop.first %}

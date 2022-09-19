@@ -40,8 +40,8 @@ metrics:
     label: rolling min
     timestamp: order_date
     time_grains: [day, week, month]
-    type: min
-    sql: order_total
+    calculation_method: min
+    expression: order_total
     dimensions:
       - had_discount
       - order_country

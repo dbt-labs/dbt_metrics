@@ -10,7 +10,7 @@
     {% for dim in dimensions %}
 
         {# Now we loop through all the metrics in the full set, which is all metrics, parent metrics,
-        and expression metrics associated with the macro call #}
+        and derived metrics associated with the macro call #}
         {% for metric_name in metric_tree.full_set %}
             {% set metric_relation = metric(metric_name)%}
             

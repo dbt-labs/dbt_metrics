@@ -11,6 +11,6 @@
         "sum": ['min', 'max', 'sum', 'average'],
         "max": ['min', 'max', 'sum', 'average'],
         "min": ['min', 'max', 'sum', 'average'],
-        "expression": ['min', 'max', 'sum'],
+        "derived": ['min', 'max', 'sum'],
     }) %}
 {% endmacro %}

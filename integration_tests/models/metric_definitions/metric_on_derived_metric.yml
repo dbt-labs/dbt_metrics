@@ -1,0 +1,11 @@
+version: 2 
+metrics:
+  - name: metric_on_derived_metric
+    label: Profit Minus Our Civic Duty
+    timestamp: order_date
+    time_grains: [day, week]
+    calculation_method: derived
+    expression: "{{metric('derived_metric')}} - {{metric('derived_metric__alternative')}}"
+    dimensions:
+      - had_discount
+      - order_country

@@ -1,0 +1,12 @@
+version: 2 
+
+metrics:
+  - name: derived_metric__alternative
+    label: Profit ($)
+    timestamp: order_date
+    time_grains: [day, week]
+    calculation_method: derived
+    expression: "{{metric('base_sum_metric')}} - {{metric('base_average_metric')}} + 5"
+    dimensions:
+      - had_discount
+      - order_country
