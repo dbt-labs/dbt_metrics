@@ -1,7 +1,7 @@
 {% macro get_base_metrics(metric) %}
 
     -- this checks whether it is a relation or a list
-    {%- if (metric is mapping and metric.get('metadata', {}).get('type', '').endswith('Relation')) %}
+    {%- if (metric is mapping and metric.get('metadata', {}).get('calculation_method', '').endswith('Relation')) %}
 
         {%- for child in metric recursive -%}
 
@@ -23,9 +23,9 @@
 
     {% else %}
 
-        {# For non-expression metrics, we just need the relation of the base model ie 
+        {# For non-derived metrics, we just need the relation of the base model ie 
         the model that its built. Then we append it to the metric list name so the same
-        variable used in expression metrics can be used below #}
+        variable used in derived metrics can be used below #}
         {%- set metric_list = [] -%}
         {% do metric_list.append(metric.name) %}
 

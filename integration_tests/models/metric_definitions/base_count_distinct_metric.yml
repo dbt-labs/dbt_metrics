@@ -1,0 +1,13 @@
+version: 2 
+
+metrics:
+  - name: base_count_distinct_metric
+    model: ref('fact_orders')
+    label: Count Distinct
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: count_distinct
+    expression: customer_id
+    dimensions:
+      - had_discount
+      - order_country

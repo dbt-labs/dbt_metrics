@@ -110,10 +110,15 @@
                         {%- for calendar_dim in calendar_dimensions %}
                             {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
                         {% endfor -%}
-
+                        
                         {%- for dim in dimensions %}
-                            {%- if loop.first and calendar_dimensions | length == 0 -%}{{ dim }}{%- endif -%}
+                            {%- if loop.first and calendar_dimensions | length == 0 -%}
+                        {{ dim }}
+                            {%- elif not loop.first and calendar_dimensions | length == 0 -%}
                         , {{ dim }}
+                            {%- else -%}
+                        , {{ dim }}
+                            {%- endif -%}
                         {%- endfor -%}
                     )
                     {%- elif dimension_count == 0 %}
@@ -136,7 +141,7 @@
     {%- endif %}
     {%- for metric in metric_tree.expression_set %}
         {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
-            {%- set metric_definition = metrics_dictionary[metric].sql %}
+            {%- set metric_definition = metrics_dictionary[metric].expression %}
             {%- if "/" in metric_definition -%}
                 {%- set split_division_metric = metric_definition.split('/') -%}
                 {%- set dividend = split_division_metric[0] -%}

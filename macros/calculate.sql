@@ -39,9 +39,9 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
         {%- do exceptions.raise_compiler_error("From v0.3.0 onwards, the where clause takes a single string, not a list of filters. Please fix to reflect this change") %}
     {%- endif -%}
 
-    {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree, secondary_calculations=secondary_calculations) -%}
+    {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
 
-    {%- do metrics.validate_expression_metrics(metric_tree=metric_tree) -%}
+    {%- do metrics.validate_derived_metrics(metric_tree=metric_tree) -%}
 
     {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree) -%} 
 
@@ -51,7 +51,7 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
 
     {%- for metric_name in metric_tree.base_set %}
         {%- for calc_config in secondary_calculations if calc_config.aggregate -%}
-            {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[metric_name].type, calculation_aggregate=calc_config.aggregate) -%}
+            {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[metric_name].calculation_method, calculation_aggregate=calc_config.aggregate) -%}
         {%- endfor -%}
     {%- endfor -%}
 

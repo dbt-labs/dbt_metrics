@@ -32,8 +32,8 @@ metrics:
     label: max_date_invalid_datatype
     timestamp: order_date
     time_grains: [day, week, month]
-    type: max
-    sql: order_country
+    calculation_method: max
+    expression: order_country
 """
 
 class TestInvalidStringDataType:

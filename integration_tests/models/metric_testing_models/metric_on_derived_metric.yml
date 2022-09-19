@@ -1,0 +1,3 @@
+version: 2 
+models: 
+  - name: metric_on_derived_metric

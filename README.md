@@ -7,6 +7,7 @@
    * [Installation Instructions](#installation-instructions)
 * [Macros](#macros)
    * [Calculate](#calculate)
+      * [Renaming the package](#renaming-the-package)
       * [Migration from metric to calculate](#migration-from-metric-to-calculate)
    * [Develop](#develop)
 * [Use cases and examples](#use-cases-and-examples)
@@ -19,7 +20,8 @@
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
 * [Customisation](#customisation)
    * [All_Time Grain](#all_time-grain)
-   * [Expression Metrics](#expression-metrics)
+   * [Window Periods](#window-periods)
+   * [Derived Metrics](#derived-metrics)
    * [Multiple Metrics](#multiple-metrics)
    * [Where Clauses](#where-clauses)
    * [Calendar](#calendar)
@@ -29,14 +31,14 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Mon Sep 12 22:27:15 UTC 2022 -->
+<!-- Added by: runner, at: Thu Sep 15 13:55:04 UTC 2022 -->
 
 <!--te-->
 
 
 
 # About
-This dbt package generates queries based on [metrics](https://docs.getdbt.com/docs/building-a-dbt-project/metrics), introduced to dbt Core in v1.0. For more information on metrics, such as available types, properties, and other definition parameters, please reference the documentation linked above.
+This dbt package generates queries based on [metrics](https://docs.getdbt.com/docs/building-a-dbt-project/metrics), introduced to dbt Core in v1.0. For more information on metrics, such as available calculation methods, properties, and other definition parameters, please reference the documentation linked above.
 
 ## Tenets
 The tenets of `dbt_metrics`, which should be considered during development, issues, and contributions, are:
@@ -87,6 +89,10 @@ from {{ metrics.calculate(
 
 `start_date` and `end_date` are optional. When not provided, the spine will span all dates from oldest to newest in the metric's dataset. This default is likely to be correct in most cases, but you can use the arguments to either narrow the resulting table or expand it (e.g. if there was no new customers until 3 January but you want to include the first two days as well). Both values are inclusive.
 
+### Renaming the package
+In version `0.4.0` we re-named the internal package name to reflect the name of the repository. `metrics` became `dbt_metrics`. This changes the syntax used in all metrics queries, as shown in the following example:
+- `metrics.calculate` to `metrics.calculate`
+
 ### Migration from metric to calculate
 In version `0.3.0` of the dbt_metrics package, the name of the main macro was changed from `metric` to `calculate`. This was done in order to better reflect the work being performed by the macro and match the semantic naming followed by the rest of the macros in the package (describing the action, not the output). Additionally, the `metric_name` input was changed to take a single `metric` function or multiple `metric` functions provided in a list.
 
@@ -100,7 +106,7 @@ There are times when you want to test what a metric might look like before defin
 
 **Limitations:**
 - The provided yml can only contain one metric
-- The metric in question cannot be an expression metric
+- The metric in question cannot be an derived metric
 
 ```sql
 {% set my_metric_yml -%}
@@ -111,8 +117,8 @@ metrics:
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    type: average
-    sql: discount_total
+    calculation_method: average
+    expression: discount_total
     dimensions:
       - had_discount
       - order_country
@@ -186,10 +192,20 @@ Constructor: `metrics.rolling(aggregate, interval [, alias])`
 Most behaviour in the package can be overridden or customised.
 
 ## All_Time Grain
+Version `0.4.0` of this package added support for the `all_time` grain to be defined in the metric. 
+
 If you're interested in returning the metric value across all time (or ignoring time bounds all together), you can include the `all_time` grain in the metric definition and then use that in the `calculate` or `develop` macro. This will return a single value for the metric (more if dimensions included) and the start/end date range for that metric calculation.
 
-## Expression Metrics 
-Version `0.3.0` of this package, and beyond, offer support for `expression` metrics! More information around this type can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+## Window Periods 
+Version `0.4.0` of this package, and beyond, offers support for the `window` attribute of the metric definition. This alters the underlying query to allow the metric definition to contain a window of time, such as the past 14 days or the past 3 months.
+
+More information can be found in the [`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+
+## Derived Metrics 
+__Note: In version `0.4.0`, `expression` metrics were renamed to `derived`__
+
+Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this calculation_method can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
+
 
 ## Multiple Metrics
 There may be instances where you want to return multiple metrics within a single macro. This is possible by providing a list of metrics instead of a single metric. See example below:
@@ -243,7 +259,7 @@ The `is_weekend` field can now be used by your metrics.
 The package protects against nonsensical secondary calculations, such as a month-to-date aggregate of data which has been rolled up to the quarter. If you customise your calendar (for example by adding a [4-5-4 retail calendar](https://calogica.com/sql/dbt/2018/11/15/retail-calendar-in-sql.html) month), you will need to override the [`get_grain_order()`](/macros/secondary_calculations/validate_grain_order.sql) macro. In that case, you might remove `month` and replace it with `month_4_5_4`. All date columns must be prefixed with `date_` in the table. Do not include the prefix when defining your metric, it will be added automatically.
 
 ## Custom aggregations 
-To create a custom primary aggregation (as exposed through the `type` config of a metric), create a macro of the form `metric_my_aggregate(expression)`, then override the [`gen_primary_metric_aggregate()`](/macros/sql_gen/gen_primary_metric_aggregate.sql) macro to add it to the dispatch list. The package also protects against nonsensical secondary calculations such as an average of an average; you will need to override the [`get_metric_allowlist()`](/macros/secondary_calculations/validate_aggregate_coherence.sql)  macro to both add your new aggregate to to the existing aggregations' allowlists, and to make an allowlist for your new aggregation:
+To create a custom primary aggregation (as exposed through the `calculation_method` config of a metric), create a macro of the form `metric_my_aggregate(expression)`, then override the [`gen_primary_metric_aggregate()`](/macros/sql_gen/gen_primary_metric_aggregate.sql) macro to add it to the dispatch list. The package also protects against nonsensical secondary calculations such as an average of an average; you will need to override the [`get_metric_allowlist()`](/macros/secondary_calculations/validate_aggregate_coherence.sql)  macro to both add your new aggregate to to the existing aggregations' allowlists, and to make an allowlist for your new aggregation:
 ```
     {% do return ({
         "average": ['max', 'min'],

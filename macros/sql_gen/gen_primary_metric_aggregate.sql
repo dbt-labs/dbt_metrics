@@ -5,6 +5,7 @@
 {%- endmacro -%}
 
 {%- macro default__gen_primary_metric_aggregate(aggregate, expression) -%}
+
     {%- if aggregate == 'count' -%}
         {{ return(adapter.dispatch('metric_count', 'metrics')(expression)) }}
     
@@ -23,8 +24,8 @@
     {%- elif aggregate == 'sum' -%}
         {{ return(adapter.dispatch('metric_sum', 'metrics')(expression)) }}
 
-    {%- elif aggregate == 'expression' -%}
-        {{ return(adapter.dispatch('metric_expression', 'metrics')(expression)) }}
+    {%- elif aggregate == 'derived' -%}
+        {{ return(adapter.dispatch('metric_derived', 'metrics')(expression)) }}
 
     {%- else -%}
         {%- do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) -%}  

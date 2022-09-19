@@ -5,8 +5,22 @@ metrics:
     label: Order Total ($)
     timestamp: order_date
     time_grains: [day, week, month, all_time]
-    type: sum
-    sql: order_total
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country
+
+  - name: base_sum_metric__14_day_window
+    model: ref('fact_orders')
+    label: Order Total ($)
+    timestamp: order_date
+    time_grains: [day, week, month, all_time]
+    calculation_method: sum
+    expression: order_total
+    window:
+      count: 14
+      period: month
     dimensions:
       - had_discount
       - order_country
@@ -15,9 +29,10 @@ metrics:
     model: ref('fact_orders')
     label: Order Total ($)
     timestamp: order_date
-    time_grains: [day, week, month, all_time]
-    type: sum
-    sql: order_total
+    time_grains: [day, week, month, all_time] 
+    calculation_method: sum
+    expression: order_total
     dimensions:
       - had_discount
       - order_country
+  

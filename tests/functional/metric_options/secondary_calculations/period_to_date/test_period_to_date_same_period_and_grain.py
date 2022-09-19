@@ -37,8 +37,8 @@ metrics:
     label: Count
     timestamp: order_date
     time_grains: [day, week, month]
-    type: count
-    sql: customer_id
+    calculation_method: count
+    expression: customer_id
     dimensions:
       - had_discount
       - order_country

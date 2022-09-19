@@ -40,8 +40,8 @@ metrics:
     label: Count Distinct
     timestamp: order_date
     time_grains: [day, week, month]
-    type: count_distinct
-    sql: customer_id
+    calculation_method: count_distinct
+    expression: customer_id
     dimensions:
       - had_discount
       - order_country
