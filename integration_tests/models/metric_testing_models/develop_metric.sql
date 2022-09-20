@@ -1,4 +1,5 @@
 {% set my_metric_yml -%}
+{% raw %}
 
 metrics:
   - name: develop_metric
@@ -12,23 +13,23 @@ metrics:
       - had_discount
       - order_country
 
-  - name: develop_metric_2
-    model: ref('fact_orders')
+  - name: derived_metric
     label: Total Discount ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: average
-    expression: discount_total
+    calculation_method: derived
+    expression: "{{ metric('develop_metric') }} - 1 "
     dimensions:
       - had_discount
       - order_country
 
+{% endraw %}
 {%- endset %}
 
 select * 
 from {{ metrics.develop(
         develop_yml=my_metric_yml,
-        metric_list=['develop_metric','develop_metric_2'],
+        metric_list=['develop_metric','derived_metric'],
         grain='month'
         )
     }}

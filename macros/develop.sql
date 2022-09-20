@@ -15,6 +15,7 @@
         {%- set metric_list = [metric_list] -%}
     {%- endif -%}
 
+
     {%- set develop_yml = fromyaml(develop_yml) -%}
 
     {# ############
@@ -24,9 +25,6 @@
     {# {%- if develop_yml.metrics | length > 1 -%}
         {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") -%}
     {%- endif -%} #}
-
-
-    {% do print(develop_yml.metrics) %}
 
     {% for metric_definition in develop_yml.metrics %}
 
@@ -79,8 +77,9 @@
     VARIABLE SETTING - Creating the faux metric tree and faux metric list. The faux fur of 2022
     ############ #}
 
-    {% set metric_tree = metrics.get_faux_metric_tree(metric_list=metric_list) %}
-    {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %}
+    {% set metric_tree = metrics.get_faux_metric_tree(metric_list=metric_list, develop_yml=develop_yml) %}
+
+    {# {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %} #}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
