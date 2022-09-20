@@ -18,13 +18,13 @@
         {% endif %}
         -- ALL DIMENSIONS
         {% for dim in dimensions %}
-            {{ dim }},
+            base_model.{{ dim }},
         {%- endfor %}
         {% for calendar_dim in calendar_dimensions %}
             calendar_table.{{ calendar_dim }},
         {%- endfor %}
         {%- if metric_sql and metric_sql | replace('*', '') | trim != '' -%}
-            {{ metric_sql }} as property_to_aggregate
+            base_model.{{ metric_sql }} as property_to_aggregate
         {%- elif metric_type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
         {%- else -%}
@@ -39,12 +39,12 @@
     {% if start_date or end_date%}
         and (
         {% if start_date and end_date %}
-            cast({{metric_timestamp}} as date) >= cast('{{ start_date }}' as date)
-            and cast({{metric_timestamp}} as date) <= cast('{{ end_date }}' as date)
+            cast(base_model.{{metric_timestamp}} as date) >= cast('{{ start_date }}' as date)
+            and cast(base_model.{{metric_timestamp}} as date) <= cast('{{ end_date }}' as date)
         {% elif start_date and not end_date %}
-            cast({{metric_timestamp}} as date) >= cast('{{ start_date }}' as date)
+            cast(base_model.{{metric_timestamp}} as date) >= cast('{{ start_date }}' as date)
         {% elif end_date and not start_date %}
-            cast({{metric_timestamp}} as date) <= cast('{{ end_date }}' as date)
+            cast(base_model.{{metric_timestamp}} as date) <= cast('{{ end_date }}' as date)
         {% endif %} 
         )
     {% endif %} 
