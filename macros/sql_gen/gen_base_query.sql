@@ -9,7 +9,7 @@
     select 
         {# This section looks at the sql aspect of the metric and ensures that 
         the value input into the macro is accurate #}
-        cast({{metric_timestamp}} as date) as metric_date_day, -- timestamp field
+        cast(base_model.{{metric_timestamp}} as date) as metric_date_day, -- timestamp field
         calendar_table.date_{{ grain }} as date_{{grain}},
         {% if secondary_calculations | length > 0 %}
             {% for period in relevant_periods %}
@@ -18,13 +18,13 @@
         {% endif %}
         -- ALL DIMENSIONS
         {% for dim in dimensions %}
-            {{ dim }},
+            base_model.{{ dim }},
         {%- endfor %}
         {% for calendar_dim in calendar_dimensions %}
-            {{ calendar_dim }},
+            calendar_table.{{ calendar_dim }},
         {%- endfor %}
         {%- if metric_sql and metric_sql | replace('*', '') | trim != '' -%}
-            {{ metric_sql }} as property_to_aggregate
+            base_model.{{ metric_sql }} as property_to_aggregate
         {%- elif metric_type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
         {%- else -%}
@@ -32,7 +32,7 @@
         {%- endif %}
     from {{ model }}
     left join {{calendar_tbl}} calendar_table
-        on cast({{metric_timestamp}} as date) = date_day
+        on cast(base_model.{{metric_timestamp}} as date) = calendar_table.date_day
     where 1=1
     
     -- metric start/end dates also applied here to limit incoming data
