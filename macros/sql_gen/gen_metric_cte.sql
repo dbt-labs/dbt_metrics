@@ -1,10 +1,16 @@
-{%- macro gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions) -%}
-    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions)) }}
+{%- macro gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, default_value_null) -%}
+    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, default_value_null)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions) %}
+{%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, default_value_null) %}
 
 , {{metric_name}}__final as (
+
+    {%- if default_value_null -%}
+        {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}
+    {%- else -%}
+        {%- set metric_val = metric_name-%}
+    {%- endif %}
     
     select
         {% if grain != 'all_time' %}
@@ -23,7 +29,7 @@
         {%- for dim in dimensions %}
         parent_metric_cte.{{ dim }},
         {%- endfor %}
-        {{ metric_name }}
+        {{ metric_val }}
         
     {%- if grain == 'all_time' %}
 

@@ -15,6 +15,7 @@
     {% do metrics_dictionary[metric_name].update({'dimensions': dict_metric.dimensions})%}
     {% do metrics_dictionary[metric_name].update({'filters': dict_metric.filters})%}
     {% do metrics_dictionary[metric_name].update({'window': dict_metric.window})%}
+    {% do metrics_dictionary[metric_name].update({'config': dict_metric.config})%}
 
     {% if dict_metric.calculation_method != 'derived' %}
         {% set metric_model_name = metrics.get_metric_model_name(metric_model=dict_metric.model) %}

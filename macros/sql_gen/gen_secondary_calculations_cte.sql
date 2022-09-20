@@ -1,8 +1,9 @@
-{%- macro gen_secondary_calculation_cte(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions) -%}
-    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'metrics')(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions)) }}
+{%- macro gen_secondary_calculation_cte(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions,metric_config_dict
+) -%}
+    {{ return(adapter.dispatch('gen_secondary_calculation_cte', 'metrics')(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions, metric_config_dict)) }}
 {%- endmacro -%}
 
-{% macro default__gen_secondary_calculation_cte(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions) %}
+{% macro default__gen_secondary_calculation_cte(metric_tree, grain, dimensions, secondary_calculations, calendar_dimensions, metric_config_dict) %}
 
 {#- The logic for secondary calculations is past the point where having calendar + dim
 in a single list would create issues. So here we join them together. Plus it makes it
@@ -22,7 +23,7 @@ easier for not having to update the working secondary calc logic -#}
             {%- for metric_name in metric_tree.base_set -%}
 
                 {%- for calc_config in secondary_calculations %}
-        , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) }} as {{ metrics.generate_secondary_calculation_alias(metric_name, calc_config, grain, true) }}
+        , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config, metric_config_dict[metric_name]) }} as {{ metrics.generate_secondary_calculation_alias(metric_name, calc_config, grain, true) }}
 
                 {% endfor -%}
 
@@ -31,7 +32,7 @@ easier for not having to update the working secondary calc logic -#}
         {%- else -%}
 
             {%- for calc_config in secondary_calculations %}
-        , {{ metrics.perform_secondary_calculation(metric_tree.base_set, grain, dimensions, calc_config) }} as {{ metrics.generate_secondary_calculation_alias(base_set,calc_config, grain, false) }}
+        , {{ metrics.perform_secondary_calculation(metric_tree.base_set, grain, dimensions, calc_config, metric_config_dict[metric_name]) }} as {{ metrics.generate_secondary_calculation_alias(base_set,calc_config, grain, false) }}
 
             {%- endfor -%}
 
