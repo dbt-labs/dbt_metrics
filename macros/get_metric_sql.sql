@@ -79,7 +79,8 @@ up the composite metric. -#}
         calendar_tbl=calendar_tbl, 
         relevant_periods=relevant_periods,
         calendar_dimensions=calendar_dimensions,
-        dimensions_provided=dimensions_provided) 
+        dimensions_provided=dimensions_provided
+    ) 
     }}
 
 {%- endfor -%}

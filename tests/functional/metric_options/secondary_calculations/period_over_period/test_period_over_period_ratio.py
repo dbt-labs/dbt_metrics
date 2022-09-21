@@ -47,7 +47,7 @@ metrics:
 # seeds/period_over_period_ratio__expected.csv
 period_over_period_ratio__expected_csv = """
 date_month,period_over_period_ratio,period_over_period_ratio_1mth
-2022-01-01,8,
+2022-01-01,8,0
 2022-02-01,6,0.75
 """.lstrip()
 

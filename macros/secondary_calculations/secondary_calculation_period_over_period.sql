@@ -24,24 +24,27 @@
 
 {% macro default__metric_comparison_strategy_difference(metric_name, calc_sql, metric_config_dict) -%}
     {%- if metric_config_dict.get("default_value_null", False) %}
-        coalesce({{ metric_name }} - {{ calc_sql }}, 0)
-    {%- else -%}
         {{ metric_name }} - {{ calc_sql }}
+    {%- else -%}
+        coalesce({{ metric_name }}, 0) - coalesce(
+        {{ calc_sql }}
+        , 0)
     {%- endif %}
         
 {%- endmacro -%}
 
 {% macro default__metric_comparison_strategy_ratio(metric_name, calc_sql, metric_config_dict) -%}
+    
     {%- if metric_config_dict.get("default_value_null", False) %}
-        coalesce(
+        cast({{ metric_name }} as {{ type_float() }}) / nullif(
+            {{ calc_sql }}
+            , 0)
+    {%- else -%}
+         coalesce(
             cast({{ metric_name }} as {{ type_float() }}) / nullif(
             {{ calc_sql }}
             , 0) 
         , 0)
-    {%- else -%}
-        cast({{ metric_name }} as {{ type_float() }}) / nullif(
-            {{ calc_sql }}
-            , 0) 
     {%- endif %}
     
 {%- endmacro %}

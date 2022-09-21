@@ -7,9 +7,9 @@
 , {{metric_name}}__final as (
 
     {%- if default_value_null -%}
-        {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}
+        {%- set metric_val = metric_name -%}
     {%- else -%}
-        {%- set metric_val = metric_name-%}
+        {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}
     {%- endif %}
     
     select
