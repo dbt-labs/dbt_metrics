@@ -5,8 +5,11 @@
       grain='day', 
       dimensions=['had_discount'], 
       secondary_calculations=[
-        {"calculation": "period_over_period", "interval": 1, "comparison_strategy": "difference", "alias": "pop_1mth"},
-        {"calculation": "period_over_period", "interval": 1, "comparison_strategy": "ratio"},
-      ] 
+        metrics.period_over_period(
+            comparison_strategy="difference"
+            ,interval=1
+            ,metric_list=['base_sum_metric']
+            )
+          ] 
       )
   }}
