@@ -13,15 +13,15 @@ easier for not having to update the working secondary calc logic #}
 
     select *
 
-        {% set is_multiple_metrics = base_set | length > 1 %}
+        {# {% set is_multiple_metrics = base_set | length > 1 %} #}
         {% for calc_config in secondary_calculations -%}
             {% if calc_config.metric_list | length > 0 %}
                 {% for metric_name in calc_config.metric_list -%}
-                    , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, is_multiple_metrics) }}
+                    , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, true) }}
                 {% endfor %}    
             {% else %}
                 {% for metric_name in base_set -%}
-                    , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, is_multiple_metrics) }}
+                    , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, true) }}
                 {% endfor %}
             {% endif%}
         
