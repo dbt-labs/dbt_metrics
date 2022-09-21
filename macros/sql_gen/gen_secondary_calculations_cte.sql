@@ -13,29 +13,26 @@ easier for not having to update the working secondary calc logic -#}
 
     select 
         *
-        
-        {#- Checking if base_set is a list - which you'd think would have its own test but no
-        Jinja doesn't have that built in so we have to hack it by checking if it is an 
-        iterable variable and NOT sring /mapping -#}
-        {%- if metric_tree.base_set is iterable and (metric_tree.base_set is not string and metric_tree.base_set is not mapping) -%} 
 
-            {%- for metric_name in metric_tree.base_set -%}
+        {% for calc_config in secondary_calculations -%}
 
-                {%- for calc_config in secondary_calculations %}
-        , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) }} as {{ metrics.generate_secondary_calculation_alias(metric_name, calc_config, grain, true) }}
+            {# This step exists to only provide the limited list if that is provided #}
+            {% if calc_config.metric_list | length > 0 %}
 
-                {% endfor -%}
+                {% for metric_name in calc_config.metric_list -%}
+        , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, true) }}
+                {% endfor %}  
 
-            {%- endfor -%}
+            {% else %}
 
-        {%- else -%}
+                {% for metric_name in base_set -%}
+        , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, true) }}
+                {% endfor %}
 
-            {%- for calc_config in secondary_calculations %}
-        , {{ metrics.perform_secondary_calculation(metric_tree.base_set, grain, dimensions, calc_config) }} as {{ metrics.generate_secondary_calculation_alias(base_set,calc_config, grain, false) }}
+            {% endif%}
 
-            {%- endfor -%}
+        {% endfor %}
 
-        {%- endif %}
 
     from {% if metric_tree.full_set|length > 1 -%} joined_metrics {%- else -%} {{ metric_tree.base_set[0] }}__final {%- endif %}
 )

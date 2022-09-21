@@ -33,25 +33,3 @@
         {{ calc_sql }}
         , 0) 
 {%- endmacro %}
-
-{% macro period_over_period(comparison_strategy, interval, alias) %}
-
-    {%- set missing_args = [] %}
-    {%- if not comparison_strategy -%}
-        {% set _ = missing_args.append("comparison_strategy") -%}
-    {%- endif %}
-    {%- if not interval -%} 
-        {% set _ = missing_args.append("interval") -%}
-    {%- endif -%}
-    {%- if missing_args | length > 0 -%}
-        {% do exceptions.raise_compiler_error( missing_args | join(", ") ~ ' not provided to period_over_period') -%}
-    {%- endif -%}
-
-    {%- do return ({
-        "calculation": "period_over_period",
-        "comparison_strategy": comparison_strategy,
-        "interval": interval,
-        "alias": alias
-        })
-    -%}
-{% endmacro %}
