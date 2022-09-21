@@ -31,7 +31,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Thu Sep 15 13:55:04 UTC 2022 -->
+<!-- Added by: runner, at: Wed Sep 21 14:42:25 UTC 2022 -->
 
 <!--te-->
 
@@ -145,7 +145,7 @@ You may want to materialize the results as a fixed table for querying. This is n
 When [dbt server](https://blog.getdbt.com/licensing-dbt/) is released in late 2022, you will be able to access these macros interactively, without needing to build each variant as a single dbt model. For more information, check out the [keynote presentation from Coalesce 2021](https://www.getdbt.com/coalesce-2021/keynote-the-metrics-system/).
 
 # Secondary calculations
-Secondary calculations are window functions which act on the primary metric. You can use them to compare a metric's value to an earlier period and calculate year-to-date sums or rolling averages.
+Secondary calculations are window functions which act on the primary metric or metrics. You can use them to compare values to an earlier period and calculate year-to-date sums or rolling averages.
 
 Create secondary calculations using the convenience [constructor](https://en.wikipedia.org/wiki/Constructor_(object-oriented_programming)) macros. Alternatively, you can manually create a list of dictionary entries (not recommended).
 
@@ -165,27 +165,42 @@ Column aliases are [automatically generated](#secondary-calculation-column-alias
 
 ## Period over Period ([source](/macros/secondary_calculations/secondary_calculation_period_over_period.sql))
 
-Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias])`
+The period over period secondary calculation performs a calculation against the metric(s) in question by either determining the difference or the ratio between two points of time. This other point in time is determined by the input variable which looks at the grain selected in the macro. 
 
-- `comparison_strategy`: How to calculate the delta between the two periods. One of [`"ratio"`, `"difference"`]. Required
-- `interval`: The number of periods to look back. Required
-- `alias`: The column alias for the resulting calculation. Optional
+Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias, metric_list])`
+
+| Parameter                  | Example | Description | Required |
+| -------------------------- | ----------- | ----------- | -----------|
+| `comparison_strategy`      | `ratio` or `difference` | How to calculate the delta between the two periods | Yes |
+| `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
+| `alias`                    | 'week_over_week' | The column alias for the resulting calculation | No |
+| `metric_list`              | 'base_sum_metric' | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
 
 ## Period to Date ([source](/macros/secondary_calculations/secondary_calculation_period_to_date.sql))
 
-Constructor: `metrics.period_to_date(aggregate, period [, alias])`
+The period to date secondary calculation performs an aggregation on a defined **period** of time that is equal to or coarser (higher, more aggregated) than the grain selected. Great example of this is when you want to display a month_to_date value alongside your weekly grained metric.
 
-- `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
-- `period`: The time grain to aggregate to. One of [`"day"`, `"week"`, `"month"`, `"quarter"`, `"year"`]. Must be at equal or lesser granularity than the metric's grain (see [Time Grains](#time-grains) below). Required
-- `alias`: The column alias for the resulting calculation. Optional
+Constructor: `metrics.period_to_date(aggregate, period [, alias, metric_list])`
+
+| Parameter                  | Example | Description | Required |
+| -------------------------- | ----------- | ----------- | -----------|
+| `aggregate`                | `max`, `average` | The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). | Yes |
+| `period`                   | `"day"`, `"week"` | The time grain to aggregate to. One of [`"day"`, `"week"`, `"month"`, `"quarter"`, `"year"`]. Must be at equal or coarser (higher, more aggregated) granularity than the metric's grain (see [Time Grains](#time-grains) below). In example grain of `month`, the acceptable periods would be `month`, `quarter`, or `year`. | Yes |
+| `alias`                    | 'month_to_date' | The column alias for the resulting calculation | No |
+| `metric_list`              | 'base_sum_metric' | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
 
 ## Rolling ([source](/macros/secondary_calculations/secondary_calculation_rolling.sql))
 
-Constructor: `metrics.rolling(aggregate, interval [, alias])`
+The rolling secondary calculation performs an aggregation on a defined number of rows in metric dataset. For example, if the user selects the `week` grain and sets a rolling secondary calculation to `4` then the value returned will be a rolling 4 week calculation of whatever aggregation type was selected.
 
-- `aggregate`: The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). Required
-- `interval`: The number of periods to look back. Required
-- `alias`: The column alias for the resulting calculation. Optional
+Constructor: `metrics.rolling(aggregate, interval [, alias, metric_list])`
+
+| Parameter                  | Example | Description | Required |
+| -------------------------- | ----------- | ----------- | -----------|
+| `aggregate`                | `max`, `average` | The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). | Yes |
+| `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
+| `alias`                    | 'month_to_date' | The column alias for the resulting calculation | No |
+| `metric_list`              | 'base_sum_metric' | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
 
 
 # Customisation
