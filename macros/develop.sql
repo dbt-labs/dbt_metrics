@@ -11,20 +11,15 @@
         {%- do return("not execute") -%}
     {%- endif %}
 
-    {%- if metric_list is iterable and (metric_list is not string and metric_list is not mapping) -%}
+    {%- if metric_list is string -%}
         {%- set metric_list = [metric_list] -%}
     {%- endif -%}
-
 
     {%- set develop_yml = fromyaml(develop_yml) -%}
 
     {# ############
     VALIDATION OF PROVIDED YML - Gotta make sure the metric looks good!
     ############ #}
-
-    {# {%- if develop_yml.metrics | length > 1 -%}
-        {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") -%}
-    {%- endif -%} #}
 
     {% for metric_definition in develop_yml.metrics %}
 
