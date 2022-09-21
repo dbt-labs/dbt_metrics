@@ -71,6 +71,7 @@ up the composite metric. -#}
 
     {{ metrics.build_metric_sql(
         metric_dictionary=metrics_dictionary[metric_name], 
+        metric_config=metric_config_dict[metric_name],
         grain=grain, 
         dimensions=non_calendar_dimensions, 
         secondary_calculations=secondary_calculations, 

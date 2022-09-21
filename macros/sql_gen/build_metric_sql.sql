@@ -1,6 +1,6 @@
-{%- macro build_metric_sql(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, dimensions_provided) %}
+{%- macro build_metric_sql(metric_dictionary, metric_config, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, dimensions_provided) %}
     
-    {%- set default_value_null = metric_dictionary.get("config", None).get("default_value_null") if metric_dictionary.get("config") else False  -%}
+    {%- set default_value_null = metric_config.get("default_value_null") if metric_config else False  -%}
     {#- This is the SQL Gen part - we've broken each component out into individual macros -#}
     {#- We broke this out so it can loop for composite metrics -#}
     {{ metrics.gen_aggregate_cte(
