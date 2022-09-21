@@ -30,6 +30,8 @@
 
     {% for metric_definition in develop_yml.metrics %}
 
+        {% do print(metrics.get_develop_unique_metric_id_list(metric_definition)) %}
+
         {%- if not metric_definition.name %}
             {%- do exceptions.raise_compiler_error("The provided yml is missing a metric name") -%}
         {%- endif %}
@@ -79,7 +81,7 @@
     VARIABLE SETTING - Creating the faux metric tree and faux metric list. The faux fur of 2022
     ############ #}
 
-    {% set metric_tree = metrics.get_faux_metric_tree(metric_list=metric_list, develop_yml=develop_yml) %}
+    {% set metric_tree = metrics.testing_get_faux_metric_tree(metric_list=metric_list, develop_yml=develop_yml) %}
 
     {# {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %} #}
 
