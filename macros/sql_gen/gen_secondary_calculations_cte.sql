@@ -12,35 +12,28 @@ easier for not having to update the working secondary calc logic #}
 ,secondary_calculations as (
 
     select *
-        
-        {# Checking if base_set is a list - which you'd think would have its own test but no
-        Jinja doesn't have that built in so we have to hack it by checking if it is an 
-        iterable variable and NOT sring /mapping #}
-        {% if base_set is iterable and (base_set is not string and base_set is not mapping) %} 
 
-            {% for metric_name in base_set -%}
-
-                {% for calc_config in secondary_calculations -%}
+        {# {% set is_multiple_metrics = base_set | length > 1 %} #}
+        {% for calc_config in secondary_calculations -%}
+            {% if calc_config.metric_list | length > 0 %}
+                {% for metric_name in calc_config.metric_list -%}
                     , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, true) }}
-
+                {% endfor %}    
+            {% else %}
+                {% for metric_name in base_set -%}
+                    , {{ metrics.perform_secondary_calculation(metric_name, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(metric_name,calc_config, grain, true) }}
                 {% endfor %}
+            {% endif%}
+        
+        {% endfor %}
 
-            {% endfor %}
 
-        {% else %}
-
-            {% for calc_config in secondary_calculations -%}
-                , {{ metrics.perform_secondary_calculation(base_set, grain, dimensions, calc_config) -}} as {{ metrics.generate_secondary_calculation_alias(base_set,calc_config, grain, false) }}
-
-            {% endfor %}
-
-        {% endif %}
 
     from 
         {% if full_set|length > 1 %} 
             joined_metrics
         {% else %} 
-            {{base_set[0]}}__final
+            {{ base_set[0] }}__final
         {% endif %}
 )
 
