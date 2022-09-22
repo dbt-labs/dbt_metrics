@@ -31,6 +31,7 @@ metrics:
 select * 
 from {{ metrics.develop(
         develop_yml=my_metric_yml,
+        metric_list='testing_metric',
         grain='month'
         )
     }}
