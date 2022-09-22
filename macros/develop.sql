@@ -15,7 +15,17 @@
         {%- set metric_list = [metric_list] -%}
     {%- endif -%}
 
+    {# For the sake of consistency with metrics definition and the ability to easily
+    reference the metric object, we are creating a metrics_dictionary for set of metrics
+    included in the provided yml. This is used to construct the metric tree #}
     {%- set develop_yml = fromyaml(develop_yml) -%}
+
+    {% set develop_dictionary = {} %}
+    {% for metric_definition in develop_yml.metrics %}
+        {% do develop_dictionary.update({metric_definition.name:{}}) %}
+        {% do develop_dictionary.update({metric_definition.name:metric_definition}) %}
+    {% endfor %}
+    {% set develop_yml = develop_dictionary %}
 
     {# ############
     VALIDATION OF PROVIDED YML - Gotta make sure the metric looks good!
@@ -25,12 +35,8 @@
         {%- do exceptions.raise_compiler_error("The develop macro only supports testing a single macro.") -%}
     {%- endif -%} #}
 
-
-    {% do print(develop_yml.metrics) %}
-
-    {% for metric_definition in develop_yml.metrics %}
-
-        {% do print(metrics.get_develop_unique_metric_id_list(metric_definition)) %}
+    {% for metric_name in metric_list %}
+        {% set metric_definition = develop_yml[metric_name] %}
 
         {%- if not metric_definition.name %}
             {%- do exceptions.raise_compiler_error("The provided yml is missing a metric name") -%}
@@ -81,15 +87,15 @@
     VARIABLE SETTING - Creating the faux metric tree and faux metric list. The faux fur of 2022
     ############ #}
 
-    {% set metric_tree = metrics.testing_get_faux_metric_tree(metric_list=metric_list, develop_yml=develop_yml) %}
+    {% set metric_tree = metrics.get_faux_metric_tree(metric_list=metric_list, develop_yml=develop_yml) %}
 
-    {# {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %} #}
+    {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
     ############ #}
 
-    {# {%- do metrics.validate_develop_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
+    {%- do metrics.validate_develop_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
 
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
         {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].calculation_method, calculation_aggregate=calc_config.aggregate) %}
@@ -97,13 +103,13 @@
 
     {%- for calc_config in secondary_calculations if calc_config.period -%}
         {%- do metrics.validate_grain_order(metric_grain=grain, calculation_grain=calc_config.period) -%}
-    {%- endfor -%} #}
+    {%- endfor -%}
 
     {# ############
     SQL GENERATION - Lets build that SQL!
     ############ -#}
 
-    {# {%- set sql = metrics.get_metric_sql(
+    {%- set sql = metrics.get_metric_sql(
         metrics_dictionary=metrics_dictionary,
         grain=grain,
         dimensions=dimensions,
@@ -113,6 +119,6 @@
         where=where,
         metric_tree=metric_tree
         ) %}
-    ({{ sql }}) metric_subq #}
+    ({{ sql }}) metric_subq
 
 {%- endmacro %}

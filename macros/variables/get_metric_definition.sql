@@ -4,9 +4,14 @@
 
     {% if metric_definition is mapping %}
 
+        {# THIS IS THE PATH FOR DEVELOP #}
+
         {% do metrics_dictionary_dict.update({'name': metric_definition.name})%}
         {% do metrics_dictionary_dict.update({'calculation_method': metric_definition.calculation_method})%}
-        {% do metrics_dictionary_dict.update({'expression': metric_definition.expression})%}
+        {# We need to do some cleanup for metric parsing #}
+        {% set metric_expression = metric_definition.expression | replace("metric(","") | replace(")","") | replace("{{","") | replace("}}","")  | replace("'","") | replace('"',"")  %}
+        {% do metrics_dictionary_dict.update({'expression': metric_expression})%} 
+        {% do print(metric_expression)%}
         {% do metrics_dictionary_dict.update({'timestamp': metric_definition.timestamp})%}
         {% do metrics_dictionary_dict.update({'time_grains': metric_definition.time_grains})%}
         {% do metrics_dictionary_dict.update({'dimensions': metric_definition.dimensions})%}
@@ -25,6 +30,7 @@
 
     {% else %}
 
+        {# THIS IS THE PATH FOR THE METRIC OBJECT #}
         {% do metrics_dictionary_dict.update({'name': metric_definition.name})%}
         {% do metrics_dictionary_dict.update({'calculation_method': metric_definition.calculation_method})%}
         {% do metrics_dictionary_dict.update({'expression': metric_definition.expression})%} 
