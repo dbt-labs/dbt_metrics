@@ -212,9 +212,17 @@ models:
 
 """
 
-develop_multiple_metrics__expected_csv = """
+# seeds/develop_multiple_metrics___expected.yml
+if os.getenv('dbt_target') == 'snowflake':
+    develop_multiple_metrics__expected_csv = """
 date_month,develop_metric,derived_metric
 2022-02-01,1.333333,0.333333
+2022-01-01,1.0,0.0
+""".lstrip()
+else: 
+    develop_multiple_metrics__expected_csv = """
+date_month,develop_metric,derived_metric
+2022-02-01,1.3333333333333333,0.33333333333333326
 2022-01-01,1.0,0.0
 """.lstrip()
 
