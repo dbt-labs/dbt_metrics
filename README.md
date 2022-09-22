@@ -35,6 +35,7 @@
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 <!-- Added by: runner, at: Thu Sep 22 18:51:19 UTC 2022 -->
 
+
 <!--te-->
 
 
@@ -238,7 +239,7 @@ The period over period secondary calculation performs a calculation against the 
 
 Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias, metric_list])`
 
-| Input                      | Example | Description | Required |
+| Input                  | Example | Description | Required |
 | -------------------------- | ----------- | ----------- | -----------|
 | `comparison_strategy`      | `ratio` or `difference` | How to calculate the delta between the two periods | Yes |
 | `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
@@ -251,7 +252,7 @@ The period to date secondary calculation performs an aggregation on a defined **
 
 Constructor: `metrics.period_to_date(aggregate, period [, alias, metric_list])`
 
-| Input                      | Example | Description | Required |
+| Input                  | Example | Description | Required |
 | -------------------------- | ----------- | ----------- | -----------|
 | `aggregate`                | `max`, `average` | The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). | Yes |
 | `period`                   | `"day"`, `"week"` | The time grain to aggregate to. One of [`"day"`, `"week"`, `"month"`, `"quarter"`, `"year"`]. Must be at equal or coarser (higher, more aggregated) granularity than the metric's grain (see [Time Grains](#time-grains) below). In example grain of `month`, the acceptable periods would be `month`, `quarter`, or `year`. | Yes |
