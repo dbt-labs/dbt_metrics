@@ -41,14 +41,6 @@ within the final dataset in order to accomplish base + secondary calc functional
 a custom calendar -#}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) -%}
 
-{#- Reducing the metric dictionary to just metric configs that are relevant for secondary calcs
-    right now the metric dictionary only gets passed to the build_metric_sql macro, which has config information already
--#}
-{%- set metric_config_dict = {} -%}
-{%- for metric, data in metrics_dictionary.items() -%}
-    {%- do metric_config_dict.update({metric: data.config}) -%}
-{%- endfor -%}
-
 {#- ############
 LET THE COMPOSITION BEGIN!
 ############ -#}
@@ -71,7 +63,6 @@ up the composite metric. -#}
 
     {{ metrics.build_metric_sql(
         metric_dictionary=metrics_dictionary[metric_name], 
-        metric_config=metric_config_dict[metric_name],
         grain=grain, 
         dimensions=non_calendar_dimensions, 
         secondary_calculations=secondary_calculations, 
@@ -106,7 +97,7 @@ up the composite metric. -#}
     dimensions=non_calendar_dimensions, 
     secondary_calculations=secondary_calculations, 
     calendar_dimensions=calendar_dimensions,
-    metric_config_dict=metric_config_dict 
+    metric_dictionary=metrics_dictionary 
     ) 
     }}
 
