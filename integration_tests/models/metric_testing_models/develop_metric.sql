@@ -42,4 +42,4 @@ from {{ metrics.develop(
         metric_list=['derived_metric'],
         grain='month'
         )
-    }}
+    }} 
