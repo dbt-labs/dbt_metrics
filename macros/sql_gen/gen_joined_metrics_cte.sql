@@ -141,14 +141,14 @@
     {%- endif %}
     {%- for metric in metric_tree.expression_set %}
         {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
-            {%- set metric_definition = metrics_dictionary[metric].expression %}
-            {%- if "/" in metric_definition -%}
-                {%- set split_division_metric = metric_definition.split('/') -%}
+            {%- set metric_expression = metrics_dictionary[metric].expression %}
+            {%- if "/" in metric_expression -%}
+                {%- set split_division_metric = metric_expression.split('/') -%}
                 {%- set dividend = split_division_metric[0] -%}
                 {%- set divisors = split_division_metric[1:] | list -%}
                 {%- set expression = dividend ~ " / nullif(" ~ divisors | join(", 0) / nullif(") ~ ", 0)" -%}
             {%- else -%}
-                {%- set expression = metric_definition -%}
+                {%- set expression = metric_expression -%}
             {%- endif %}
         , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric].name }}
         {%- endif -%}
