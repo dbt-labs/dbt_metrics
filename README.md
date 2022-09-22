@@ -89,9 +89,16 @@ from {{ metrics.calculate(
 
 `start_date` and `end_date` are optional. When not provided, the spine will span all dates from oldest to newest in the metric's dataset. This default is likely to be correct in most cases, but you can use the arguments to either narrow the resulting table or expand it (e.g. if there was no new customers until 3 January but you want to include the first two days as well). Both values are inclusive.
 
-### Renaming the package
-In version `0.4.0` we re-named the internal package name to reflect the name of the repository. `metrics` became `dbt_metrics`. This changes the syntax used in all metrics queries, as shown in the following example:
-- `metrics.calculate` to `metrics.calculate`
+### Supported Inputs
+
+| Input       | Example     | Description | Required   |
+| ----------- | ----------- | ----------- | -----------|
+| metric_list | `metric('some_metric)'`, [`metric('some_metric)'`,`metric('some_other_metric)'`] | The metric(s) to be queried by the macro. If multiple metrics required, provide in list format.  | Required |
+| grain       | `day`, `week`, `month` | The time grain that the metric will be aggregated to in the returned dataset | Required |
+| dimensions  | [`plan`, `country`, `some_predefined_dimension_name` | The dimensions you want the metric to be aggregated by in the returned dataset | Optional |
+| start_date  | `2022-01-01` | Limits the date range of data used in the metric calculation by not querying data before this date | Optional |
+| end_date    | `2022-12-31` | Limits the date range of data used in the metric claculation by not querying data after this date | Optional |
+| where       | `plan='paying_customer'` | A sql statment, or series of sql statements, that alter the **final** CTE in the generated sql. Most often used to limit the data to specific values of dimensions provided | Optional |
 
 ### Migration from metric to calculate
 In version `0.3.0` of the dbt_metrics package, the name of the main macro was changed from `metric` to `calculate`. This was done in order to better reflect the work being performed by the macro and match the semantic naming followed by the rest of the macros in the package (describing the action, not the output). Additionally, the `metric_name` input was changed to take a single `metric` function or multiple `metric` functions provided in a list.
@@ -103,10 +110,6 @@ To correctly change this syntax, you must:
 
 ## Develop
 There are times when you want to test what a metric might look like before defining it in your project. In these cases you should use the `develop` metric, which allows you to provide a single metric in a contained yml in order to simulate what the metric might loook like if defined in your project.
-
-**Limitations:**
-- The provided yml can only contain one metric
-- The metric in question cannot be an derived metric
 
 ```sql
 {% set my_metric_yml -%}
@@ -128,10 +131,74 @@ metrics:
 select * 
 from {{ metrics.develop(
         develop_yml=my_metric_yml,
+        metric_list=['develop_metric']
         grain='month'
         )
     }}
 ```
+
+### Supported Inputs
+| Input       | Example     | Description | Required   |
+| ----------- | ----------- | ----------- | -----------|
+| metric_list | `('some_metric)'`, [`('some_metric)'`,`('some_other_metric)'`] | The metric(s) to be queried by the macro. If multiple metrics required, provide in list format. Do not provide in `metric('name)` format as that triggers dbt parsing for metric that doesn't exist. Just provide the name of the metric.  | Required |
+| grain       | `day`, `week`, `month` | The time grain that the metric will be aggregated to in the returned dataset | Required |
+| dimensions  | [`plan`, `country`, `some_predefined_dimension_name` | The dimensions you want the metric to be aggregated by in the returned dataset | Optional |
+| start_date  | `2022-01-01` | Limits the date range of data used in the metric calculation by not querying data before this date | Optional |
+| end_date    | `2022-12-31` | Limits the date range of data used in the metric claculation by not querying data after this date | Optional |
+| where       | `plan='paying_customer'` | A sql statment, or series of sql statements, that alter the **final** CTE in the generated sql. Most often used to limit the data to specific values of dimensions provided | Optional |
+
+### Multiple Metrics Or Derived Metrics
+If you have a more complicated use case that you are interested in testing, the develop macro also supports this behavior. The only caveat is that **you must include the raw tags** for any provided metric yml that contains a derived metric. Example below:
+
+```sql
+{% set my_metric_yml -%}
+{% raw %}
+
+metrics:
+  - name: develop_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: average
+    expression: discount_total
+    dimensions:
+      - had_discount
+      - order_country
+
+  - name: derived_metric
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: derived
+    expression: "{{ metric('develop_metric') }} - 1 "
+    dimensions:
+      - had_discount
+      - order_country
+
+  - name: some_other_metric_not_using
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: derived
+    expression: "{{ metric('derived_metric') }} - 1 "
+    dimensions:
+      - had_discount
+      - order_country
+
+{% endraw %}
+{%- endset %}
+
+select * 
+from {{ metrics.develop(
+        develop_yml=my_metric_yml,
+        metric_list=['derived_metric']
+        grain='month'
+        )
+    }}
+```
+
+The above example will return a dataset that contains the metric provided in the metric list (`derived_metric`) and the parent metric (`develop_metric`). It will **not** contain `some_other_metric_not_using` as it is not designated in the metric list or a parent of the metrics included.
 
 # Use cases and examples
 
@@ -169,7 +236,7 @@ The period over period secondary calculation performs a calculation against the 
 
 Constructor: `metrics.period_over_period(comparison_strategy, interval [, alias, metric_list])`
 
-| Parameter                  | Example | Description | Required |
+| Input                      | Example | Description | Required |
 | -------------------------- | ----------- | ----------- | -----------|
 | `comparison_strategy`      | `ratio` or `difference` | How to calculate the delta between the two periods | Yes |
 | `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
@@ -182,7 +249,7 @@ The period to date secondary calculation performs an aggregation on a defined **
 
 Constructor: `metrics.period_to_date(aggregate, period [, alias, metric_list])`
 
-| Parameter                  | Example | Description | Required |
+| Input                      | Example | Description | Required |
 | -------------------------- | ----------- | ----------- | -----------|
 | `aggregate`                | `max`, `average` | The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). | Yes |
 | `period`                   | `"day"`, `"week"` | The time grain to aggregate to. One of [`"day"`, `"week"`, `"month"`, `"quarter"`, `"year"`]. Must be at equal or coarser (higher, more aggregated) granularity than the metric's grain (see [Time Grains](#time-grains) below). In example grain of `month`, the acceptable periods would be `month`, `quarter`, or `year`. | Yes |
@@ -195,7 +262,7 @@ The rolling secondary calculation performs an aggregation on a defined number of
 
 Constructor: `metrics.rolling(aggregate, interval [, alias, metric_list])`
 
-| Parameter                  | Example | Description | Required |
+| Input                      | Example | Description | Required |
 | -------------------------- | ----------- | ----------- | -----------|
 | `aggregate`                | `max`, `average` | The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). | Yes |
 | `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
@@ -239,9 +306,9 @@ There may be instances where you want to return multiple metrics within a single
 
 
 ## Where Clauses
-Sometimes you'll want to see the metric in the context of a particular filter but this filter isn't neccesarily part of the metric definition. In this case, you can use the `where` parameter of the metrics package. It takes a list of `sql` statements and adds them in as filters to the final CTE in the produced SQL. 
+Sometimes you'll want to see the metric in the context of a particular filter but this filter isn't neccesarily part of the metric definition. In this case, you can use the `where` input for the metrics package. It takes a list of `sql` statements and adds them in as filters to the final CTE in the produced SQL. 
 
-Additionally, this parameter can be used by BI Tools to as a way for filters in their UI to be passed through into the metric logic.
+Additionally, this input can be used by BI Tools to as a way for filters in their UI to be passed through into the metric logic.
 
 ## Calendar 
 The package comes with a [basic calendar table](/models/dbt_metrics_default_calendar.sql), running between 2010-01-01 and 2029-12-31 inclusive. You can replace it with any custom calendar table which meets the following requirements:
@@ -284,7 +351,7 @@ To create a custom primary aggregation (as exposed through the `calculation_meth
     }) %}
 ```
 
-To create a custom secondary aggregation (as exposed through the `secondary_calculations` parameter in the `metric` macro), create a macro of the form `secondary_calculation_my_calculation(metric_name, dimensions, calc_config)`, then override the [`perform_secondary_calculations()`](/macros/secondary_calculations/perform_secondary_calculation.sql) macro. 
+To create a custom secondary aggregation (as exposed through the `secondary_calculations` input in the `metric` macro), create a macro of the form `secondary_calculation_my_calculation(metric_name, dimensions, calc_config)`, then override the [`perform_secondary_calculations()`](/macros/secondary_calculations/perform_secondary_calculation.sql) macro. 
 
 ## Secondary calculation column aliases
 Aliases can be set for a secondary calculation. If no alias is provided, one will be automatically generated. To modify the existing alias logic, or add support for a custom secondary calculation, override [`generate_secondary_calculation_alias()`](/macros/secondary_calculations/generate_secondary_calculation_alias.sql).
