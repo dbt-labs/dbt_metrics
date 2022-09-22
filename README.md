@@ -7,9 +7,11 @@
    * [Installation Instructions](#installation-instructions)
 * [Macros](#macros)
    * [Calculate](#calculate)
-      * [Renaming the package](#renaming-the-package)
+      * [Supported Inputs](#supported-inputs)
       * [Migration from metric to calculate](#migration-from-metric-to-calculate)
    * [Develop](#develop)
+      * [Supported Inputs](#supported-inputs-1)
+      * [Multiple Metrics Or Derived Metrics](#multiple-metrics-or-derived-metrics)
 * [Use cases and examples](#use-cases-and-examples)
    * [Jaffle Shop Metrics](#jaffle-shop-metrics)
    * [Inside of dbt Models](#inside-of-dbt-models)
@@ -31,7 +33,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Wed Sep 21 19:46:39 UTC 2022 -->
+<!-- Added by: runner, at: Thu Sep 22 18:51:19 UTC 2022 -->
 
 <!--te-->
 
