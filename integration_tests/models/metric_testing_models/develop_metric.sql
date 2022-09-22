@@ -23,6 +23,16 @@ metrics:
       - had_discount
       - order_country
 
+  - name: some_other_metric_not_using
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: derived
+    expression: "{{ metric('derived_metric') }} - 1 "
+    dimensions:
+      - had_discount
+      - order_country
+
 {% endraw %}
 {%- endset %}
 

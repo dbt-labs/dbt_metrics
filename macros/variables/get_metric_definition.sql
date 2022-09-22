@@ -11,7 +11,6 @@
         {# We need to do some cleanup for metric parsing #}
         {% set metric_expression = metric_definition.expression | replace("metric(","") | replace(")","") | replace("{{","") | replace("}}","")  | replace("'","") | replace('"',"")  %}
         {% do metrics_dictionary_dict.update({'expression': metric_expression})%} 
-        {% do print(metric_expression)%}
         {% do metrics_dictionary_dict.update({'timestamp': metric_definition.timestamp})%}
         {% do metrics_dictionary_dict.update({'time_grains': metric_definition.time_grains})%}
         {% do metrics_dictionary_dict.update({'dimensions': metric_definition.dimensions})%}
