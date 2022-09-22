@@ -188,7 +188,6 @@
         , {{metric_name}}
         {%- endfor %}  
         {%- for metric in metric_tree.expression_set %}
-        {#- should this me ordered expression set? -#}
         , {{ metric }}
         {% endfor -%}
     
