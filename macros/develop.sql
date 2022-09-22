@@ -89,7 +89,7 @@
 
     {% set metric_tree = metrics.get_faux_metric_tree(metric_list=metric_list, develop_yml=develop_yml) %}
 
-    {% set metrics_dictionary = metrics.get_develop_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %}
+    {% set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %}
 
     {# ############
     SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
