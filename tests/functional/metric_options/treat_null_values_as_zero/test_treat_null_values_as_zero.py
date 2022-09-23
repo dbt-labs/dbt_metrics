@@ -10,28 +10,28 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/default_value_null.sql
-default_value_null_sql = """
+# models/treat_null_values_as_zero.sql
+treat_null_values_as_zero_sql = """
 select *
 from 
-{{ metrics.calculate(metric('default_value_null'), 
+{{ metrics.calculate(metric('treat_null_values_as_zero'), 
     grain='month',
     dimensions=['had_discount','order_country']
     )
 }}
 """
 
-# models/default_value_null.yml
-default_value_null_yml = """
+# models/treat_null_values_as_zero.yml
+treat_null_values_as_zero_yml = """
 version: 2 
 
 models:
-  - name: default_value_null
+  - name: treat_null_values_as_zero
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('default_value_null__expected')
+          compare_model: ref('treat_null_values_as_zero__expected')
 metrics:
-  - name: default_value_null
+  - name: treat_null_values_as_zero
     model: ref('fact_orders')
     label: Total Amount (Nulls)
     timestamp: order_date
@@ -42,12 +42,12 @@ metrics:
       - had_discount
       - order_country
     config:
-      default_value_null: true
+      treat_null_values_as_zero: false
 """
 
-# seeds/default_value_null__expected.csv
-default_value_null__expected_csv = """
-date_month,had_discount,order_country,default_value_null
+# seeds/treat_null_values_as_zero__expected.csv
+treat_null_values_as_zero__expected_csv = """
+date_month,had_discount,order_country,treat_null_values_as_zero
 2022-01-01,TRUE,France,1
 2022-01-01,TRUE,Japan,1
 2022-01-01,FALSE,France,4
@@ -93,7 +93,7 @@ class TestDefaultValueNullMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "default_value_null__expected.csv": default_value_null__expected_csv,
+            "treat_null_values_as_zero__expected.csv": treat_null_values_as_zero__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -101,9 +101,9 @@ class TestDefaultValueNullMetric:
     def models(self):
         return {
             "fact_orders.yml": fact_orders_yml,
-            "default_value_null.yml": default_value_null_yml,
+            "treat_null_values_as_zero.yml": treat_null_values_as_zero_yml,
             "fact_orders.sql": fact_orders_sql,
-            "default_value_null.sql": default_value_null_sql
+            "treat_null_values_as_zero.sql": treat_null_values_as_zero_sql
         }
 
     def test_build_completion(self,project,):

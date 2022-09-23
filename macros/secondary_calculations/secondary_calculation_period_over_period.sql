@@ -23,7 +23,7 @@
 {% endmacro %}
 
 {% macro default__metric_comparison_strategy_difference(metric_name, calc_sql, metric_config) -%}
-    {%- if metric_config.get("default_value_null", False) %}
+    {%- if not metric_config.get("treat_null_values_as_zero", True) %}
         {{ metric_name }} - {{ calc_sql }}
     {%- else -%}
         coalesce({{ metric_name }}, 0) - coalesce(
@@ -35,7 +35,7 @@
 
 {% macro default__metric_comparison_strategy_ratio(metric_name, calc_sql, metric_config) -%}
     
-    {%- if metric_config.get("default_value_null", False) %}
+    {%- if not metric_config.get("treat_null_values_as_zero", True) %}
         cast({{ metric_name }} as {{ type_float() }}) / nullif(
             {{ calc_sql }}
             , 0)

@@ -1,12 +1,12 @@
-{%- macro gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, default_value_null) -%}
-    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, default_value_null)) }}
+{%- macro gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero) -%}
+    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, default_value_null) %}
+{%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero) %}
 
 , {{metric_name}}__final as (
 
-    {%- if default_value_null -%}
+    {%- if not treat_null_values_as_zero -%}
         {%- set metric_val = metric_name -%}
     {%- else -%}
         {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}

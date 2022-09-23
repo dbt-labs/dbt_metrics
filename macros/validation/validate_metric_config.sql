@@ -7,7 +7,7 @@
 
     {%- set accepted_configs = {
         "enabled" : {"accepted_values" : [True, False]},
-        "default_value_null" : {"accepted_values" : [True, False]}
+        "treat_null_values_as_zero" : {"accepted_values" : [True, False]}
         }
     -%}
 
