@@ -115,6 +115,7 @@ There are times when you want to test what a metric might look like before defin
 
 ```sql
 {% set my_metric_yml -%}
+{% raw %}
 
 metrics:
   - name: develop_metric
@@ -128,6 +129,7 @@ metrics:
       - had_discount
       - order_country
 
+{% endraw %}
 {%- endset %}
 
 select * 
