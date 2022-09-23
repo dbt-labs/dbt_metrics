@@ -33,7 +33,7 @@
             {%- endfor %}
 
             {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
-                base_model.{{ metric_dictionary.expression }} as property_to_aggregate
+                ({{ metric_dictionary.expression }}) as property_to_aggregate
             {%- elif metric_dictionary.calculation_type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
             {%- else -%}
