@@ -33,11 +33,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<<<<<<< HEAD
-<!-- Added by: runner, at: Wed Sep 21 22:59:41 UTC 2022 -->
-=======
-<!-- Added by: runner, at: Thu Sep 22 19:07:12 UTC 2022 -->
->>>>>>> main
+<!-- Added by: runner, at: Fri Sep 23 16:59:11 UTC 2022 -->
 
 <!--te-->
 
