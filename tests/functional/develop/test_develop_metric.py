@@ -25,6 +25,8 @@ metrics:
     dimensions:
       - had_discount
       - order_country
+    config:
+      treat_null_values_as_zero: false
 
 {%- endset %}
 
