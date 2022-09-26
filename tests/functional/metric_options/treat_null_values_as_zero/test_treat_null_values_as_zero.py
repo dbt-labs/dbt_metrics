@@ -10,31 +10,30 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/period_over_period_ratio.sql
-period_over_period_ratio_sql = """
+# models/treat_null_values_as_zero.sql
+treat_null_values_as_zero_sql = """
 select *
 from 
-{{ metrics.calculate(metric('period_over_period_ratio'), 
+{{ metrics.calculate(metric('treat_null_values_as_zero'), 
     grain='month',
-    secondary_calculations=[
-        metrics.period_over_period(comparison_strategy="ratio", interval=1, alias = "1mth")
-    ]
+    dimensions=['had_discount','order_country']
     )
 }}
 """
 
-# models/period_over_period_ratio.yml
-period_over_period_ratio_yml = """
+# models/treat_null_values_as_zero.yml
+treat_null_values_as_zero_yml = """
 version: 2 
+
 models:
-  - name: period_over_period_ratio
+  - name: treat_null_values_as_zero
     tests: 
       - dbt_utils.equality:
-          compare_model: ref('period_over_period_ratio__expected')
+          compare_model: ref('treat_null_values_as_zero__expected')
 metrics:
-  - name: period_over_period_ratio
+  - name: treat_null_values_as_zero
     model: ref('fact_orders')
-    label: Total Discount ($)
+    label: Total Amount (Nulls)
     timestamp: order_date
     time_grains: [day, week, month]
     calculation_method: sum
@@ -42,31 +41,24 @@ metrics:
     dimensions:
       - had_discount
       - order_country
+    config:
+      treat_null_values_as_zero: false
 """
 
-# seeds/period_over_period_ratio__expected.csv
-period_over_period_ratio__expected_csv = """
-date_month,period_over_period_ratio,period_over_period_ratio_1mth
-2022-01-01,8,0
-2022-02-01,6,0.75
+# seeds/treat_null_values_as_zero__expected.csv
+treat_null_values_as_zero__expected_csv = """
+date_month,had_discount,order_country,treat_null_values_as_zero
+2022-01-01,TRUE,France,1
+2022-01-01,TRUE,Japan,1
+2022-01-01,FALSE,France,4
+2022-01-01,FALSE,Japan,2
+2022-02-01,TRUE,France,4
+2022-02-01,FALSE,France,
+2022-02-01,FALSE,Japan,2
+2022-02-01,TRUE,Japan,
 """.lstrip()
 
-# seeds/period_over_period_ratio___expected.yml
-if os.getenv('dbt_target') == 'bigquery':
-    period_over_period_ratio__expected_yml = """
-version: 2
-seeds:
-  - name: period_over_period_ratio__expected
-    config:
-      column_types:
-        date_month: date
-        period_over_period_ratio: INT64
-        period_over_period_ratio_1mth: FLOAT64
-""".lstrip()
-else: 
-    period_over_period_ratio__expected_yml = """"""
-
-class TestPeriodOverPeriodRatio:
+class TestDefaultValueNullMetric:
 
     # configuration in dbt_project.yml
     # setting bigquery as table to get around query complexity 
@@ -101,18 +93,17 @@ class TestPeriodOverPeriodRatio:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "period_over_period_ratio__expected.csv": period_over_period_ratio__expected_csv,
-            "period_over_period_ratio__expected.yml": period_over_period_ratio__expected_yml
+            "treat_null_values_as_zero__expected.csv": treat_null_values_as_zero__expected_csv,
         }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
     def models(self):
         return {
-            "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "period_over_period_ratio.sql": period_over_period_ratio_sql,
-            "period_over_period_ratio.yml": period_over_period_ratio_yml
+            "treat_null_values_as_zero.yml": treat_null_values_as_zero_yml,
+            "fact_orders.sql": fact_orders_sql,
+            "treat_null_values_as_zero.sql": treat_null_values_as_zero_sql
         }
 
     def test_build_completion(self,project,):
@@ -131,6 +122,6 @@ class TestPeriodOverPeriodRatio:
         results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # # # validate that the results include pass
+        # # # # validate that the results include pass
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["pass"]

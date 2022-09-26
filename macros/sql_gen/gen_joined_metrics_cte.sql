@@ -61,7 +61,7 @@
         ) as {{dim}}
     {%- endfor %}
     {% for metric_name in metric_tree.parent_set %}
-        , nullif({{metric_name}},0) as {{metric_name}}
+        , {{metric_name}} as {{metric_name}}
     {%- endfor %}  
 
     {%- if grain == 'all_time' %}
@@ -139,11 +139,23 @@
     {%- else %}
         join_metrics__{{previous_cte_number}}.*
     {%- endif %}
-    {%- for metric in metric_tree.ordered_expression_set %}
+    {%- for metric in metric_tree.expression_set %}
         {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
-        ,({{metrics_dictionary[metric].expression | replace(".metric_value","")}}) as {{metrics_dictionary[metric].name}}
+            {#- this logic will parse an expression for divisions signs (/) and wrap all divisors in nullif functions to prevent divide by zero -#}
+            {#- "1 / 2 / 3 / ... / N" results in "1 / nullif(2, 0) / nullif(3, 0) / ... / nullif(N, 0)"  -#}
+            {%- set metric_expression = metrics_dictionary[metric].expression %}
+            {%- if "/" in metric_expression -%}
+                {%- set split_division_metric = metric_expression.split('/') -%}
+                {%- set dividend = split_division_metric[0] -%}
+                {%- set divisors = split_division_metric[1:] | list -%}
+                {%- set expression = dividend ~ " / nullif(" ~ divisors | join(", 0) / nullif(") ~ ", 0)" -%}
+            {%- else -%}
+                {%- set expression = metric_expression -%}
+            {%- endif %}
+        , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric].name }}
         {%- endif -%}
-    {%- endfor %}
+    {%- endfor -%}
+
     {% if loop.first %}
     from first_join_metrics
     {%- else %}
@@ -175,10 +187,10 @@
         , {{ dim }}
         {%- endfor %}
         {%- for metric_name in metric_tree.parent_set %}
-        , coalesce({{metric_name}},0) as {{metric_name}}
+        , {{metric_name}}
         {%- endfor %}  
-        {%- for metric in metric_tree.ordered_expression_set%}
-        , {{metric}}
+        {%- for metric in metric_tree.expression_set %}
+        , {{ metric }}
         {% endfor -%}
     
     {% if metric_tree.expression_set | length == 0 %}
