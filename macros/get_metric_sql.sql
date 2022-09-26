@@ -71,7 +71,8 @@ up the composite metric. -#}
         calendar_tbl=calendar_tbl, 
         relevant_periods=relevant_periods,
         calendar_dimensions=calendar_dimensions,
-        dimensions_provided=dimensions_provided) 
+        dimensions_provided=dimensions_provided
+    ) 
     }}
 
 {%- endfor -%}
@@ -95,12 +96,17 @@ up the composite metric. -#}
     grain=grain, 
     dimensions=non_calendar_dimensions, 
     secondary_calculations=secondary_calculations, 
-    calendar_dimensions=calendar_dimensions) 
+    calendar_dimensions=calendar_dimensions,
+    metric_dictionary=metrics_dictionary 
+    ) 
     }}
 
 {{ metrics.gen_final_cte(
     metric_tree=metric_tree,
     grain=grain, 
+    dimensions=non_calendar_dimensions, 
+    calendar_dimensions=calendar_dimensions, 
+    relevant_periods=relevant_periods,
     secondary_calculations=secondary_calculations,
     where=where) 
     }}

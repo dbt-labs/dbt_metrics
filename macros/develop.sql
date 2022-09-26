@@ -96,6 +96,7 @@
     ############ #}
 
     {%- do metrics.validate_develop_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
+    {%- do metrics.validate_metric_config(metrics_dictionary=metrics_dictionary) -%}
 
     {%- for calc_config in secondary_calculations if calc_config.aggregate %}
         {%- do metrics.validate_aggregate_coherence(metric_aggregate=metrics_dictionary[0].calculation_method, calculation_aggregate=calc_config.aggregate) %}

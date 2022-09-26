@@ -60,6 +60,6 @@
         sum({{ expression }})
 {%- endmacro -%}
 
-{%- macro default__metric_derived(expression) -%}
+{% macro default__metric_derived(expression) %}
         {{ expression }}
 {%- endmacro -%}

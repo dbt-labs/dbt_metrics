@@ -21,6 +21,8 @@
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
 * [Customisation](#customisation)
+   * [Metric Configs](#metric-configs)
+      * [Accepted Metric Configurations](#accepted-metric-configurations)
    * [All_Time Grain](#all_time-grain)
    * [Window Periods](#window-periods)
    * [Derived Metrics](#derived-metrics)
@@ -33,7 +35,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Thu Sep 22 19:07:12 UTC 2022 -->
+<!-- Added by: runner, at: Mon Sep 26 16:49:56 UTC 2022 -->
 
 <!--te-->
 
@@ -277,7 +279,49 @@ Constructor: `metrics.rolling(aggregate, interval [, alias, metric_list])`
 # Customisation
 Most behaviour in the package can be overridden or customised.
 
+## Metric Configs
+
+Metric nodes now accept `config` dictionaries like other dbt resources (beginning in dbt-core v1.3+). Metric configs can specified in the metric yml itself or for groups of metrics in the `dbt_project.yml` file.
+
+```yml
+# in metrics.yml
+version: 2
+
+metrics:
+  - name: config_metric
+    label: Example Metric with Config
+    model: ref('my_model')
+    calculation_method: count
+    timestamp: date_field
+    time_grains: [day, week, month]
+
+    config:
+      enabled: True
+```
+
+Or:
+
+```yml
+# in dbt_project.yml
+
+metrics: 
+  your_project_name: 
+    +enabled: true
+```
+
+The metrics package contains validation on the configurations you're able to provide.
+
+### Accepted Metric Configurations
+
+Below is the list of metric configs currently accepted by this package.
+
+| Config                      | Type    | Accepted Values | Default Value | Description                                                                                                                                                                                                                                                                                                                  |
+|-----------------------------|---------|-----------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`                   | boolean | True/False      | True          | Enables or disables a metric node. When disabled, dbt will not consider it as part of your project.                                                                                                                                                                                                                          |
+| `treat_null_values_as_zero` | boolean | True/False      | True          | Controls the `coalesce` behavior for metrics. By default, when there are no observations for a metric, the output of the metric as well as period Over period secondary calculations will include a `coalesce({{ field }}, 0)` to return 0's rather than nulls. Setting this config to False instead returns `NULL` values.  |
+
 ## All_Time Grain
+
 Version `0.4.0` of this package added support for the `all_time` grain to be defined in the metric. 
 
 If you're interested in returning the metric value across all time (or ignoring time bounds all together), you can include the `all_time` grain in the metric definition and then use that in the `calculate` or `develop` macro. This will return a single value for the metric (more if dimensions included) and the start/end date range for that metric calculation.

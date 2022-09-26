@@ -1,0 +1,11 @@
+version: 2 
+metrics:
+  - name: case_when_metric
+    model: ref('fact_orders')
+    label: Order Total ($)
+    timestamp: order_date
+    time_grains: [day, week, month, all_time]
+    calculation_method: sum
+    expression: case when had_discount = true then 1 else 0 end
+    dimensions:
+      - order_country

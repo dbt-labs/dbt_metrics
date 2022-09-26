@@ -45,6 +45,8 @@ l{% macro calculate(metric_list, grain, dimensions=[], secondary_calculations=[]
 
     {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree) -%} 
 
+    {%- do metrics.validate_metric_config(metrics_dictionary=metrics_dictionary) -%} 
+
     {#- ############
     SECONDARY CALCULATION VALIDATION - Let there be window functions
     ############ -#}
