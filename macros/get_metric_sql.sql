@@ -87,8 +87,15 @@ metrics there are #}
 
     {{ metrics.gen_joined_metrics_cte(metric_tree["parent_set"], metric_tree["expression_set"], metric_tree["ordered_expression_set"], grain, non_calendar_dimensions, calendar_dimensions, secondary_calculations, relevant_periods) }}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
-    {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
-    
+    {{ metrics.gen_final_cte(
+        metric_tree=metric_tree,
+        grain=grain, 
+        dimensions=non_calendar_dimensions, 
+        calendar_dimensions=calendar_dimensions, 
+        relevant_periods=relevant_periods,
+        secondary_calculations=secondary_calculations,
+        where=where) 
+        }}    
 
 {# If we're calling the develop macro then we don't need to loop through the metrics because we know 
 this is only a single metric and not an expression metric #}
@@ -96,7 +103,15 @@ this is only a single metric and not an expression metric #}
 
     {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, dimensions_provided) }}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
-    {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
+    {{ metrics.gen_final_cte(
+        metric_tree=metric_tree,
+        grain=grain, 
+        dimensions=non_calendar_dimensions, 
+        calendar_dimensions=calendar_dimensions, 
+        relevant_periods=relevant_periods,
+        secondary_calculations=secondary_calculations,
+        where=where) 
+        }}
 
 {# If it is NOT a composite metric, we run the baseline model #}
 {%- else -%}
@@ -123,8 +138,17 @@ this is only a single metric and not an expression metric #}
         {{ metrics.build_metric_sql(metric_name, metric_type, metric_sql, metric_timestamp, metric_filters, metric_model, grain, non_calendar_dimensions, secondary_calculations, start_date, end_date,calendar_tbl, relevant_periods, calendar_dimensions,dimensions_provided) }}
     {% endfor %}
     {{ metrics.gen_secondary_calculation_cte(metric_tree["base_set"], non_calendar_dimensions, grain, metric_tree["full_set"], secondary_calculations, calendar_dimensions) }}
-    {{ metrics.gen_final_cte(metric_tree["base_set"], grain, metric_tree["full_set"], secondary_calculations,where) }}
     
+    {{ metrics.gen_final_cte(
+        metric_tree=metric_tree,
+        grain=grain, 
+        dimensions=non_calendar_dimensions, 
+        calendar_dimensions=calendar_dimensions, 
+        relevant_periods=relevant_periods,
+        secondary_calculations=secondary_calculations,
+        where=where) 
+        }}
+
 {%- endif -%}
 
 {% endmacro %}

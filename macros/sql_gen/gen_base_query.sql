@@ -24,7 +24,7 @@
             calendar_table.{{ calendar_dim }},
         {%- endfor %}
         {%- if metric_sql and metric_sql | replace('*', '') | trim != '' -%}
-            base_model.{{ metric_sql }} as property_to_aggregate
+            ({{ metric_sql }}) as property_to_aggregate
         {%- elif metric_type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
         {%- else -%}
