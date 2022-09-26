@@ -21,8 +21,9 @@
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
 * [Customisation](#customisation)
-  * [Metric Configs](#metric-configs)
-  * [All_Time Grain](#all_time-grain)
+   * [Metric Configs](#metric-configs)
+      * [Accepted Metric Configurations](#accepted-metric-configurations)
+   * [All_Time Grain](#all_time-grain)
    * [Window Periods](#window-periods)
    * [Derived Metrics](#derived-metrics)
    * [Multiple Metrics](#multiple-metrics)
@@ -34,7 +35,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Fri Sep 23 20:20:52 UTC 2022 -->
+<!-- Added by: runner, at: Mon Sep 26 16:31:56 UTC 2022 -->
 
 <!--te-->
 
