@@ -104,6 +104,9 @@ up the composite metric. -#}
 {{ metrics.gen_final_cte(
     metric_tree=metric_tree,
     grain=grain, 
+    dimensions=non_calendar_dimensions, 
+    calendar_dimensions=calendar_dimensions, 
+    relevant_periods=relevant_periods,
     secondary_calculations=secondary_calculations,
     where=where) 
     }}
