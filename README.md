@@ -34,7 +34,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Fri Sep 23 16:59:11 UTC 2022 -->
+<!-- Added by: runner, at: Fri Sep 23 20:20:52 UTC 2022 -->
 
 <!--te-->
 
@@ -116,6 +116,7 @@ There are times when you want to test what a metric might look like before defin
 
 ```sql
 {% set my_metric_yml -%}
+{% raw %}
 
 metrics:
   - name: develop_metric
@@ -129,6 +130,7 @@ metrics:
       - had_discount
       - order_country
 
+{% endraw %}
 {%- endset %}
 
 select * 
