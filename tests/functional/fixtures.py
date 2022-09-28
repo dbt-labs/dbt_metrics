@@ -1,4 +1,9 @@
 # seeds/seed_slack_users.csv
+from telnetlib import STATUS
+import pytest
+from dbt.tests.util import run_dbt
+import os
+
 seed_slack_users_csv = """
 user_id,joined_at,is_active_past_quarter,has_messaged
 1,2021-01-01,true,true
@@ -149,3 +154,53 @@ packages_yml = """
   - package: calogica/dbt_expectations
     version: [">=0.5.0", "<0.6.0"]
 """
+
+    # configuration in dbt_project.yml
+
+class BaseTestSetup():
+
+    MODELS_DICT = dict({})
+    SEEDS_DICT = dict({})
+    EXPECTED_STATUSES = ["pass"]
+    SEED_COUNT = 2
+    MODEL_COUNT = 3
+    TEST_COUNT = 1
+
+    def project_config_update(self):
+        return {
+          "name": "example",
+          "models": {"+materialized": "table"}
+        }
+
+    def packages(self):
+        return {
+            "packages": [
+                {"local": os.getcwd()}
+                ]
+        }
+
+    def models(self):
+        return self.MODELS_DICT
+
+    def seeds(self):
+        return self.SEEDS_DICT
+
+    def simple_build(self, project):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
+        # seed seeds
+        results = run_dbt(["seed"])
+        assert len(results) == self.SEED_COUNT
+
+        # initial run
+        results = run_dbt(["run"])
+        assert len(results) == self.MODEL_COUNT
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == self.TEST_COUNT
+
+        # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == self.EXPECTED_STATUSES
