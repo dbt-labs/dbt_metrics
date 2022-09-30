@@ -275,6 +275,18 @@ Constructor: `metrics.rolling(aggregate, interval [, alias, metric_list])`
 | `alias`                    | `month_to_date` | The column alias for the resulting calculation | No |
 | `metric_list`              | `base_sum_metric` | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
 
+## Prior ([source](/macros/secondary_calculations/secondary_calculation_prior.sql))
+
+The prior secondary calculation returns the value from a specified number of intervals prior to the row. 
+
+Constructor: `metrics.prior(interval [, alias, metric_list])`
+
+| Input                      | Example | Description | Required |
+| -------------------------- | ----------- | ----------- | -----------|
+| `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
+| `alias`                    | `2_weeks_prior` | The column alias for the resulting calculation | No |
+| `metric_list`              | `base_sum_metric` | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
+
 
 # Customisation
 Most behaviour in the package can be overridden or customised.
