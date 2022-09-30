@@ -35,6 +35,13 @@
             {%- do return(calc_config.aggregate ~ "_for_" ~ calc_config.period) %}
         {% endif %}
         
+    {%- elif calc_type == 'prior' %}
+        {% if is_multiple_metrics %}
+            {%- do return(metric_name ~ "_" ~ calc_config.interval ~ "_" ~ grain ~ "s_prior") %}
+        {% else %}
+            {%- do return(calc_config.interval ~ "_" ~ grain ~ "s_prior") %}
+        {% endif %}
+
     {%- else %}
         {%- do exceptions.raise_compiler_error("Can't generate alias for unknown secondary calculation: " ~ calc_type ~ ". calc_config: " ~ calc_config) %}  
     {%- endif %}
