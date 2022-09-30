@@ -20,6 +20,7 @@
    * [Period over Period (<a href="/macros/secondary_calculations/secondary_calculation_period_over_period.sql">source</a>)](#period-over-period-source)
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
+   * [Prior (<a href="/macros/secondary_calculations/secondary_calculation_prior.sql">source</a>)](#prior-source)
 * [Customisation](#customisation)
    * [Metric Configs](#metric-configs)
       * [Accepted Metric Configurations](#accepted-metric-configurations)
@@ -35,7 +36,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Mon Sep 26 19:12:12 UTC 2022 -->
+<!-- Added by: runner, at: Fri Sep 30 21:18:04 UTC 2022 -->
 
 <!--te-->
 
