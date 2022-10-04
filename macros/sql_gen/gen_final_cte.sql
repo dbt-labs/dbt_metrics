@@ -20,7 +20,6 @@
     {%- if where %}
     where {{ where }}
     {%- endif %}
-    {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 
 {% else %}
 
@@ -31,7 +30,6 @@
         {%- if where %}
     where {{ where }}
         {%- endif -%}
-    {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 
     {% else %}
 
@@ -39,7 +37,6 @@
         {%- if where %}
     where {{ where }}
         {%- endif -%}
-    {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
     
     {%- endif %}
 
