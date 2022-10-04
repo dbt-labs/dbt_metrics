@@ -149,6 +149,7 @@ this is only a single metric and not an expression metric #}
         where=where) 
         }}
 
+
 {%- endif -%}
 
 {% endmacro %}
