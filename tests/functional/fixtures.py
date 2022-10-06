@@ -120,3 +120,37 @@ packages_yml = """
   - package: calogica/dbt_expectations
     version: [">=0.5.0", "<0.6.0"]
 """
+
+# seeds/events.csv
+events_source_csv = """
+id,country,timestamp_field
+1,FR,2022-01-01
+2,UK,2022-02-01
+""".lstrip()
+
+# models/event.sql
+event_sql = """
+with source as (
+    select * from {{ ref('events_source') }}
+)
+,
+final as (
+    select *
+    from source 
+)
+select * from final
+"""
+
+# models/event.yml
+event_yml = """
+version: 2 
+models: 
+  - name: event
+    columns:
+      - name: id
+        description: TBD
+      - name: country
+        description: TBD
+      - name: timestamp_field
+        description: TBD
+"""

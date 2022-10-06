@@ -70,7 +70,7 @@
                 {% if loop.first %}
                     {{metric_name}}__final
                 {% else %}
-                    left outer join {{metric_name}}__final 
+                    full outer join {{metric_name}}__final 
                         using ( date_{{grain}}
                             {% for calendar_dim in calendar_dimensions %}
                                 ,{{ calendar_dim }}
