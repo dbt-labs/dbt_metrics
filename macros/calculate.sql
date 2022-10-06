@@ -96,6 +96,4 @@
         relevant_periods=relevant_periods
     ) %}
     ({{ sql }}) metric_subq
-    {{- metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) -}}
-
 {%- endmacro %}
