@@ -8,9 +8,9 @@
 {%- set cte_numbers = [] -%}
 {%- set unique_cte_numbers = [] -%}
 {#- the cte numbers are more representative of node depth -#}
-{%- if metric_tree.expression_set | length > 0 -%}
-    {%- for metric_name in metric_tree.ordered_expression_set -%}
-        {%- do cte_numbers.append(metric_tree.ordered_expression_set[metric_name]) -%}
+{%- if metric_tree.derived_set | length > 0 -%}
+    {%- for metric_name in metric_tree.ordered_derived_set -%}
+        {%- do cte_numbers.append(metric_tree.ordered_derived_set[metric_name]) -%}
     {%- endfor -%}
     {%- for cte_num in cte_numbers|unique -%}
         {%- do unique_cte_numbers.append(cte_num) -%}
@@ -139,8 +139,8 @@
     {%- else %}
         join_metrics__{{previous_cte_number}}.*
     {%- endif %}
-    {%- for metric in metric_tree.expression_set %}
-        {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
+    {%- for metric in metric_tree.derived_set %}
+        {%- if metric_tree.ordered_derived_set[metric] == cte_number %}
             {#- this logic will parse an expression for divisions signs (/) and wrap all divisors in nullif functions to prevent divide by zero -#}
             {#- "1 / 2 / 3 / ... / N" results in "1 / nullif(2, 0) / nullif(3, 0) / ... / nullif(N, 0)"  -#}
             {%- set metric_expression = metrics_dictionary[metric].expression %}
@@ -189,11 +189,11 @@
         {%- for metric_name in metric_tree.parent_set %}
         , {{metric_name}}
         {%- endfor %}  
-        {%- for metric in metric_tree.expression_set %}
+        {%- for metric in metric_tree.derived_set %}
         , {{ metric }}
         {% endfor -%}
     
-    {% if metric_tree.expression_set | length == 0 %}
+    {% if metric_tree.derived_set | length == 0 %}
     from first_join_metrics
     {% else %}
     from join_metrics__999

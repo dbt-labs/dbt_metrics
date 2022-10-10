@@ -13,7 +13,7 @@
 
     {# Here we're starting with the highest level and assigning the metric tree that first level
     value. This is used before de-duping in get_faux_metric_tree #}
-    {%- do metric_tree["ordered_expression_set"].update({metric_definition.name:metric_count}) -%}
+    {%- do metric_tree["ordered_derived_set"].update({metric_definition.name:metric_count}) -%}
     {%- set metric_count = metric_count - 1 -%}
 
     {# Here we create two sets, sets being the same as lists but they account for uniqueness. 
@@ -70,8 +70,8 @@
 
     {%- endif -%}
 
-    {%- set expression_set_plus = ( metric_tree["full_set"] | reject('in',metric_tree["parent_set"]) | list) -%}
-    {%- do metric_tree.update({'expression_set':expression_set_plus}) -%}
+    {%- set derived_set_plus = ( metric_tree["full_set"] | reject('in',metric_tree["parent_set"]) | list) -%}
+    {%- do metric_tree.update({'derived_set':derived_set_plus}) -%}
 
     {%- do return(metric_tree) -%}
 
