@@ -1,0 +1,113 @@
+{
+    "$defs": {
+      "PeriodToDate": {
+        "type": "object",
+        "required": ["function", "args"],
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string",
+            "const": "period_to_date"
+          },
+          "args": {
+            "type": "object",
+            "required": ["aggregate", "period"],
+            "additionalProperties": false,
+            "properties": {
+              "alias": { "type": "string" },
+              "aggregate": {
+                "type": "string",
+                "enum": ["min", "max", "sum", "average"]
+              },
+              "period": {
+                "type": "string",
+                "enum": ["day", "week", "month", "quarter", "year"]
+              }
+            }
+          }
+        }
+      },
+      "PeriodOverPeriod": {
+        "type": "object",
+        "required": ["function", "args"],
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string",
+            "const": "period_over_period"
+          },
+          "args": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": ["comparison_strategy", "interval"],
+            "properties": {
+              "alias": { "type": "string" },
+              "comparison_strategy": {
+                "type": "string",
+                "enum": ["ratio", "difference"]
+              },
+              "interval": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "Prior": {
+        "type": "object",
+        "required": ["function", "args"],
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string",
+            "const": "prior"
+          },
+          "args": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": ["interval"],
+            "properties": {
+              "alias": { "type": "string" },
+              "interval": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      },
+      "Rolling": {
+        "type": "object",
+        "required": ["function", "args"],
+        "additionalProperties": false,
+        "properties": {
+          "function": {
+            "type": "string",
+            "const": "rolling"
+          },
+          "args": {
+            "type": "object",
+            "required": ["aggregate", "interval"],
+            "additionalProperties": false,
+            "properties": {
+              "alias": { "type": "string" },
+              "aggregate": {
+                "type": "string",
+                "enum": ["min", "max", "sum", "average"]
+              },
+              "interval": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+  
+    "anyOf": [
+      { "$ref": "#/$defs/PeriodToDate" },
+      { "$ref": "#/$defs/PeriodOverPeriod" },
+      { "$ref": "#/$defs/Prior" },
+      { "$ref": "#/$defs/Rolling" }
+    ],
+    "$schema": "http://json-schema.org/draft-07/schema"
+  }

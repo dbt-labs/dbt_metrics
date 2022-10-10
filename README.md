@@ -20,6 +20,7 @@
    * [Period over Period (<a href="/macros/secondary_calculations/secondary_calculation_period_over_period.sql">source</a>)](#period-over-period-source)
    * [Period to Date (<a href="/macros/secondary_calculations/secondary_calculation_period_to_date.sql">source</a>)](#period-to-date-source)
    * [Rolling (<a href="/macros/secondary_calculations/secondary_calculation_rolling.sql">source</a>)](#rolling-source)
+   * [Prior (<a href="/macros/secondary_calculations/secondary_calculation_prior.sql">source</a>)](#prior-source)
 * [Customisation](#customisation)
    * [Metric Configs](#metric-configs)
       * [Accepted Metric Configurations](#accepted-metric-configurations)
@@ -35,7 +36,7 @@
    * [Secondary calculation column aliases](#secondary-calculation-column-aliases)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: runner, at: Mon Sep 26 19:12:12 UTC 2022 -->
+<!-- Added by: runner, at: Fri Sep 30 21:18:04 UTC 2022 -->
 
 <!--te-->
 
@@ -273,6 +274,18 @@ Constructor: `metrics.rolling(aggregate, interval [, alias, metric_list])`
 | `aggregate`                | `max`, `average` | The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). | Yes |
 | `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
 | `alias`                    | `month_to_date` | The column alias for the resulting calculation | No |
+| `metric_list`              | `base_sum_metric` | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
+
+## Prior ([source](/macros/secondary_calculations/secondary_calculation_prior.sql))
+
+The prior secondary calculation returns the value from a specified number of intervals prior to the row. 
+
+Constructor: `metrics.prior(interval [, alias, metric_list])`
+
+| Input                      | Example | Description | Required |
+| -------------------------- | ----------- | ----------- | -----------|
+| `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
+| `alias`                    | `2_weeks_prior` | The column alias for the resulting calculation | No |
 | `metric_list`              | `base_sum_metric` | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
 
 
