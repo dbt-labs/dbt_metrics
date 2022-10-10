@@ -8,6 +8,8 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
+    custom_calendar_sql
+
 )
 
 # models/prior_metric.sql
@@ -72,7 +74,11 @@ class TestPrior:
         def project_config_update(self):
             return {
             "name": "example",
-            "models": {"+materialized": "table"}
+            "models": {"+materialized": "table"},
+            "vars":{
+                "dbt_metrics_calendar_model": "custom_calendar",
+                "custom_calendar_dimension_list": ["is_weekend"]
+            }
             }
     else: 
         @pytest.fixture(scope="class")
@@ -106,6 +112,7 @@ class TestPrior:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
+            "custom_calendar.sql": custom_calendar_sql,
             "prior_metric.sql": prior_metric_sql,
             "prior_metric.yml": prior_metric_yml
         }
@@ -120,7 +127,7 @@ class TestPrior:
 
         # initial run
         results = run_dbt(["run"])
-        assert len(results) == 3
+        assert len(results) == 4
         
         # test tests
         results = run_dbt(["test"]) # expect passing test
