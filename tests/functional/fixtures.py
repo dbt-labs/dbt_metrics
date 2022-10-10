@@ -58,13 +58,13 @@ final as (
         cast(date_day as date) as date_day,
         {% if target.type == 'bigquery' %}
             --BQ starts its weeks on Sunday. I don't actually care which day it runs on for auto testing purposes, just want it to be consistent with the other seeds
-            cast({{ dbt_utils.date_trunc('week(MONDAY)', 'date_day') }} as date) as date_week,
+            cast({{ date_trunc('week(MONDAY)', 'date_day') }} as date) as date_week,
         {% else %}
-            cast({{ dbt_utils.date_trunc('week', 'date_day') }} as date) as date_week,
+            cast({{ date_trunc('week', 'date_day') }} as date) as date_week,
         {% endif %}
-        cast({{ dbt_utils.date_trunc('month', 'date_day') }} as date) as date_month,
-        cast({{ dbt_utils.date_trunc('quarter', 'date_day') }} as date) as date_quarter,
-        cast({{ dbt_utils.date_trunc('year', 'date_day') }} as date) as date_year,
+        cast({{ date_trunc('month', 'date_day') }} as date) as date_month,
+        cast({{ date_trunc('quarter', 'date_day') }} as date) as date_quarter,
+        cast({{ date_trunc('year', 'date_day') }} as date) as date_year,
         true as is_weekend
     from days
 )
@@ -148,4 +148,38 @@ models:
 packages_yml = """
   - package: calogica/dbt_expectations
     version: [">=0.5.0", "<0.6.0"]
+"""
+
+# seeds/events.csv
+events_source_csv = """
+id,country,timestamp_field
+1,FR,2022-01-01
+2,UK,2022-02-01
+""".lstrip()
+
+# models/event.sql
+event_sql = """
+with source as (
+    select * from {{ ref('events_source') }}
+)
+,
+final as (
+    select *
+    from source 
+)
+select * from final
+"""
+
+# models/event.yml
+event_yml = """
+version: 2 
+models: 
+  - name: event
+    columns:
+      - name: id
+        description: TBD
+      - name: country
+        description: TBD
+      - name: timestamp_field
+        description: TBD
 """
