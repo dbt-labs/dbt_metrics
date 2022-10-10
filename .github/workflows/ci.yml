@@ -4,11 +4,13 @@ on:
   push:
     paths-ignore:
       - "**.md"
+      - ".changes/*"
     branches:
       - "main"
   pull_request:
     paths-ignore:
       - "**.md"
+      - ".changes/*"
 
 jobs:
   postgres:
