@@ -4,12 +4,14 @@ on:
   push:
     paths-ignore:
       - "**.md"
+      - ".changes/*"
     branches:
       - "main"
       - "*.latest"
   pull_request:
     paths-ignore:
       - "**.md"
+      - ".changes/*"
 
 # will cancel previous workflows triggered by the same event and for the same ref for PRs or same SHA otherwise
 concurrency:
