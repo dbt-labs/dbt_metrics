@@ -1,0 +1,7 @@
+kind: Docs
+body: Fixing typo in rolling secondary calc
+time: 2022-10-11T09:42:43.49833-05:00
+custom:
+  Author: callum-mcdata
+  Issue: "140"
+  PR: "141"
