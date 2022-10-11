@@ -24,8 +24,11 @@ are one depth upstream #}
 
 {# {% if metric_list is iterable and (metric_list is not string and metric_list is not mapping) %}  #}
 {% set base_set_list = []%}
+{% set full_set_list = []%}
+{# {% do print(metric_list)%} #}
 {% for metric in metric_list %}
     {%- do base_set_list.append(metric.name) -%}
+    {# {%- set test_list = metric.full_metric_dependency() -%} #}
     {# TODO #47 its not really GETTING the metric tree as much as operating. re-name that  #}
     {%- set metric_tree = metrics.update_metric_tree(metric ,metric_tree) -%}
 {% endfor %}
