@@ -26,7 +26,7 @@ version: 2
 models:
   - name: old_spec_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('old_spec_metric__expected')
 metrics:
   - name: old_spec_metric

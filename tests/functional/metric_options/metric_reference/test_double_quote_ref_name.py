@@ -28,7 +28,7 @@ version: 2
 models:
   - name: double_quote_ref_metrics
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('double_quote_ref_metrics__expected')
 metrics:
   - name: base_count_metric

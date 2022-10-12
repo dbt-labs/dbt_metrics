@@ -30,7 +30,7 @@ version: 2
 models:
   - name: multiple_metrics
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('multiple_metrics__expected')
 
 metrics:

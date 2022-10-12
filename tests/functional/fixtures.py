@@ -147,7 +147,10 @@ models:
 # packages.yml
 packages_yml = """
   - package: calogica/dbt_expectations
-    version: [">=0.5.0", "<0.6.0"]
+    version: [">=0.6.0", "<0.7.0"]
+
+  - package: dbt-labs/dbt_utils
+    version: [">=0.9.0", "<1.0.0"]
 """
 
 # seeds/events.csv

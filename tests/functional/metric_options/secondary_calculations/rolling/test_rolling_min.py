@@ -32,7 +32,7 @@ version: 2
 models:
   - name: rolling_min
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('rolling_min__expected')
 metrics:
   - name: rolling_min

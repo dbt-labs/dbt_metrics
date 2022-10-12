@@ -26,7 +26,7 @@ version: 2
 models:
   - name: month_grain_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('month_grain__expected')
 metrics:
   - name: month_grain_metric

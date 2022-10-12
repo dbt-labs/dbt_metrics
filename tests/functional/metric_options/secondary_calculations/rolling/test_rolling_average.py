@@ -30,7 +30,7 @@ version: 2
 models:
   - name: rolling_average
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('rolling_average__expected')
 metrics:
   - name: rolling_average

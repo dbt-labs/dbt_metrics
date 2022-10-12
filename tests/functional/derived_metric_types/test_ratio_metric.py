@@ -58,7 +58,7 @@ version: 2
 models:
   - name: ratio_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('ratio_metric__expected')
 metrics:
   - name: ratio_metric

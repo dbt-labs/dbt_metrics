@@ -32,7 +32,7 @@ version: 2
 models:
   - name: period_to_date_count
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('period_to_date_count__expected')
 metrics:
   - name: period_to_date_count

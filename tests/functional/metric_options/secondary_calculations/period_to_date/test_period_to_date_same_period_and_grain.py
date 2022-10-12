@@ -29,7 +29,7 @@ version: 2
 models:
   - name: same_period_and_grain
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('same_period_and_grain__expected')
 metrics:
   - name: same_period_and_grain

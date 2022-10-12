@@ -27,7 +27,7 @@ version: 2
 models:
   - name: multi_dimension_base_sum_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('multi_dimension_base_sum_metric__expected')
 metrics:
   - name: multi_dimension_base_sum_metric

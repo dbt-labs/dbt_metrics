@@ -29,7 +29,7 @@ version: 2
 models:
   - name: prior_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('prior_metric__expected')
 metrics:
   - name: prior_metric

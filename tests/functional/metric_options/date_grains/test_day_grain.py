@@ -26,7 +26,7 @@ version: 2
 models:
   - name: day_grain_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('day_grain__expected')
 metrics:
   - name: day_grain_metric

@@ -47,7 +47,7 @@ version: 2
 models:
   - name: rolling_derived_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('rolling_derived_metric__expected')
 metrics:
   - name: rolling_derived_metric

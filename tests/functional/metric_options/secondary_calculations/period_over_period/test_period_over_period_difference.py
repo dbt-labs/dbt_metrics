@@ -29,7 +29,7 @@ version: 2
 models:
   - name: period_over_period_difference
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('period_over_period_difference__expected')
 metrics:
   - name: period_over_period_difference

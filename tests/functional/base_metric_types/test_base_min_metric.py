@@ -26,7 +26,7 @@ version: 2
 models:
   - name: base_min_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('base_min_metric__expected')
 metrics:
   - name: base_min_metric
