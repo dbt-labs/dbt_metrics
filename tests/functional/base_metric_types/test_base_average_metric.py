@@ -8,6 +8,7 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
+    packages_yml
 )
 
 # models/base_average_metric.sql
@@ -26,7 +27,7 @@ version: 2
 models:
   - name: base_average_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('base_average_metric__expected')
 metrics:
   - name: base_average_metric

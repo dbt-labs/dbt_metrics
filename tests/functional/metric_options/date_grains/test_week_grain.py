@@ -26,7 +26,7 @@ version: 2
 models:
   - name: week_grain_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('week_grain__expected')
 metrics:
   - name: week_grain_metric

@@ -70,7 +70,7 @@ version: 2
 models:
   - name: testing_metric_develop
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('testing_metric_calculate')
 
 """

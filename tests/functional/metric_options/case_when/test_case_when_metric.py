@@ -26,7 +26,7 @@ version: 2
 models:
   - name: case_when_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('case_when_metric__expected')
 metrics:
   - name: case_when_metric

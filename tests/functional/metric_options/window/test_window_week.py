@@ -27,7 +27,7 @@ version: 2
 models:
   - name: base_window_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('base_window_metric__expected')
 metrics:
   - name: base_window_metric

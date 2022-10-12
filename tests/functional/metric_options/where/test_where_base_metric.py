@@ -28,7 +28,7 @@ version: 2
 models:
   - name: where_base_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('where_base_metric__expected')
 metrics:
   - name: where_base_metric

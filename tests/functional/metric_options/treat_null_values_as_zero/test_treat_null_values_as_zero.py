@@ -28,7 +28,7 @@ version: 2
 models:
   - name: treat_null_values_as_zero
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('treat_null_values_as_zero__expected')
 metrics:
   - name: treat_null_values_as_zero

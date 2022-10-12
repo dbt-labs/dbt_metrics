@@ -43,7 +43,7 @@ version: 2
 models:
   - name: end_date_derived_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('end_date_derived_metric__expected')
 metrics:
   - name: end_date_derived_metric

@@ -28,7 +28,7 @@ version: 2
 models:
   - name: divide_by_zero_expression_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('divide_by_zero_expression_metric__expected')
 metrics:
   - name: base_sum_metric

@@ -46,7 +46,7 @@ purchased_at,payment_type,payment_total
 custom_calendar_sql = """
 {{ config(materialized='table') }}
 with days as (
-    {{ dbt_utils.date_spine(
+    {{ metrics.metric_date_spine(
     datepart="day",
     start_date="cast('2010-01-01' as date)",
     end_date="cast('2030-01-01' as date)"
@@ -147,7 +147,10 @@ models:
 # packages.yml
 packages_yml = """
   - package: calogica/dbt_expectations
-    version: [">=0.5.0", "<0.6.0"]
+    version: [">=0.6.0", "<0.7.0"]
+
+  - package: dbt-labs/dbt_utils
+    version: [">=0.9.0", "<1.0.0"]
 """
 
 # seeds/events.csv

@@ -42,7 +42,7 @@ version: 2
 models:
   - name: derived_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('derived_metric__expected')
 metrics:
   - name: derived_metric

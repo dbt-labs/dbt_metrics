@@ -44,7 +44,7 @@ version: 2
 models:
   - name: develop_metric
     tests: 
-      - dbt_utils.equality:
+      - metrics.metric_equality:
           compare_model: ref('develop_metric__expected')
 """
 
