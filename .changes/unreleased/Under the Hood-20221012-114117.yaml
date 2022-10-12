@@ -1,0 +1,7 @@
+kind: Under the Hood
+body: Removing dbt_utils
+time: 2022-10-12T11:41:17.757328-05:00
+custom:
+  Author: callum-mcdata
+  Issue: "143"
+  PR: "143"
