@@ -40,7 +40,7 @@
         {{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate') }} as {{ metric_dictionary.name }},
 
         {%- if grain != 'all_time' %}
-        {{ dbt_utils.bool_or('metric_date_day is not null') }} as has_data
+        {{ bool_or('metric_date_day is not null') }} as has_data
         {% else %}
         min(metric_date_day) as metric_start_date,
         max(metric_date_day) as metric_end_date
