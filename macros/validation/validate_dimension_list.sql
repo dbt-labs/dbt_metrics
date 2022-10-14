@@ -13,9 +13,15 @@
         and derived metrics associated with the macro call #}
         {% for metric_name in metric_tree.full_set %}
             {% set metric_relation = metric(metric_name)%}
+            {% set all_metric_dimensions = [] %}
+            {% for model, dimensions in metric_relation.dimensions.items() %}
+                {% for dim in dimensions %}
+                    {% do all_metric_dimensions.append(dim) %}
+                {% endfor %}
+            {% endfor %}
             
             {# This macro returns a list of dimensions that are inclusive of calendar dimensions #}
-            {% set complete_dimension_list = metric_relation.dimensions + calendar_dimensions %}
+            {% set complete_dimension_list = all_metric_dimensions + calendar_dimensions %}
 
             {# If the dimension provided is not present in the loop metrics dimension list then we 
             will raise an error. If it is missing in ANY of the metrics, it cannot be used in the 

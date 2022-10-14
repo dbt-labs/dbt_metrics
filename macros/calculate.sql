@@ -15,9 +15,12 @@
     {%- endif -%}
 
     {%- set metric_tree = metrics.get_metric_tree(metric_list=metric_list) -%}
+    
 
     {#- Here we are creating the metrics dictionary which contains all of the metric information needed for sql gen. -#}
     {%- set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree=metric_tree) -%}
+    {{ log(metrics_dictionary, info = True) }}
+
 
     {#- ############
     VALIDATION - Make sure everything is good!

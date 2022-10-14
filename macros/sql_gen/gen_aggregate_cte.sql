@@ -20,14 +20,14 @@
             {%- if secondary_calculations | length > 0 -%}
                 {%- for period in relevant_periods %}
         date_{{ period }},
-                {% endfor -%}
-            {% endif -%}
-        {% endif -%}
+                {%- endfor -%}
+            {%- endif -%}
+        {%- endif -%}
 
         {#- This is the consistent code you'll find that loops through the list of 
         dimensions. It is used throughout this macro, with slight differences to 
         account for comma syntax around loop last -#}
-        {% for dim in dimensions %}
+        {%- for dim in dimensions %}
         {{ dim }},
         {%- endfor %}
 
