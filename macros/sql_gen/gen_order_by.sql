@@ -10,7 +10,7 @@ making it its own function -#}
 
 {#- The issue arises when we have an initial date column (ie date_month) where month 
 is also included in the relevent periods. This causes issues and so we need to
-remove the grain from the list of relevant periods so it isnt double counted -#}
+remove the grain from the list of relevant periods so it isn't double counted -#}
 
     {%- set dimension_length = dimensions | length -%}
     {%- set calendar_dimension_length = calendar_dimensions | length -%}
