@@ -4,10 +4,8 @@
 
 {% macro default__gen_base_query(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
 
-    {% set dimension_table_references = metrics.get_dimension_table_references(metric_dictionary) %}
-    {% set joined_models = metrics.get_joined_models(metric_dictionary, dimensions) %}
-    {{ log(dimension_table_references, info=True)}}
-    {{ log(joined_models, info=True)}}
+    {%- set dimension_table_references = metrics.get_dimension_table_references(metric_dictionary) -%}
+    {%- set joined_models = metrics.get_joined_models(metric_dictionary, dimensions) -%}
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
         select 
@@ -34,11 +32,11 @@
             {%- endfor %}
 
             {%- for calendar_dim in calendar_dimensions %}
-                calendar_table.{{ calendar_dim }},
+            calendar_table.{{ calendar_dim }},
             {%- endfor %}
 
             {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
-                ({{ metric_dictionary.expression }}) as property_to_aggregate
+            ({{ metric_dictionary.expression }}) as property_to_aggregate
             {%- elif metric_dictionary.calculation_type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
             {%- else -%}
@@ -47,13 +45,22 @@
 
         from {{ metric_dictionary.metric_model }} base_model 
         left join {{calendar_tbl}} calendar_table
-
         {% if metric_dictionary.window is not none %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) >= dateadd({{metric_dictionary.window.period}}, -{{metric_dictionary.window.count}}, calendar_table.date_day)
             and cast(base_model.{{metric_dictionary.timestamp}} as date) <= calendar_table.date_day
-        {% else %}
+        {%- else %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) = calendar_table.date_day
-        {% endif %}
+        {%- endif %}
+
+        {%- if joined_models | length > 0 %}
+            {%- for joined_model in joined_models %}
+            {%- set relationship = metric_dictionary.metric_model_relationships[joined_model] %}
+        left join {{ relationship.related_model_relation }}
+            on base_model.{{ relationship.related_model_join_info.join_key }} = {{ relationship.related_model_relation.name }}.{{ relationship.related_model_join_info.join_key }}
+            {%- endfor %}
+        {%- endif %}
+
+
 
         where 1=1
         
@@ -74,7 +81,7 @@
         {% if metric_dictionary.filters %}
             and (
                 {% for filter in metric_dictionary.filters -%}
-                    {%- if not loop.first -%} and {% endif %}{{ filter.field }} {{ filter.operator }} {{ filter.value }}
+                    {%- if not loop.first -%} and {% endif %}base_model.{{ filter.field }} {{ filter.operator }} {{ filter.value }}
                 {% endfor -%}
             )
         {% endif -%}
@@ -85,6 +92,8 @@
 
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
+        {%- set dimension_table_references = metrics.get_dimension_table_references(metric_dictionary) -%}
+        {%- set joined_models = metrics.get_joined_models(metric_dictionary, dimensions) -%}
         select 
 
             {# This section looks at the sql aspect of the metric and ensures that 
@@ -107,15 +116,15 @@
             {%- endif -%}
 
             {%- for dim in dimensions %}
-                base_model.{{ dim }},
+            {{ dimension_table_references[dim] }},
             {%- endfor %}
 
             {%- for calendar_dim in calendar_dimensions %}
-                calendar_table.{{ calendar_dim }},
+            calendar_table.{{ calendar_dim }},
             {%- endfor %}
 
             {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
-                ({{ metric_dictionary.expression }}) as property_to_aggregate
+            ({{ metric_dictionary.expression }}) as property_to_aggregate
             {%- elif metric_dictionary.calculation_method == 'count' -%}
 
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
@@ -126,12 +135,20 @@
         from {{ metric_dictionary.metric_model }} base_model 
         left join {{calendar_tbl}} calendar_table
 
-        {% if metric_dictionary.window is not none %}
+        {%- if metric_dictionary.window is not none %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) >= date_sub(calendar_table.date_day, interval {{metric_dictionary.window.count}} {{metric_dictionary.window.period}})
             and cast(base_model.{{metric_dictionary.timestamp}} as date) <= calendar_table.date_day
-        {% else %}
+        {%- else %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) = calendar_table.date_day
-        {% endif %}
+        {%- endif %}
+
+        {%- if joined_models | length > 0 %}
+            {%- for joined_model in joined_models %}
+            {%- set relationship = metric_dictionary.metric_model_relationships[joined_model] %}
+        left join {{ relationship.related_model_relation }}
+            on base_model.{{ relationship.related_model_join_info.join_key }} = {{ relationship.related_model_relation.name }}.{{ relationship.related_model_join_info.join_key }}
+            {%- endfor %}
+        {%- endif %}
 
         where 1=1
 
@@ -161,10 +178,8 @@
 
 {% macro postgres__gen_base_query(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
 
-    {% set dimension_table_references = metrics.get_dimension_table_references(metric_dictionary) %}
-    {% set joined_models = metrics.get_joined_models(metric_dictionary, dimensions) %}
-    {{ log(dimension_table_references, info=True)}}
-    {{ log(joined_models, info=True)}}
+    {%- set dimension_table_references = metrics.get_dimension_table_references(metric_dictionary) -%}
+    {%- set joined_models = metrics.get_joined_models(metric_dictionary, dimensions) -%}
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
         select 
@@ -204,19 +219,20 @@
 
         from {{ metric_dictionary.metric_model }} base_model 
         left join {{calendar_tbl}} calendar_table
-        {% if joined_models | length > 0 %}
-            {% for joined_model in joined_models %}
-            {% set relationship = metric_dictionary.metric_model_relationships[joined_model] %}
-        left join {{ relationship.related_model_relation }}
-            on base_model.{{ relationship.related_model_join_info.join_key }} = {{ relationship.related_model_relation.name }}.{{ relationship.related_model_join_info.join_key }}
-            {% endfor %}
-        {% endif %}
 
         {%- if metric_dictionary.window is not none %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) >=  calendar_table.date_day - interval '{{metric_dictionary.window.count}} {{metric_dictionary.window.period}}'
             and cast(base_model.{{metric_dictionary.timestamp}} as date) <= calendar_table.date_day
-        {%- else -%}
+        {%- else %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) = calendar_table.date_day
+        {%- endif %}
+
+        {%- if joined_models | length > 0 %}
+            {%- for joined_model in joined_models %}
+            {%- set relationship = metric_dictionary.metric_model_relationships[joined_model] %}
+        left join {{ relationship.related_model_relation }}
+            on base_model.{{ relationship.related_model_join_info.join_key }} = {{ relationship.related_model_relation.name }}.{{ relationship.related_model_join_info.join_key }}
+            {%- endfor %}
         {%- endif %}
 
         where 1=1
@@ -249,6 +265,8 @@
 
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
+    {%- set dimension_table_references = metrics.get_dimension_table_references(metric_dictionary) -%}
+    {%- set joined_models = metrics.get_joined_models(metric_dictionary, dimensions) -%}
         select 
         
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day, -- timestamp field
@@ -268,15 +286,15 @@
             {%- endif -%}
 
             {%- for dim in dimensions %}
-                base_model.{{ dim }},
+            {{ dimension_table_references[dim] }},
             {%- endfor %}
 
             {%- for calendar_dim in calendar_dimensions %}
-                calendar_table.{{ calendar_dim }},
+            calendar_table.{{ calendar_dim }},
             {%- endfor %}
 
             {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
-                ({{ metric_dictionary.expression }}) as property_to_aggregate
+            ({{ metric_dictionary.expression }}) as property_to_aggregate
             {%- elif metric_dictionary.calculation_type == 'count' -%}
             1 as property_to_aggregate /*a specific expression to aggregate wasn't provided, so this effectively creates count(*) */
             {%- else -%}
@@ -286,12 +304,20 @@
         from {{ metric_dictionary.metric_model }} base_model 
         left join {{calendar_tbl}} calendar_table
 
-        {% if metric_dictionary.window is not none %}
+        {%- if metric_dictionary.window is not none %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) >= dateadd({{metric_dictionary.window.period}}, -{{metric_dictionary.window.count}}, calendar_table.date_day)
             and cast(base_model.{{metric_dictionary.timestamp}} as date) <= calendar_table.date_day
-        {% else %}
+        {%- else %}
             on cast(base_model.{{metric_dictionary.timestamp}} as date) = calendar_table.date_day
-        {% endif %}
+        {%- endif %}
+
+        {%- if joined_models | length > 0 %}
+            {%- for joined_model in joined_models %}
+            {%- set relationship = metric_dictionary.metric_model_relationships[joined_model] %}
+        left join {{ relationship.related_model_relation }}
+            on base_model.{{ relationship.related_model_join_info.join_key }} = {{ relationship.related_model_relation.name }}.{{ relationship.related_model_join_info.join_key }}
+            {%- endfor %}
+        {%- endif %}
 
         where 1=1
         

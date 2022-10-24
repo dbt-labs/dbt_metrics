@@ -2,7 +2,7 @@
 
     {% set joined_models = [] %}
 
-        {% for dim in dimensions %}
+    {% for dim in dimensions %}
     {% for model_name, dim_list in metric_dictionary.dimensions.items() %}
             {% if dim in dim_list and model_name != metric_dictionary.metric_model.name %}
                 {% if model_name not in joined_models %}
