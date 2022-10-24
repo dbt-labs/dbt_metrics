@@ -14,7 +14,7 @@
             calendar_table.date_{{ grain }} as date_{{grain}},
             {% endif -%}
 
-            {% if grain != 'day' %}
+            {% if grain %}
             calendar_table.date_day as window_filter_date,
             {% endif %}
 
@@ -91,7 +91,7 @@
             calendar_table.date_{{ grain }} as date_{{grain}},
             {% endif -%}
 
-            {% if grain != 'day' %}
+            {% if grain %}
             calendar_table.date_day as window_filter_date,
             {% endif %}
 
@@ -168,7 +168,7 @@
             calendar_table.date_{{ grain }} as date_{{grain}},
             {% endif -%}
             
-            {% if grain != 'day' %}
+            {% if grain %}
             calendar_table.date_day as window_filter_date,
             {% endif %}
 
@@ -242,7 +242,7 @@
             calendar_table.date_{{ grain }} as date_{{grain}},
             {% endif -%}
 
-            {% if grain != 'day' %}
+            {% if grain %}
             calendar_table.date_day as window_filter_date,
             {% endif %}
 
