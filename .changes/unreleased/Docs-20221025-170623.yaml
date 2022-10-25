@@ -1,0 +1,7 @@
+kind: Docs
+body: Add changie as a PR condition to the CONTRIBUTING.md file
+time: 2022-10-25T17:06:23.469012+01:00
+custom:
+  Author: JoeryV
+  Issue: "154"
+  PR: "155"
