@@ -5,7 +5,7 @@
         {% set _ = missing_args.append("interval") %}
     {% endif %}
     {% if missing_args | length > 0 %}
-        {% do exceptions.raise_compiler_error( missing_args | join(", ") ~ ' not provided to period_over_period') %}
+        {% do exceptions.raise_compiler_error( missing_args | join(", ") ~ ' not provided to prior') %}
     {% endif %}
     {% if metric_list is string %}
         {% set metric_list = [metric_list] %}
