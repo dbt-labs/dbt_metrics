@@ -61,7 +61,7 @@ Include in your `package.yml`
 ```yaml
 packages:
   - package: dbt-labs/metrics
-    version: [">=0.3.0", "<0.4.0"]
+    version: [">=1.3.0", "<1.4.0"]
 ```
 
 # Macros
