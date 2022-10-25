@@ -51,7 +51,7 @@ jobs:
           project: CT
           issuetype: "GitHub Issue"
           summary: "${{ github.event.issue.title }}"
-          fields: '{ "customfield_10115": "${{ github.repository }}", "customfield_10114": "${{ github.event.issue.html_url }}", "customfield_10115": ${{ github.event.issue.number }} }'
+          fields: '{ "customfield_10116": "${{ github.repository }}", "customfield_10114": "${{ github.event.issue.html_url }}", "customfield_10115": ${{ github.event.issue.number }} }'
  
       - name: Update Issue Title
         env:
