@@ -5,7 +5,8 @@
 3. [Getting the code](#getting-the-code)
 4. [Running `dbt_metrics` in development](#running-dbtmetrics-in-development)
 6. [Testing](#testing)
-7. [Submitting a Pull Request](#submitting-a-pull-request)
+7. [Adding a changelog entry](#adding-a-changelog-entry)
+8. [Submitting a Pull Request](#submitting-a-pull-request)
 
 ## About this document
 
@@ -153,6 +154,16 @@ python3 -m pytest tests/functional/example/test_example_failing_test.py
 ```shell
 python3 -m pytest tests/functional
 ```
+
+## Adding a CHANGELOG Entry
+
+We use [changie](https://changie.dev) to generate `CHANGELOG` entries. **Note:** Do not edit the `CHANGELOG.md` directly. Your modifications will be lost.
+
+Follow the steps to [install `changie`](https://changie.dev/guide/installation/) for your system.
+
+Once changie is installed and your PR is created, simply run `changie new` and changie will walk you through the process of creating a changelog entry.  Commit the file that's created and your changelog entry is complete!
+
+You don't need to worry about which `dbt_metrics` version your change will go into. Just create the changelog entry with `changie`, and open your PR against the `main` branch. All merged changes will be included in the next minor version of `dbt_metrics`. The metrics maintainers _may_ choose to "backport" specific changes in order to patch older minor versions. In that case, a maintainer will take care of that backport after merging your PR, before releasing the new version of `dbt_metrics`.
 
 ## Submitting a Pull Request
 
