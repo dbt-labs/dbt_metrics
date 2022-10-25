@@ -1,0 +1,7 @@
+kind: Fixes
+body: fix typo in prior macro
+time: 2022-10-25T15:14:22.043378-04:00
+custom:
+  Author: deanna-minnick
+  Issue: "160"
+  PR: "159"
