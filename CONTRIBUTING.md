@@ -6,7 +6,7 @@
 4. [Running `dbt_metrics` in development](#running-dbtmetrics-in-development)
 6. [Testing](#testing)
 7. [Adding a changelog entry](#adding-a-changelog-entry)
-7. [Submitting a Pull Request](#submitting-a-pull-request)
+8. [Submitting a Pull Request](#submitting-a-pull-request)
 
 ## About this document
 
