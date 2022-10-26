@@ -1,0 +1,7 @@
+kind: Fixes
+body: Fixing bug with window functionality
+time: 2022-10-25T16:40:09.927002+01:00
+custom:
+  Author: JoeryV
+  Issue: "146"
+  PR: "149"
