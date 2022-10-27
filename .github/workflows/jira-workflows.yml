@@ -70,7 +70,7 @@ jobs:
         id: save-id
         run: |
           ID='${{ steps.create.outputs.issue }}'
-          echo ::set-output name=issueId::${ID}
+          echo "issueId=${ID}" >> $GITHUB_OUTPUT
 
   find-labels:
     runs-on: ubuntu-latest
@@ -83,7 +83,7 @@ jobs:
         id: generate-labels
         run: |
           LABELS='${{ toJSON(github.event.issue.labels.*.name) }}'
-          echo ::set-output name=labels::${LABELS}
+          echo "labels=${LABELS}" >> $GITHUB_OUTPUT
 
   add-labels:
     runs-on: ubuntu-latest
