@@ -18,8 +18,10 @@ permissions:
   issues: write
 
 jobs:
-  call-label-action:
-    uses: dbt-labs/dbt_metrics/.github/workflows/jira-workflows.yml@main
+  call-creation-action:
+    uses: dbt-labs/actions/.github/workflows/jira-creation.yml@main
+    with:
+      project_key: "CT"
     secrets:
       JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
       JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
