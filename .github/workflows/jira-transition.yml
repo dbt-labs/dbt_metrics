@@ -22,7 +22,7 @@ jobs:
   call-transition-action:
     uses: dbt-labs/actions/.github/workflows/jira-transition.yml@main
     with:
-      project_key: "CT"
+      project_key: "SEMANTIC"
     secrets:
       JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
       JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
