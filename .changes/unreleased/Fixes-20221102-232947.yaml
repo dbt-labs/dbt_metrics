@@ -1,0 +1,7 @@
+kind: Fixes
+body: Updated the example metric_json_schema.yml file to reference the new properties.
+time: 2022-11-02T23:29:47.135949+02:00
+custom:
+  Author: rijnhardtkotze
+  Issue: "176"
+  PR: "177"
