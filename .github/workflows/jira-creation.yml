@@ -21,7 +21,7 @@ jobs:
   call-creation-action:
     uses: dbt-labs/actions/.github/workflows/jira-creation.yml@main
     with:
-      project_key: "CT"
+      project_key: "SEMANTIC"
     secrets:
       JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
       JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
