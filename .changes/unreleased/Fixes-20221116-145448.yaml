@@ -1,0 +1,7 @@
+kind: Fixes
+body: Fixing calendar table join
+time: 2022-11-16T14:54:48.473292-06:00
+custom:
+  Author: callum-mcdata
+  Issue: "181"
+  PR: "180"
