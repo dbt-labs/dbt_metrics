@@ -1,0 +1,7 @@
+kind: Fixes
+body: Fixing date_day bug
+time: 2022-11-17T11:32:42.297464-06:00
+custom:
+  Author: callum-mcdata
+  Issue: "184"
+  PR: "185"
