@@ -8,6 +8,7 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
+    custom_calendar_sql
 )
 
 # models/rolling_count.sql
@@ -99,7 +100,11 @@ class TestRollingCount:
         def project_config_update(self):
             return {
             "name": "example",
-            "models": {"+materialized": "table"}
+            "models": {"+materialized": "table"},
+            "vars":{
+                "dbt_metrics_calendar_model": "custom_calendar",
+                "custom_calendar_dimension_list": ["is_weekend"]
+            }
             }
     else: 
         @pytest.fixture(scope="class")
@@ -133,6 +138,7 @@ class TestRollingCount:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
+            "custom_calendar.sql": custom_calendar_sql,
             "rolling_count.sql": rolling_count_sql,
             "rolling_count.yml": rolling_count_yml
         }
@@ -147,7 +153,7 @@ class TestRollingCount:
 
         # initial run
         results = run_dbt(["run"])
-        assert len(results) == 3
+        assert len(results) == 4
 
         # test tests
         results = run_dbt(["test"]) # expect passing test
