@@ -1,0 +1,8 @@
+kind: Docs
+body: Updated the example test environment file to match what is required across all
+  platforms
+time: 2022-11-04T14:21:57.704467+02:00
+custom:
+  Author: rijnhardtkotze
+  Issue: "178"
+  PR: "179"

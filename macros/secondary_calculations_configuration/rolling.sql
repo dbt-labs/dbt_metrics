@@ -4,9 +4,6 @@
     {% if not aggregate %} 
         {% set _ = missing_args.append("aggregate") %}
     {% endif %}
-    {% if not interval %}
-        {% set _ = missing_args.append("interval") %}
-    {% endif %}
     {% if missing_args | length > 0 %}
         {% do exceptions.raise_compiler_error( missing_args | join(", ") ~ ' not provided to rolling') %}
     {% endif %}

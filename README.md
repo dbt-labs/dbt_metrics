@@ -265,14 +265,14 @@ Constructor: `metrics.period_to_date(aggregate, period [, alias, metric_list])`
 
 ## Rolling ([source](/macros/secondary_calculations/secondary_calculation_rolling.sql))
 
-The rolling secondary calculation performs an aggregation on a defined number of rows in metric dataset. For example, if the user selects the `week` grain and sets a rolling secondary calculation to `4` then the value returned will be a rolling 4 week calculation of whatever aggregation type was selected.
+The rolling secondary calculation performs an aggregation on a number of rows in metric dataset. For example, if the user selects the `week` grain and sets a rolling secondary calculation to `4` then the value returned will be a rolling 4 week calculation of whatever aggregation type was selected. If the `interval` input is not provided then the rolling caclulation will be unbounded on all preceding rows.
 
-Constructor: `metrics.rolling(aggregate, interval [, alias, metric_list])`
+Constructor: `metrics.rolling(aggregate [, interval, alias, metric_list])`
 
 | Input                      | Example | Description | Required |
 | -------------------------- | ----------- | ----------- | -----------|
 | `aggregate`                | `max`, `average` | The aggregation to use in the window function. Options vary based on the primary aggregation and are enforced in [validate_aggregate_coherence()](/macros/secondary_calculations/validate_aggregate_coherence.sql). | Yes |
-| `interval`                 | 1 | Integer - the number of time grains to look back | Yes |
+| `interval`                 | 1 | Integer - the number of time grains to look back | No |
 | `alias`                    | `month_to_date` | The column alias for the resulting calculation | No |
 | `metric_list`              | `base_sum_metric` | List of metrics that the secondary calculation should be applied to. Default is all metrics selected | No |
 
@@ -328,10 +328,10 @@ The metrics package contains validation on the configurations you're able to pro
 
 Below is the list of metric configs currently accepted by this package.
 
-| Config                      | Type    | Accepted Values | Default Value | Description                                                                                                                                                                                                                                                                                                                  |
-|-----------------------------|---------|-----------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`                   | boolean | True/False      | True          | Enables or disables a metric node. When disabled, dbt will not consider it as part of your project.                                                                                                                                                                                                                          |
-| `treat_null_values_as_zero` | boolean | True/False      | True          | Controls the `coalesce` behavior for metrics. By default, when there are no observations for a metric, the output of the metric as well as period Over period secondary calculations will include a `coalesce({{ field }}, 0)` to return 0's rather than nulls. Setting this config to False instead returns `NULL` values.  |
+| Config | Type | Accepted Values | Default Value | Description |
+|--------|------|-----------------|---------------|-------------|
+| `enabled` | boolean | True/False | True | Enables or disables a metric node. When disabled, dbt will not consider it as part of your project. |
+| `treat_null_values_as_zero` | boolean | True/False | True | Controls the `coalesce` behavior for metrics. By default, when there are no observations for a metric, the output of the metric as well as period Over period secondary calculations will include a `coalesce({{ field }}, 0)` to return 0's rather than nulls. Setting this config to False instead returns `NULL` values. |
 
 ## All_Time Grain
 
