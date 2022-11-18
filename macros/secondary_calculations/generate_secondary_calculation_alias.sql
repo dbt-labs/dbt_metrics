@@ -23,9 +23,17 @@
    
     {%- elif calc_type == 'rolling' %}
         {%- if is_multiple_metrics -%}
-            {%- do return(metric_name ~ "_" ~ "rolling_" ~ calc_config.aggregate ~ "_" ~ calc_config.interval ~ "_" ~ grain) %}
+            {%- if calc_config.interval -%}
+                {%- do return(metric_name ~ "_" ~ "rolling_" ~ calc_config.aggregate ~ "_" ~ calc_config.interval ~ "_" ~ grain) %}
+            {%- else -%}
+                {%- do return(metric_name ~ "_" ~ "rolling_" ~ calc_config.aggregate) %}
+            {%- endif -%}
         {%- else -%}
-            {%- do return("rolling_" ~ calc_config.aggregate ~ "_" ~ calc_config.interval ~ "_" ~ grain) %}
+            {%- if calc_config.interval -%}
+                {%- do return("rolling_" ~ calc_config.aggregate ~ "_" ~ calc_config.interval ~ "_" ~ grain) %}
+            {%- else -%}
+                {%- do return("rolling_" ~ calc_config.aggregate) %}
+            {%- endif -%}
         {%- endif -%}
     
     {%- elif calc_type == 'period_to_date' %}

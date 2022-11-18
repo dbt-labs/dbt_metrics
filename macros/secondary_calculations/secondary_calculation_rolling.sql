@@ -6,7 +6,11 @@
                 partition by {{ dimensions | join(", ") }} 
             {% endif -%}
             order by date_{{grain}}
+            {% if calc_config.interval %}
             rows between {{ calc_config.interval - 1 }} preceding and current row
+            {% else %}
+            rows between unbounded preceding and current row
+            {% endif %}
         )
     {% endset %}
 
