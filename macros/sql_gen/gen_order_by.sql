@@ -27,3 +27,11 @@ remove the grain from the list of relevant periods so it isnt double counted -#}
     {% endif %}
 
 {% endmacro %}
+
+{% macro redshift__gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) %}
+
+{% endmacro %}
+
+{% macro postgres__gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) %}
+
+{% endmacro %}
