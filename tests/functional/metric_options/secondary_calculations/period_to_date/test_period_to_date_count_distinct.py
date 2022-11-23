@@ -48,31 +48,13 @@ metrics:
 """
 
 # seeds/period_to_date_count_distinct__expected.csv
-if os.getenv('dbt_target') == 'postgres':
-    period_to_date_count_distinct__expected_csv = """
-date_month,date_year,period_to_date_count_distinct,period_to_date_count_distinct_this_year_min,period_to_date_count_distinct_max_for_year,period_to_date_count_distinct_sum_for_year,period_to_date_count_distinct_average_for_year
-2022-01-01,2022-01-01,5,5,5,5,5.0000000000000000
-2022-02-01,2022-01-01,3,3,5,8,4.0000000000000000
-""".lstrip()
-
-# seeds/period_to_date_count_distinct__expected.csv
-if os.getenv('dbt_target') == 'redshift':
-    period_to_date_count_distinct__expected_csv = """
-date_month,date_year,period_to_date_count_distinct,period_to_date_count_distinct_this_year_min,period_to_date_count_distinct_max_for_year,period_to_date_count_distinct_sum_for_year,period_to_date_count_distinct_average_for_year
-2022-01-01,2022-01-01,5,5,5,5,5.0000000000000000
-2022-02-01,2022-01-01,3,3,5,8,4.0000000000000000
-""".lstrip()
-
-# seeds/period_to_date_count_distinct__expected.csv
 if os.getenv('dbt_target') == 'snowflake':
     period_to_date_count_distinct__expected_csv = """
 date_month,date_year,period_to_date_count_distinct,period_to_date_count_distinct_this_year_min,period_to_date_count_distinct_max_for_year,period_to_date_count_distinct_sum_for_year,period_to_date_count_distinct_average_for_year
 2022-01-01,2022-01-01,5,5,5,5,5.000000
 2022-02-01,2022-01-01,3,3,5,8,4.000000
 """.lstrip()
-
-# seeds/period_to_date_count_distinct__expected.csv
-if os.getenv('dbt_target') == 'bigquery':
+else:
     period_to_date_count_distinct__expected_csv = """
 date_month,date_year,period_to_date_count_distinct,period_to_date_count_distinct_this_year_min,period_to_date_count_distinct_max_for_year,period_to_date_count_distinct_sum_for_year,period_to_date_count_distinct_average_for_year
 2022-01-01,2022-01-01,5,5,5,5,5.0000000000000000

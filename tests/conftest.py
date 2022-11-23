@@ -18,7 +18,7 @@ def dbt_profile_target():
     if os.environ['dbt_target'] == 'postgres':
         return {
             'type': 'postgres',
-            'threads': 1,
+            'threads': 8,
             'host': os.environ['POSTGRES_TEST_HOST'],
             'user': os.environ['POSTGRES_TEST_USER'],
             'password': os.environ['POSTGRES_TEST_PASSWORD'],
@@ -29,7 +29,7 @@ def dbt_profile_target():
     if os.environ['dbt_target'] == 'redshift':
         return {
             'type': 'redshift',
-            'threads': 1,
+            'threads': 8,
             'host': os.environ['REDSHIFT_TEST_HOST'],
             'user': os.environ['REDSHIFT_TEST_USER'],
             'pass': os.environ['REDSHIFT_TEST_PASS'],
@@ -40,7 +40,7 @@ def dbt_profile_target():
     if os.environ['dbt_target'] == 'snowflake':
         return {
             'type': 'snowflake',
-            'threads': 1,
+            'threads': 8,
             'account': os.environ['SNOWFLAKE_TEST_ACCOUNT'],
             'user': os.environ['SNOWFLAKE_TEST_USER'],
             'password': os.environ['SNOWFLAKE_TEST_PASSWORD'],
@@ -52,8 +52,19 @@ def dbt_profile_target():
     if os.environ['dbt_target'] == 'bigquery':
         return {
             'type': 'bigquery',
-            'threads': 1,
+            'threads': 8,
             'method': 'service-account',
             'project': os.environ['BIGQUERY_TEST_PROJECT'],
             'keyfile': os.environ['BIGQUERY_SERVICE_KEY_PATH'],
+        }
+
+    if os.environ['dbt_target'] == 'databricks':
+        return {
+            'type': 'databricks',
+            'threads': 8,
+            'catalog': os.environ['DATABRICKS_TEST_CATALOG'],
+            'schema': os.environ['DATABRICKS_TEST_SCHEMA'],
+            'host': os.environ['DATABRICKS_TEST_HOST'],
+            'http_path': os.environ['DATABRICKS_TEST_HTTP_PATH'],
+            'token': os.environ['DATABRICKS_TEST_TOKEN'],
         }

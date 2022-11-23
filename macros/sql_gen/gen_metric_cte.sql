@@ -9,7 +9,11 @@
     {%- if not treat_null_values_as_zero -%}
         {%- set metric_val = metric_name -%}
     {%- else -%}
-        {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}
+        {%- if target.name == 'databricks' -%}
+            {%- set metric_val = "cast(coalesce(" ~ metric_name ~ ", 0) as numeric) as " ~ metric_name -%}
+        {%- else -%}
+            {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}
+        {%- endif %}
     {%- endif %}
     
     select

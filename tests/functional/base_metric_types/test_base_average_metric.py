@@ -43,31 +43,13 @@ metrics:
 """
 
 # seeds/base_average_metric__expected.csv
-if os.getenv('dbt_target') == 'postgres':
-    base_average_metric__expected_csv = """
-date_month,base_average_metric
-2022-01-01,1.00000000000000000000
-2022-02-01,1.3333333333333333
-""".lstrip()
-
-# seeds/base_average_metric__expected.csv
-if os.getenv('dbt_target') == 'redshift':
-    base_average_metric__expected_csv = """
-date_month,base_average_metric
-2022-01-01,1.00000000000000000000
-2022-02-01,1.3333333333333333
-""".lstrip()
-
-# seeds/base_average_metric__expected.csv
 if os.getenv('dbt_target') == 'snowflake':
     base_average_metric__expected_csv = """
 date_month,base_average_metric
 2022-01-01,1.000000
 2022-02-01,1.333333
 """.lstrip()
-
-# seeds/base_average_metric__expected.csv
-if os.getenv('dbt_target') == 'bigquery':
+else: 
     base_average_metric__expected_csv = """
 date_month,base_average_metric
 2022-01-01,1.00000000000000000000
