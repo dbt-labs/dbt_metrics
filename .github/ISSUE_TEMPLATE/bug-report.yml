@@ -79,6 +79,7 @@ body:
         - redshift
         - snowflake
         - bigquery
+        - databricks
         - spark
         - other (mention it in "Additional Context")
     validations:
