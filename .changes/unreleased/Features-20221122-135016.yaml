@@ -1,0 +1,8 @@
+kind: Features
+body: DRYer code in gen_final_cte macro. Moved relevant portions into gen_group_by
+  macro.
+time: 2022-11-22T13:50:16.559433-05:00
+custom:
+  Author: deanna-minnick
+  Issue: "144"
+  PR: "189"
