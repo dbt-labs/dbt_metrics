@@ -48,31 +48,13 @@ metrics:
 """
 
 # seeds/rolling_sum__expected.csv
-if os.getenv('dbt_target') == 'postgres':
-    rolling_sum__expected_csv = """
-date_month,rolling_sum,rolling_sum_rolling_min_2_month,rolling_sum_rolling_max_2_month,rolling_sum_rolling_sum_2_month,rolling_sum_rolling_average_2_month
-2022-01-01,18,18,18,18,18.0000000000000000
-2022-02-01,6,6,18,24,12.0000000000000000
-""".lstrip()
-
-# seeds/rolling_sum__expected.csv
-if os.getenv('dbt_target') == 'redshift':
-    rolling_sum__expected_csv = """
-date_month,rolling_sum,rolling_sum_rolling_min_2_month,rolling_sum_rolling_max_2_month,rolling_sum_rolling_sum_2_month,rolling_sum_rolling_average_2_month
-2022-01-01,18,18,18,18,18.0000000000000000
-2022-02-01,6,6,18,24,12.0000000000000000
-""".lstrip()
-
-# seeds/rolling_sum__expected.csv
 if os.getenv('dbt_target') == 'snowflake':
     rolling_sum__expected_csv = """
 date_month,rolling_sum,rolling_sum_rolling_min_2_month,rolling_sum_rolling_max_2_month,rolling_sum_rolling_sum_2_month,rolling_sum_rolling_average_2_month
 2022-01-01,18,18,18,18,18.000000
 2022-02-01,6,6,18,24,12.000000
 """.lstrip()
-
-# seeds/rolling_sum__expected.csv
-if os.getenv('dbt_target') == 'bigquery':
+else:
     rolling_sum__expected_csv = """
 date_month,rolling_sum,rolling_sum_rolling_min_2_month,rolling_sum_rolling_max_2_month,rolling_sum_rolling_sum_2_month,rolling_sum_rolling_average_2_month
 2022-01-01,18,18,18,18,18.0000000000000000

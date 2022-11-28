@@ -78,5 +78,9 @@ class TestInvalidStringDataType:
         results = run_dbt(["deps"])
         results = run_dbt(["seed"])
 
-        # initial run
-        results = run_dbt(["run"],expect_pass = False)
+        if os.getenv('dbt_target') == 'databricks':
+            # initial run. Databricks has a funky way of handling coalesce
+            results = run_dbt(["run"])
+        else:
+            # initial run
+            results = run_dbt(["run"], expect_pass = False)

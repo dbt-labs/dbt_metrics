@@ -64,6 +64,15 @@ packages:
     version: [">=1.3.0", "<1.4.0"]
 ```
 
+## Supported Adapters
+The adapaters that are currently supported in the dbt_metrics package are:
+- Snowflake
+- BigQuery
+- Redshift
+- Postgres
+- Databricks
+
+
 # Macros
 
 ## Calculate

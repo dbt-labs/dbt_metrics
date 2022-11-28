@@ -136,3 +136,25 @@ jobs:
           BIGQUERY_TEST_PROJECT: ${{ secrets.BIGQUERY_TEST_PROJECT }}
         with:
           dbt_target: bigquery
+
+  databricks:
+    needs: databricks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: ./.github/actions/end-to-end-test
+        env:
+          DATABRICKS_TEST_CATALOG: ${{ secrets.DATABRICKS_TEST_CATALOG }}
+          DATABRICKS_TEST_SCHEMA: ${{ secrets.DATABRICKS_TEST_SCHEMA }}
+          DATABRICKS_TEST_HOST: ${{ secrets.DATABRICKS_TEST_HOST }}
+          DATABRICKS_TEST_HTTP_PATH: ${{ secrets.DATABRICKS_TEST_HTTP_PATH }}
+          DATABRICKS_TEST_TOKEN: ${{ secrets.DATABRICKS_TEST_TOKEN }}
+        with:
+          dbt_target: databricks
