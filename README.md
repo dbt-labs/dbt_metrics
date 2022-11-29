@@ -5,6 +5,7 @@
 * [About](#about)
    * [Tenets](#tenets)
    * [Installation Instructions](#installation-instructions)
+   * [Supported Adapters](#supported-adapters)
 * [Macros](#macros)
    * [Calculate](#calculate)
       * [Supported Inputs](#supported-inputs)
