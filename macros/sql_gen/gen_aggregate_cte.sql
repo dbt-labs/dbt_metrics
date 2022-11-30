@@ -3,6 +3,18 @@
 {%- endmacro -%}
 
 {%- macro default__gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
+, {{metric_dictionary.name}}__base_query as (
+    {{ metrics.gen_base_query(
+                metric_dictionary=metric_dictionary,
+                grain=grain, 
+                dimensions=dimensions, 
+                secondary_calculations=secondary_calculations, 
+                start_date=start_date, 
+                end_date=end_date, 
+                calendar_tbl=calendar_tbl, 
+                relevant_periods=relevant_periods, 
+                calendar_dimensions=calendar_dimensions) }}
+)
 
 , {{metric_dictionary.name}}__aggregate as (
     {# This is the most important CTE. Instead of joining all relevant information
@@ -46,17 +58,7 @@
         max(metric_date_day) as metric_end_date
         {% endif %}
 
-    from ({{ metrics.gen_base_query(
-                metric_dictionary=metric_dictionary,
-                grain=grain, 
-                dimensions=dimensions, 
-                secondary_calculations=secondary_calculations, 
-                start_date=start_date, 
-                end_date=end_date, 
-                calendar_tbl=calendar_tbl, 
-                relevant_periods=relevant_periods, 
-                calendar_dimensions=calendar_dimensions) }}
-    ) as base_query
+    from {{metric_dictionary.name}}__base_query
 
     where 1=1
 
