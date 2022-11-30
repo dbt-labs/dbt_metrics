@@ -1,0 +1,8 @@
+kind: Under the Hood
+body: Update the calculation base query to be a CTE instead of a subquery in the compiled
+  code.
+time: 2022-11-30T16:57:10.964798-06:00
+custom:
+  Author: bennieregenold7
+  Issue: "195"
+  PR: "196"
