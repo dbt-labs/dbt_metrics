@@ -22,7 +22,7 @@
         {% if metric_definition.window %}
             {% do metrics_dictionary_dict.update({'window': metric_definition.window}) %}
         {% else %}
-            {% do metrics_dictionary_dict.update({'window': None}) %}
+            {% do metrics_dictionary_dict.update({'window': none}) %}
         {% endif %}
     {# Behavior specific to calculate #}
     {% else %}

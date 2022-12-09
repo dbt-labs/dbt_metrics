@@ -7,7 +7,7 @@
 {# This macro has gone through many revisions. As of 1.3.2, it will be changed to reduce its 
 functionality to only order by the date field #}
 
-    {% if grain != 'all_time' %}
+    {% if grain %}
     order by 1 desc
     {% endif %}
 

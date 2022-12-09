@@ -1,15 +1,8 @@
-/*
-    Core metric query generation logic.
-    TODO:
-      - allow start/end dates on metrics. Maybe special-case "today"?
-      - allow passing in a seed with targets for a metric's value
-*/
 {%- macro get_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, where, metric_tree) %}
 
 {#- ############
-TODO: COMMENT AROUND how get metric sql doesn't do validation and that lives further upstream in calculate and develop
+TODO: All validation occurs in calculate and develop - please reference there for any validation
 ############ -#}
-
 
 {#- ############
 LETS SET SOME VARIABLES!
@@ -41,6 +34,9 @@ within the final dataset in order to accomplish base + secondary calc functional
 a custom calendar -#}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) -%}
 
+{# Here we get the total dimension count for grouping #}
+{%- set total_dimension_count = metrics.get_total_dimension_count(grain, dimensions, calendar_dimensions, relevant_periods) -%}
+
 {#- ############
 LET THE COMPOSITION BEGIN!
 ############ -#}
@@ -61,6 +57,7 @@ up the composite metric. -#}
 
 {%- for metric_name in metric_tree["parent_set"] -%}
 
+    --TODO: Make this branching
     {{ metrics.build_metric_sql(
         metric_dictionary=metrics_dictionary[metric_name], 
         grain=grain, 
@@ -71,7 +68,8 @@ up the composite metric. -#}
         calendar_tbl=calendar_tbl, 
         relevant_periods=relevant_periods,
         calendar_dimensions=calendar_dimensions,
-        dimensions_provided=dimensions_provided
+        dimensions_provided=dimensions_provided,
+        total_dimension_count=total_dimension_count
     ) 
     }}
 
@@ -79,6 +77,7 @@ up the composite metric. -#}
 
 {%- if metric_tree["full_set"] | length > 1 -%}
 
+    -- TODO: Make this permissive with non date-spined metrics
     {{ metrics.gen_joined_metrics_cte(
         metric_tree=metric_tree,
         grain=grain, 
@@ -86,21 +85,28 @@ up the composite metric. -#}
         calendar_dimensions=calendar_dimensions, 
         secondary_calculations=secondary_calculations, 
         relevant_periods=relevant_periods,
-        metrics_dictionary=metrics_dictionary ) 
+        metrics_dictionary=metrics_dictionary,
+        total_dimension_count=total_dimension_count ) 
     }}
 
 {% endif -%}
 
-{{ metrics.gen_secondary_calculation_cte(
-    metric_tree=metric_tree,
-    grain=grain, 
-    dimensions=non_calendar_dimensions, 
-    secondary_calculations=secondary_calculations, 
-    calendar_dimensions=calendar_dimensions,
-    metric_dictionary=metrics_dictionary 
-    ) 
-    }}
+{%- if secondary_calculations | length > 0 -%}
 
+    --TODO Make this optional for secondary calcs
+    {{ metrics.gen_secondary_calculation_cte(
+        metric_tree=metric_tree,
+        grain=grain, 
+        dimensions=non_calendar_dimensions, 
+        secondary_calculations=secondary_calculations, 
+        calendar_dimensions=calendar_dimensions,
+        metric_dictionary=metrics_dictionary 
+        ) 
+        }}
+
+{%- endif -%}
+
+--TODO: Make sure this pulls from the right CTEs
 {{ metrics.gen_final_cte(
     metric_tree=metric_tree,
     grain=grain, 

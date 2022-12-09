@@ -12,7 +12,7 @@
     -%}
 
     {%- for metric in metrics_dictionary -%}
-        {%- set metric_config = metrics_dictionary[metric].get("config", None) -%}
+        {%- set metric_config = metrics_dictionary[metric].get("config", none) -%}
         {%- if metric_config -%}
             {%- for config in metric_config -%}
                 {%- set config_value = metric_config[config] -%}

@@ -1,8 +1,8 @@
-{% test metric_equality(model, compare_model, compare_columns=None) %}
+{% test metric_equality(model, compare_model, compare_columns=none) %}
   {{ return(adapter.dispatch('test_metric_equality', 'metrics')(model, compare_model, compare_columns)) }}
 {% endtest %}
 
-{% macro default__test_metric_equality(model, compare_model, compare_columns=None) %}
+{% macro default__test_metric_equality(model, compare_model, compare_columns=none) %}
 
 {% set set_diff %}
     count(*) + coalesce(abs(
