@@ -1,8 +1,8 @@
-{% macro gen_base_query(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
-    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)) }}
+{% macro gen_base_query(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, where) %}
+    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, where)) }}
 {% endmacro %}
 
-{% macro default__gen_base_query(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
+{% macro default__gen_base_query(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, where) %}
 
     {# This is the "base" CTE which selects the fields we need to correctly 
     calculate the metric.  #}
@@ -44,6 +44,6 @@
 
         where 1=1
         
-        {{ metrics.gen_filters(metric_dictionary, start_date, end_date) }}
+        {{ metrics.gen_filters(metric_dictionary, start_date, end_date, where) }}
 
 {%- endmacro -%}

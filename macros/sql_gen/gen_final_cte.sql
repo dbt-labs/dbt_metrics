@@ -18,7 +18,7 @@
 
     {# metric where clauses #}
     {%- if where %}
-    where {{ where }}
+    where 1=1
     {%- endif %}
     {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 
@@ -29,7 +29,7 @@
     select * from joined_metrics
     {#- metric where clauses -#}
         {%- if where %}
-    where {{ where }}
+    where 1=1
         {%- endif -%}
     {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 
@@ -37,7 +37,7 @@
 
     select * from {{metric_tree.base_set[0]}}__final 
         {%- if where %}
-    where {{ where }}
+    where 1=1
         {%- endif -%}
     {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
     

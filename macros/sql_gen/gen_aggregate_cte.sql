@@ -1,8 +1,8 @@
-{%- macro gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) -%}
-    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)) }}
+{%- macro gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, where) -%}
+    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, where)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
+{%- macro default__gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, where) %}
 
 , {{metric_dictionary.name}}__aggregate as (
     {# This is the most important CTE. Instead of joining all relevant information
@@ -55,7 +55,8 @@
                 end_date=end_date, 
                 calendar_tbl=calendar_tbl, 
                 relevant_periods=relevant_periods, 
-                calendar_dimensions=calendar_dimensions) }}
+                calendar_dimensions=calendar_dimensions,
+                where=where) }}
     ) as base_query
 
     where 1=1
