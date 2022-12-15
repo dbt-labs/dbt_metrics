@@ -37,7 +37,7 @@
 
         {#- This line performs the relevant aggregation by calling the 
         gen_primary_metric_aggregate macro. Take a look at that one if you're curious -#}
-        {{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate') }} as {{ metric_dictionary.name }},
+        {{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate', dimensions) }} as {{ metric_dictionary.name }},
 
         {%- if grain != 'all_time' %}
         {{ bool_or('metric_date_day is not null') }} as has_data
