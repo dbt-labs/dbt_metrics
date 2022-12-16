@@ -68,7 +68,7 @@
 {%- endmacro -%}
 
 {% macro default__metric_cohort(expression, dimensions) %}
-        case when (max(count(distinct {{ expression }})) over (partition by first_payment_month )) != 0 
+        case when (max(count(distinct {{ expression }})) over (partition by {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} )) != 0 
             then (count(distinct {{ expression }})) / (max(count(distinct {{ expression }})) over (partition by {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %}))
             else 0 end
 {%- endmacro -%}
