@@ -29,6 +29,9 @@
     
     {%- elif aggregate == 'cohort' -%}
         {{ return(adapter.dispatch('metric_cohort', 'metrics')(expression, dimensions)) }}
+    
+    {%- elif aggregate[:10] == 'custom_sql' -%}
+        {{ return(adapter.dispatch('metric_custom_sql', 'metrics')(aggregate, expression)) }}
 
     {%- else -%}
         {%- do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) -%}  
@@ -71,4 +74,8 @@
         case when (max(count(distinct {{ expression }})) over (partition by {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} )) != 0 
             then (count(distinct {{ expression }})) / (max(count(distinct {{ expression }})) over (partition by {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %}))
             else 0 end
+{%- endmacro -%}
+
+{% macro default__metric_custom_sql(aggregate, expression) %}
+        {{aggregate[13:]}}
 {%- endmacro -%}
