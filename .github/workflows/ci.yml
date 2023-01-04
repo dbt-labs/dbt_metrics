@@ -6,6 +6,9 @@ on:
       - "**.md"
       - ".changes/*"
       - ".github/*"
+    branches:
+      - "main"
+      - "*.latest"
   pull_request:
     paths-ignore:
       - "**.md"
