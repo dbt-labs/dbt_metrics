@@ -83,6 +83,7 @@ class TestNoTimeGrainSecondaryCalcMetric:
 
     def test_model(self,project,):
         # initial run
-        with pytest.raises(ParsingException):
-            run_dbt(["deps"])
-            run_dbt(["run"])
+        run_dbt(["deps"])
+        run_dbt(["seed"])
+        run_dbt(["run"],expect_pass = False)
+

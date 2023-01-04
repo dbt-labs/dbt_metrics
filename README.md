@@ -109,7 +109,7 @@ from {{ metrics.calculate(
 | Input       | Example     | Description | Required   |
 | ----------- | ----------- | ----------- | -----------|
 | metric_list | `metric('some_metric)'`, [`metric('some_metric)'`,`metric('some_other_metric)'`] | The metric(s) to be queried by the macro. If multiple metrics required, provide in list format.  | Required |
-| grain       | `day`, `week`, `month` | The time grain that the metric will be aggregated to in the returned dataset | Required |
+| grain       | `day`, `week`, `month` | The time grain that the metric will be aggregated to in the returned dataset | Optional  |
 | dimensions  | [`plan`, `country`, `some_predefined_dimension_name` | The dimensions you want the metric to be aggregated by in the returned dataset | Optional |
 | start_date  | `2022-01-01` | Limits the date range of data used in the metric calculation by not querying data before this date | Optional |
 | end_date    | `2022-12-31` | Limits the date range of data used in the metric claculation by not querying data after this date | Optional |
@@ -158,7 +158,7 @@ from {{ metrics.develop(
 | Input       | Example     | Description | Required   |
 | ----------- | ----------- | ----------- | -----------|
 | metric_list | `('some_metric)'`, [`('some_metric)'`,`('some_other_metric)'`] | The metric(s) to be queried by the macro. If multiple metrics required, provide in list format. Do not provide in `metric('name)` format as that triggers dbt parsing for metric that doesn't exist. Just provide the name of the metric.  | Required |
-| grain       | `day`, `week`, `month` | The time grain that the metric will be aggregated to in the returned dataset | Required |
+| grain       | `day`, `week`, `month` | The time grain that the metric will be aggregated to in the returned dataset | Optional |
 | dimensions  | [`plan`, `country`, `some_predefined_dimension_name` | The dimensions you want the metric to be aggregated by in the returned dataset | Optional |
 | start_date  | `2022-01-01` | Limits the date range of data used in the metric calculation by not querying data before this date | Optional |
 | end_date    | `2022-12-31` | Limits the date range of data used in the metric claculation by not querying data after this date | Optional |

@@ -11,16 +11,14 @@ from tests.functional.fixtures import (
     fact_orders_yml
 )
 
-# models/invalid_window_all_time.yml
-invalid_window_all_time_yml = """
+# models/invalid_window_no_time_grain.yml
+invalid_window_no_time_grain_yml = """
 version: 2 
 
 metrics:
-  - name: invalid_window_all_time
+  - name: invalid_window_no_time_grain
     model: ref('fact_orders')
     label: Total Discount ($)
-    timestamp: order_date
-    time_grains: [day, week, month, all_time]
     calculation_method: sum
     expression: discount_total
     window: 
@@ -31,17 +29,15 @@ metrics:
       - order_country
 """
 
-# models/invalid_window_all_time.sql
-invalid_window_all_time_sql = """
+# models/invalid_window_no_time_grain.sql
+invalid_window_no_time_grain_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_window_all_time'), 
-    grain='all_time'
-    )
+{{ metrics.calculate(metric('invalid_window_no_time_grain'))
 }}
 """
 
-class TestInvalidWindowAllTime:
+class TestInvalidWindowNoTimeGrain:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -74,26 +70,24 @@ class TestInvalidWindowAllTime:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "invalid_window_all_time.yml": invalid_window_all_time_yml,
-            "invalid_window_all_time.sql": invalid_window_all_time_sql
+            "invalid_window_no_time_grain.yml": invalid_window_no_time_grain_yml,
+            "invalid_window_no_time_grain.sql": invalid_window_no_time_grain_sql
         }
 
-    def test_failing_window_all_time(self,project,):
-        run_dbt(["deps"])
-        run_dbt(["seed"])
-        run_dbt(["run"], expect_pass = False)
+    def test_failing_window_no_time_grain(self,project):
+        with pytest.raises(ParsingException):
+            run_dbt(["deps"])
+            run_dbt(["run"])
 
 
-# models/invalid_develop_window_all_time.sql
-invalid_develop_window_all_time_sql = """
+# models/invalid_develop_window_no_time_grain.sql
+invalid_develop_window_no_time_grain_sql = """
 {% set my_metric_yml -%}
 
 metrics:
-  - name: invalid_window_all_time
+  - name: invalid_window_no_time_grain
     model: ref('fact_orders')
     label: Total Discount ($)
-    timestamp: order_date
-    time_grains: [day, week, month, all_time]
     calculation_method: sum
     expression: discount_total
     window: 
@@ -107,8 +101,8 @@ metrics:
 
 select * 
 from {{ metrics.develop(
-        develop_yml=my_metric_yml,
-        grain='all_time'
+        metric_list=['invalid_window_no_time_grain'],
+        develop_yml=my_metric_yml
         )
     }}
 """
@@ -146,10 +140,10 @@ class TestInvalidDevelopWindowAllTime:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "invalid_develop_window_all_time.sql": invalid_develop_window_all_time_sql
+            "invalid_develop_window_no_time_grain.sql": invalid_develop_window_no_time_grain_sql
         }
 
-    def test_failing_develop_window_all_time(self,project):
+    def test_failing_develop_window_no_time_grain(self,project):
         run_dbt(["deps"])
         run_dbt(["seed"])
         run_dbt(["run"], expect_pass = False)
