@@ -101,6 +101,7 @@ from {{ metrics.calculate(
     where="some_column='filter_value'"
 ) }}
 ```
+If no `grain` is provided to the macro in the query then the dataset returned will not be time-bound.
 
 `start_date` and `end_date` are optional. When not provided, the spine will span all dates from oldest to newest in the metric's dataset. This default is likely to be correct in most cases, but you can use the arguments to either narrow the resulting table or expand it (e.g. if there was no new customers until 3 January but you want to include the first two days as well). Both values are inclusive.
 
@@ -114,14 +115,6 @@ from {{ metrics.calculate(
 | start_date  | `2022-01-01` | Limits the date range of data used in the metric calculation by not querying data before this date | Optional |
 | end_date    | `2022-12-31` | Limits the date range of data used in the metric claculation by not querying data after this date | Optional |
 | where       | `plan='paying_customer'` | A sql statment, or series of sql statements, that alter the **final** CTE in the generated sql. Most often used to limit the data to specific values of dimensions provided | Optional |
-
-### Migration from metric to calculate
-In version `0.3.0` of the dbt_metrics package, the name of the main macro was changed from `metric` to `calculate`. This was done in order to better reflect the work being performed by the macro and match the semantic naming followed by the rest of the macros in the package (describing the action, not the output). Additionally, the `metric_name` input was changed to take a single `metric` function or multiple `metric` functions provided in a list.
-
-To correctly change this syntax, you must:
-- change `metrics.metric` to `metrics.calculate`.
-- change `metric_name` to `metric('name_here')` 
-  - alternatively use `[metric('name_here'),metric('another_name_here')]` for multiple metrics
 
 ## Develop
 There are times when you want to test what a metric might look like before defining it in your project. In these cases you should use the `develop` metric, which allows you to provide a single metric in a contained yml in order to simulate what the metric might loook like if defined in your project.
@@ -222,14 +215,8 @@ The above example will return a dataset that contains the metric provided in the
 ## Jaffle Shop Metrics
 For those curious about how to implement metrics in a dbt project, please reference the [`jaffle_shop_metrics`](https://github.com/dbt-labs/jaffle_shop_metrics). 
 
-## Inside of dbt Models
-You may want to materialize the results as a fixed table for querying. This is not the way we expect the dbt Metrics layer to add the most value, but is a way to experiment with the project without needing access to the interactive server.  
-
-## Via the interactive dbt server (coming soon)
-When [dbt server](https://blog.getdbt.com/licensing-dbt/) is released in late 2022, you will be able to access these macros interactively, without needing to build each variant as a single dbt model. For more information, check out the [keynote presentation from Coalesce 2021](https://www.getdbt.com/coalesce-2021/keynote-the-metrics-system/).
-
 # Secondary calculations
-Secondary calculations are window functions which act on the primary metric or metrics. You can use them to compare values to an earlier period and calculate year-to-date sums or rolling averages.
+Secondary calculations are window functions which act on the primary metric or metrics. You can use them to compare values to an earlier period and calculate year-to-date sums or rolling averages. The use of secondary calculations requires a `grain` input in the macro.
 
 Create secondary calculations using the convenience [constructor](https://en.wikipedia.org/wiki/Constructor_(object-oriented_programming)) macros. Alternatively, you can manually create a list of dictionary entries (not recommended).
 
@@ -343,20 +330,13 @@ Below is the list of metric configs currently accepted by this package.
 | `enabled` | boolean | True/False | True | Enables or disables a metric node. When disabled, dbt will not consider it as part of your project. |
 | `treat_null_values_as_zero` | boolean | True/False | True | Controls the `coalesce` behavior for metrics. By default, when there are no observations for a metric, the output of the metric as well as period Over period secondary calculations will include a `coalesce({{ field }}, 0)` to return 0's rather than nulls. Setting this config to False instead returns `NULL` values. |
 
-## All_Time Grain
-
-Version `0.4.0` of this package added support for the `all_time` grain to be defined in the metric. 
-
-If you're interested in returning the metric value across all time (or ignoring time bounds all together), you can include the `all_time` grain in the metric definition and then use that in the `calculate` or `develop` macro. This will return a single value for the metric (more if dimensions included) and the start/end date range for that metric calculation.
-
 ## Window Periods 
-Version `0.4.0` of this package, and beyond, offers support for the `window` attribute of the metric definition. This alters the underlying query to allow the metric definition to contain a window of time, such as the past 14 days or the past 3 months.
+Version `0.4.0` of this package, and beyond, offers support for the `window` attribute of the metric definition. This alters the underlying query to allow the metric definition to contain a window of time, such as the past 14 days or the past 3 months. Utilizing the window functionality requires a `grain` be provided in the query.
 
 More information can be found in the [`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
 ## Derived Metrics 
 __Note: In version `0.4.0`, `expression` metrics were renamed to `derived`__
-
 Version `0.3.0` of this package, and beyond, offer support for `derived` metrics! More information around this calculation_method can be found in the[`metrics` page of dbt docs](https://docs.getdbt.com/docs/building-a-dbt-project/metrics)/.
 
 
