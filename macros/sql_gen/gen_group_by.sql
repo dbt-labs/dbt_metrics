@@ -22,7 +22,7 @@ remove the grain from the list of relevant periods so it isnt double counted -#}
     {%- else -%}
         {%- if total_dimension_count > 0 -%}
             group by
-            {% for number in range(1,total_dimension_count) -%}
+            {% for number in range(1,total_dimension_count+1) -%}
             {{ number }} {%- if not loop.last -%}, {%- endif -%}
             {%- endfor -%}
         {%- endif -%}

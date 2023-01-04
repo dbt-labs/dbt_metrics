@@ -31,39 +31,7 @@
     VALIDATION OF PROVIDED YML - Gotta make sure the metric looks good!
     ############ #}
 
-    {% for metric_name in metric_list %}
-        {% set metric_definition = develop_yml[metric_name] %}
-
-        {%- if not metric_definition.name %}
-            {%- do exceptions.raise_compiler_error("The provided yml is missing a metric name") -%}
-        {%- endif %}
-
-        {%- if not metric_definition.calculation_method %}
-            {%- do exceptions.raise_compiler_error("The provided yml for metric " ~ metric_definition.name ~ " is missing a calculation method") -%}
-        {%- endif %}
-
-        {%- if not metric_definition.model and metric_definition.calculation_method != 'derived' %}
-            {%- do exceptions.raise_compiler_error("The provided yml for metric " ~ metric_definition.name ~ " is missing a model") -%}
-        {%- endif %}
-
-        {%- if metric_definition.time_grains and grain %}
-            {%- if grain not in metric_definition.time_grains %}
-            {%- do exceptions.raise_compiler_error("The selected grain is missing from the metric definition of metric " ~ metric_definition.name ) -%}
-            {%- endif %}
-        {%- endif %}
-
-        {%- if not metric_definition.expression %}
-            {%- do exceptions.raise_compiler_error("The provided yml for metric " ~ metric_definition.name ~ " is missing an expression") -%}
-        {%- endif %}
-
-        {%- for dim in dimensions -%}
-            {% if dim not in metric_definition.dimensions -%}
-                {%- do exceptions.raise_compiler_error("The macro provided dimension is missing from the metric definition of metric " ~ metric_definition.name ) %}
-            {% endif %}
-        {%- endfor -%}
-
-
-    {%- endfor -%}
+    {%- do metrics.validate_develop_metrics(metric_list=metric_list, develop_yml=develop_yml) -%}
 
     {# ############
     VARIABLE SETTING - Creating the faux metric tree and faux metric list. The faux fur of 2022
@@ -74,14 +42,20 @@
     {% set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree=metric_tree, develop_yml=develop_yml) %}
 
     {# ############
-    SECONDARY CALCULATION VALIDATION - Gotta make sure the secondary calcs are good!
+    SECONDARY VALIDATION - Gotta make sure everything else is good!
     ############ #}
 
-    {%- do metrics.validate_develop_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
+    {%- do metrics.validate_timestamp(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, dimensions=dimensions) -%}
+
+    {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
     
+    {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary) -%} 
+
     {%- do metrics.validate_metric_config(metrics_dictionary=metrics_dictionary) -%}
 
     {%- do metrics.validate_secondary_calculations(metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, grain=grain, secondary_calculations=secondary_calculations) -%} 
+
+    {%- do metrics.validate_where(where=where) -%} 
 
     {# ############
     SQL GENERATION - Lets build that SQL!

@@ -1,0 +1,11 @@
+order_id,order_country,order_total,had_discount,customer_id,order_date
+1,Russia,2,false,1,01/29/2022
+2,Mauritius,1,false,2,01/21/2022
+3,Peru,1,false,1,01/14/2022
+4,Kazakhstan,1,true,3,01/07/2022
+5,Portugal,1,false,4,01/09/2022
+6,China,1,false,5,01/22/2022
+7,Germany,1,true,2,01/23/2022
+8,Greenland,1,true,1,02/16/2022
+9,Bangladesh,1,false,2,02/04/2022
+10,Sweden,1,false,3,02/14/2022

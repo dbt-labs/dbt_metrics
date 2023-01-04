@@ -20,6 +20,7 @@ final as (
         {% endif %}
         cast({{ date_trunc('month', 'date_day') }} as date) as date_month,
         cast({{ date_trunc('quarter', 'date_day') }} as date) as date_quarter,
+        '2022-01-01' as date_test,
         cast({{ date_trunc('year', 'date_day') }} as date) as date_year,
         true as is_weekend
     from days

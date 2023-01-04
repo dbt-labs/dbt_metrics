@@ -8,25 +8,34 @@ from tests.functional.fixtures import (
     fact_orders_source_csv,
     fact_orders_sql,
     fact_orders_yml,
+    custom_calendar_sql
 )
 
-# models/metric_on_derived_metric.sql
-metric_on_derived_metric_sql = """
+# models/base_sum_metric.sql
+base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('metric_on_derived_metric'))
+{{ metrics.calculate(metric('base_sum_metric'), 
+    grain='month',
+    dimensions=["is_weekend"]
+    )
 }}
 """
 
 # models/base_sum_metric.yml
 base_sum_metric_yml = """
 version: 2 
+models:
+  - name: base_sum_metric
+    tests: 
+      - metrics.metric_equality:
+          compare_model: ref('base_sum_metric__expected')
 metrics:
   - name: base_sum_metric
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
-    time_grains: [day, week, month, all_time]
+    time_grains: [day, week, month]
     calculation_method: sum
     expression: order_total
     dimensions:
@@ -34,50 +43,25 @@ metrics:
       - order_country
 """
 
-# models/derived_metric.yml
-metric_on_derived_metric_yml = """
-version: 2 
-models:
-  - name: metric_on_derived_metric
-    tests: 
-      - metrics.metric_equality:
-          compare_model: ref('metric_on_derived_metric__expected')
-metrics:
-  - name: derived_metric
-    label: derived ($)
-    timestamp: order_date
-    time_grains: [day, week, month, all_time]
-    calculation_method: derived
-    expression: "{{metric('base_sum_metric')}} + 1"
-    dimensions:
-      - had_discount
-      - order_country
-
-  - name: metric_on_derived_metric
-    label: derived ($)
-    timestamp: order_date
-    time_grains: [day, week, month, all_time]
-    calculation_method: derived
-    expression: "{{metric('derived_metric')}} + 1"
-    dimensions:
-      - had_discount
-      - order_country
-"""
-
-# seeds/metric_on_derived_metric__expected.csv
-metric_on_derived_metric__expected_csv = """
-metric_start_date,metric_end_date,base_sum_metric,metric_on_derived_metric,derived_metric
-2022-01-06,2022-02-15,14,16,15
+# seeds/base_sum_metric__expected.csv
+base_sum_metric__expected_csv = """
+date_month,is_weekend,base_sum_metric
+2022-01-01,true,8
+2022-02-01,true,6
 """.lstrip()
 
-class TestAllTimeMetricOnderivedMetric:
+class TestCustomCalendarDimensionsMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
         return {
-          "name": "example",
-          "models": {"+materialized": "table"}
+            "name": "example",
+            "models": {"+materialized": "table"},
+            "vars":{
+                "dbt_metrics_calendar_model": "custom_calendar",
+                "custom_calendar_dimension_list": ["is_weekend"]
+            }
         }
 
     # install current repo as package
@@ -89,24 +73,23 @@ class TestAllTimeMetricOnderivedMetric:
                 ]
         }
 
-
     # everything that goes in the "seeds" directory
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "metric_on_derived_metric__expected.csv": metric_on_derived_metric__expected_csv,
+            "base_sum_metric__expected.csv": base_sum_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
     def models(self):
         return {
-            "fact_orders.yml": fact_orders_yml,
-            "base_sum_metric.yml": base_sum_metric_yml,
-            "metric_on_derived_metric.yml": metric_on_derived_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "metric_on_derived_metric.sql": metric_on_derived_metric_sql
+            "fact_orders.yml": fact_orders_yml,
+            "custom_calendar.sql": custom_calendar_sql,
+            "base_sum_metric.sql": base_sum_metric_sql,
+            "base_sum_metric.yml": base_sum_metric_yml
         }
 
     def test_build_completion(self,project,):
@@ -119,43 +102,67 @@ class TestAllTimeMetricOnderivedMetric:
 
         # initial run
         results = run_dbt(["run"])
-        assert len(results) == 3
+        assert len(results) == 4
+
+        # breakpoint()
 
         # test tests
         results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # # # # validate that the results include pass
+        # # # validate that the results include pass
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["pass"]
 
-
-# models/metric_on_derived_metric.sql
-all_time_dimension_metric_sql = """
+# models/base_sum_metric_custom_grain.sql
+base_sum_metric_custom_grain_sql = """
 select *
 from 
-{{ metrics.calculate(metric('metric_on_derived_metric'), 
-    grain='all_time',
-    dimensions=['had_discount']
+{{ metrics.calculate(metric('base_sum_metric_custom_grain'), 
+    grain='test'
     )
 }}
 """
 
-# seeds/metric_on_derived_metric__expected.csv
-all_time_dimension_metric__expected_csv = """
-metric_start_date,metric_end_date,had_discount,base_sum_metric,metric_on_derived_metric,derived_metric
-2022-01-06,2022-02-15,true,6,8,7
-2022-01-08,2022-02-13,false,8,10,9
+# models/base_sum_metric_custom_grain.yml
+base_sum_metric_custom_grain_yml = """
+version: 2 
+models:
+  - name: base_sum_metric_custom_grain
+    tests: 
+      - metrics.metric_equality:
+          compare_model: ref('base_sum_metric_custom_grain__expected')
+metrics:
+  - name: base_sum_metric_custom_grain
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month, test]
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# seeds/base_sum_metric_custom_grain__expected.csv
+base_sum_metric_custom_grain__expected_csv = """
+date_test,base_sum_metric_custom_grain
+2022-01-01,14
 """.lstrip()
 
-class TestAllTimeWithDimension:
+class TestCustomCalendarGrainMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
         return {
-          "name": "example",
-          "models": {"+materialized": "table"}
+            "name": "example",
+            "models": {"+materialized": "table"},
+            "vars":{
+                "dbt_metrics_calendar_model": "custom_calendar",
+                "custom_calendar_dimension_list": ["is_weekend"]
+            }
         }
 
     # install current repo as package
@@ -167,24 +174,23 @@ class TestAllTimeWithDimension:
                 ]
         }
 
-
     # everything that goes in the "seeds" directory
     @pytest.fixture(scope="class")
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "metric_on_derived_metric__expected.csv": all_time_dimension_metric__expected_csv,
+            "base_sum_metric_custom_grain__expected.csv": base_sum_metric_custom_grain__expected_csv,
         }
 
     # everything that goes in the "models" directory
     @pytest.fixture(scope="class")
     def models(self):
         return {
-            "fact_orders.yml": fact_orders_yml,
-            "base_sum_metric.yml": base_sum_metric_yml,
-            "metric_on_derived_metric.yml": metric_on_derived_metric_yml,
             "fact_orders.sql": fact_orders_sql,
-            "metric_on_derived_metric.sql": all_time_dimension_metric_sql
+            "fact_orders.yml": fact_orders_yml,
+            "custom_calendar.sql": custom_calendar_sql,
+            "base_sum_metric_custom_grain.sql": base_sum_metric_custom_grain_sql,
+            "base_sum_metric_custom_grain.yml": base_sum_metric_custom_grain_yml
         }
 
     def test_build_completion(self,project,):
@@ -197,12 +203,14 @@ class TestAllTimeWithDimension:
 
         # initial run
         results = run_dbt(["run"])
-        assert len(results) == 3
+        assert len(results) == 4
+
+        # breakpoint()
 
         # test tests
         results = run_dbt(["test"]) # expect passing test
         assert len(results) == 1
 
-        # # # # validate that the results include pass
+        # # # validate that the results include pass
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["pass"]

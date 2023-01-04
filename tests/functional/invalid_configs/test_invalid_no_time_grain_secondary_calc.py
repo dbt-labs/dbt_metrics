@@ -2,6 +2,8 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
+from dbt.tests.util import run_dbt
+from dbt.exceptions import CompilationException, ParsingException
 
 # our file contents
 from tests.functional.fixtures import (
@@ -11,31 +13,26 @@ from tests.functional.fixtures import (
     custom_calendar_sql
 )
 
-# models/base_sum_metric.sql
-base_sum_metric_sql = """
+# models/no_time_grain_base_sum_metric.sql
+no_time_grain_base_sum_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('base_sum_metric'), 
-    grain='month',
-    dimensions=["is_weekend"]
+{{ metrics.calculate(
+    metric('no_time_grain_base_sum_metric'), 
+    secondary_calculations=[
+        metrics.period_over_period(comparison_strategy="difference", interval=1, alias = "1mth")
+    ]
     )
 }}
 """
 
-# models/base_sum_metric.yml
-base_sum_metric_yml = """
+# models/no_time_grain_base_sum_metric.yml
+no_time_grain_base_sum_metric_yml = """
 version: 2 
-models:
-  - name: base_sum_metric
-    tests: 
-      - metrics.metric_equality:
-          compare_model: ref('base_sum_metric__expected')
 metrics:
-  - name: base_sum_metric
+  - name: no_time_grain_base_sum_metric
     model: ref('fact_orders')
     label: Total Discount ($)
-    timestamp: order_date
-    time_grains: [day, week, month]
     calculation_method: sum
     expression: order_total
     dimensions:
@@ -43,14 +40,7 @@ metrics:
       - order_country
 """
 
-# seeds/base_sum_metric__expected.csv
-base_sum_metric__expected_csv = """
-date_month,is_weekend,base_sum_metric
-2022-01-01,true,8
-2022-02-01,true,6
-""".lstrip()
-
-class TestCustomCalendarDimensionsMetric:
+class TestNoTimeGrainSecondaryCalcMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -78,7 +68,6 @@ class TestCustomCalendarDimensionsMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "base_sum_metric__expected.csv": base_sum_metric__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -88,28 +77,12 @@ class TestCustomCalendarDimensionsMetric:
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
             "custom_calendar.sql": custom_calendar_sql,
-            "base_sum_metric.sql": base_sum_metric_sql,
-            "base_sum_metric.yml": base_sum_metric_yml
+            "no_time_grain_base_sum_metric.sql": no_time_grain_base_sum_metric_sql,
+            "no_time_grain_base_sum_metric.yml": no_time_grain_base_sum_metric_yml
         }
 
-    def test_build_completion(self,project,):
-        # running deps to install package
-        results = run_dbt(["deps"])
-
-        # seed seeds
-        results = run_dbt(["seed"])
-        assert len(results) == 2
-
+    def test_model(self,project,):
         # initial run
-        results = run_dbt(["run"])
-        assert len(results) == 4
-
-        # breakpoint()
-
-        # test tests
-        results = run_dbt(["test"]) # expect passing test
-        assert len(results) == 1
-
-        # # # validate that the results include pass
-        result_statuses = sorted(r.status for r in results)
-        assert result_statuses == ["pass"]
+        with pytest.raises(ParsingException):
+            run_dbt(["deps"])
+            run_dbt(["run"])

@@ -32,11 +32,13 @@
         {%- do exceptions.raise_compiler_error("No metric or metrics provided") -%}
     {%- endif -%}
 
+    {%- do metrics.validate_timestamp(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, dimensions=dimensions) -%}
+
     {%- do metrics.validate_grain(grain=grain, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, secondary_calculations=secondary_calculations) -%}
 
     {%- do metrics.validate_derived_metrics(metric_tree=metric_tree) -%}
 
-    {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree) -%} 
+    {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary) -%} 
 
     {%- do metrics.validate_metric_config(metrics_dictionary=metrics_dictionary) -%} 
 

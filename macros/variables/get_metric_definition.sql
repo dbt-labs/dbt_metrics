@@ -24,6 +24,7 @@
         {% else %}
             {% do metrics_dictionary_dict.update({'window': none}) %}
         {% endif %}
+
     {# Behavior specific to calculate #}
     {% else %}
         {% do metrics_dictionary_dict.update({'expression': metric_definition.expression})%} 

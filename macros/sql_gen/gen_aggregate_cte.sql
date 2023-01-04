@@ -12,14 +12,14 @@
     select
 
         {%- if grain %}
-        date_{{grain}}
+        date_{{grain}},
 
         {#- All of the other relevant periods that aren't currently selected as the grain
         are neccesary for downstream secondary calculations. We filter it on whether 
         there are secondary calculations to reduce the need for overhead -#}
             {%- if secondary_calculations | length > 0 -%}
                 {%- for period in relevant_periods %}
-        ,date_{{ period }},
+        date_{{ period }},
                 {% endfor -%}
             {% endif -%}
         {% endif -%}
@@ -27,21 +27,21 @@
         {#- This is the consistent code you'll find that loops through the list of 
         dimensions. It is used throughout this macro, with slight differences to 
         account for comma syntax around loop last -#}
-        {% for dim in dimensions %}
-        ,{{ dim }}
+        {%- for dim in dimensions %}
+        {{ dim }},
         {%- endfor %}
 
         {%- for calendar_dim in calendar_dimensions %}
-        ,{{ calendar_dim }}
+        {{ calendar_dim }},
         {% endfor -%}
 
         {%- if grain %}
-        ,{{ bool_or('metric_date_day is not null') }} as has_data
+        {{ bool_or('metric_date_day is not null') }} as has_data,
         {% endif %}
 
         {#- This line performs the relevant aggregation by calling the 
         gen_primary_metric_aggregate macro. Take a look at that one if you're curious -#}
-        {%- if total_dimension_count > 0 -%},{%- endif -%}{{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate') }} as {{ metric_dictionary.name }}
+        {{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate') }} as {{ metric_dictionary.name }}
 
     from ({{ metrics.gen_base_query(
                 metric_dictionary=metric_dictionary,
