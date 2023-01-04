@@ -1,7 +1,7 @@
 {%- macro get_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, where, metric_tree) %}
 
 {#- ############
-TODO: All validation occurs in calculate and develop - please reference there for any validation
+Most validation occurs in calculate and develop - please reference there for validation
 ############ -#}
 
 {#- ############
@@ -57,7 +57,6 @@ up the composite metric. -#}
 
 {%- for metric_name in metric_tree["parent_set"] -%}
 
-    --TODO: Make this branching
     {{ metrics.build_metric_sql(
         metric_dictionary=metrics_dictionary[metric_name], 
         grain=grain, 
@@ -77,7 +76,6 @@ up the composite metric. -#}
 
 {%- if metric_tree["full_set"] | length > 1 -%}
 
-    -- TODO: Make this permissive with non date-spined metrics
     {{ metrics.gen_joined_metrics_cte(
         metric_tree=metric_tree,
         grain=grain, 
@@ -93,7 +91,6 @@ up the composite metric. -#}
 
 {%- if secondary_calculations | length > 0 -%}
 
-    --TODO Make this optional for secondary calcs
     {{ metrics.gen_secondary_calculation_cte(
         metric_tree=metric_tree,
         grain=grain, 
@@ -106,7 +103,6 @@ up the composite metric. -#}
 
 {%- endif -%}
 
---TODO: Make sure this pulls from the right CTEs
 {{ metrics.gen_final_cte(
     metric_tree=metric_tree,
     grain=grain, 

@@ -22,11 +22,9 @@ Metric C would have the value of 999 (max depth) and A and B would have 998, rep
 are one depth upstream #}
 {%- do metric_tree.update({'ordered_expression_set':{}}) -%}
 
-{# {% if metric_list is iterable and (metric_list is not string and metric_list is not mapping) %}  #}
 {% set base_set_list = []%}
 {% for metric in metric_list %}
     {%- do base_set_list.append(metric.name) -%}
-    {# TODO #47 its not really GETTING the metric tree as much as operating. re-name that  #}
     {%- set metric_tree = metrics.update_metric_tree(metric ,metric_tree) -%}
 {% endfor %}
 {%- do metric_tree.update({'base_set':base_set_list}) -%}
@@ -37,8 +35,6 @@ are one depth upstream #}
 {% set expression_set = [] %}
 {% set base_set = [] %}
 
-{# TODO See if this unique filtering logic can live in the operate on metric tree macro #}
-{# TODO rename to metric_name for all of the unique filters #}
 {% for metric_name in metric_tree['full_set']|unique%}
     {% do full_set.append(metric_name)%}
 {% endfor %}
