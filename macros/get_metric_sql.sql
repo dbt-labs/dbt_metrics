@@ -111,6 +111,6 @@ up the composite metric. -#}
     relevant_periods=relevant_periods,
     secondary_calculations=secondary_calculations,
     where=where) 
-    }}
+    }} 
 
 {% endmacro %}
