@@ -51,6 +51,6 @@
         relevant_periods=relevant_periods, 
         calendar_dimensions=calendar_dimensions,
         treat_null_values_as_zero=treat_null_values_as_zero
-    )}}
+    )}} 
 
 {% endmacro -%}
