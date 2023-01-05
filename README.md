@@ -388,13 +388,13 @@ The package comes with a [basic calendar table](/models/dbt_metrics_default_cale
 - Contains the following columns: `date_week`, `date_month`, `date_quarter`, `date_year`, or equivalents. 
 - Additional date columns need to be prefixed with `date_`, e.g. `date_4_5_4_month` for a 4-5-4 retail calendar date set. Dimensions can have any name (see [dimensions on calendar tables](#dimensions-on-calendar-tables)).
 
-To do this, set the value of the `dbt_metrics_default_calendar` variable in your `dbt_project.yml` file: 
+To do this, set the value of the `dbt_metrics_calendar_model` variable in your `dbt_project.yml` file: 
 ```yaml
 #dbt_project.yml
 config-version: 2
 [...]
 vars:
-    dbt_metrics_default_calendar: my_custom_calendar
+    dbt_metrics_calendar_model: my_custom_calendar
 ```
 
 ### Dimensions from calendar tables
