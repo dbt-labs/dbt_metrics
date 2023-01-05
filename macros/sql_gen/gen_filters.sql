@@ -9,11 +9,11 @@
         and (
         {% if start_date and end_date -%}
             cast(base_model.{{metric_dictionary.timestamp}} as date) >= cast('{{ start_date }}' as date)
-            and cast(base_model.{{metric_dictionary.timestamp}} as date) <= cast('{{ end_date }}' as date)
+            and cast(base_model.{{metric_dictionary.timestamp}} as date) < cast('{{ end_date }}' as date)
         {%- elif start_date and not end_date -%}
             cast(base_model.{{metric_dictionary.timestamp}} as date) >= cast('{{ start_date }}' as date)
         {%- elif end_date and not start_date -%}
-            cast(base_model.{{metric_dictionary.timestamp}} as date) <= cast('{{ end_date }}' as date)
+            cast(base_model.{{metric_dictionary.timestamp}} as date) < cast('{{ end_date }}' as date)
         {%- endif %} 
         )
     {% endif -%} 
