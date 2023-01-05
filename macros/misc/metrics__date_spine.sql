@@ -64,7 +64,7 @@ filtered as (
 
     select *
     from all_periods
-    where date_{{datepart}} <= {{ end_date }}
+    where date_{{datepart}} < {{ end_date }}
 
 )
 

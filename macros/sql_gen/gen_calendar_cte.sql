@@ -14,11 +14,11 @@ with calendar as (
     {% if start_date or end_date %}
         {%- if start_date and end_date -%}
             where date_day >= cast('{{ start_date }}' as date)
-            and date_day <= cast('{{ end_date }}' as date)
+            and date_day < cast('{{ end_date }}' as date)
         {%- elif start_date and not end_date -%}
             where date_day >= cast('{{ start_date }}' as date)
         {%- elif end_date and not start_date -%}
-            where date_day <= cast('{{ end_date }}' as date)
+            where date_day < cast('{{ end_date }}' as date)
         {%- endif -%}       
     {% endif %} 
 )
