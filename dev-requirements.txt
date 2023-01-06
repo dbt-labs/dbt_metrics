@@ -8,7 +8,7 @@ git+https://github.com/dbt-labs/dbt-core.git@main#egg=dbt-postgres&subdirectory=
 git+https://github.com/dbt-labs/dbt-redshift.git
 git+https://github.com/dbt-labs/dbt-snowflake.git
 git+https://github.com/dbt-labs/dbt-bigquery.git
-git+https://github.com/dbt-labs/dbt-databricks.git
+git+https://github.com/databricks/dbt-databricks.git
 
 # Most recent release candidates
 # dbt-tests-adapter==1.3.0
