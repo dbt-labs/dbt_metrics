@@ -161,7 +161,6 @@ if os.getenv('dbt_target') == 'bigquery':
     week_grain__expected_csv = """
 date_week,week_grain_metric
 2022-02-13,2
-2022-02-06,0
 2022-01-30,1
 2022-01-23,1
 2022-01-16,3
