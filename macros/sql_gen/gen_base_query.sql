@@ -32,7 +32,7 @@
 
             {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
                 ({{ metric_dictionary.expression }}) as property_to_aggregate
-            {%- elif metric_dictionary.calculation_type == 'count' -%}
+            {%- elif metric_dictionary.calculation_method == 'count' -%} 
             {# We use 1 as the property to aggregate in count so that it matches count(*) #}
             1 as property_to_aggregate 
             {%- else -%}
