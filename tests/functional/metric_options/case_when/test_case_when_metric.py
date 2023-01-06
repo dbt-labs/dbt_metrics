@@ -104,24 +104,24 @@ class TestCaseWhenMetric:
         result_statuses = sorted(r.status for r in results)
         assert result_statuses == ["pass"]
 
-# models/no_timestamp_case_when_metric_sql.sql
-no_timestamp_case_when_metric_sql = """
+# models/case_when_metric_no_time_grain_sql.sql
+case_when_metric_no_time_grain_sql = """
 select *
 from 
-{{ metrics.calculate(metric('no_timestamp_case_when_metric'))
+{{ metrics.calculate(metric('case_when_metric_no_time_grain'))
 }}
 """
 
-# models/no_timestamp_case_when_metric_yml.yml
-no_timestamp_case_when_metric_yml = """
+# models/case_when_metric_no_time_grain_yml.yml
+case_when_metric_no_time_grain_yml = """
 version: 2 
 models:
-  - name: no_timestamp_case_when_metric
+  - name: case_when_metric_no_time_grain
     tests: 
       - metrics.metric_equality:
-          compare_model: ref('no_timestamp_case_when_metric__expected')
+          compare_model: ref('case_when_metric_no_time_grain__expected')
 metrics:
-  - name: no_timestamp_case_when_metric
+  - name: case_when_metric_no_time_grain
     model: ref('fact_orders')
     label: Total Discount ($)
     calculation_method: sum
@@ -130,9 +130,9 @@ metrics:
       - order_country
 """
 
-# seeds/no_timestamp_case_when_metric__expected_csv.csv
-no_timestamp_case_when_metric__expected_csv = """
-no_timestamp_case_when_metric
+# seeds/case_when_metric_no_time_grain__expected_csv.csv
+case_when_metric_no_time_grain__expected_csv = """
+case_when_metric_no_time_grain
 3
 """.lstrip()
 
@@ -160,7 +160,7 @@ class TestNoTimestampCaseWhenMetric:
     def seeds(self):
         return {
             "fact_orders_source.csv": fact_orders_source_csv,
-            "no_timestamp_case_when_metric__expected.csv": no_timestamp_case_when_metric__expected_csv,
+            "case_when_metric_no_time_grain__expected.csv": case_when_metric_no_time_grain__expected_csv,
         }
 
     # everything that goes in the "models" directory
@@ -169,8 +169,8 @@ class TestNoTimestampCaseWhenMetric:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "no_timestamp_case_when_metric.sql": no_timestamp_case_when_metric_sql,
-            "no_timestamp_case_when_metric.yml": no_timestamp_case_when_metric_yml
+            "case_when_metric_no_time_grain.sql": case_when_metric_no_time_grain_sql,
+            "case_when_metric_no_time_grain.yml": case_when_metric_no_time_grain_yml
         }
 
     def test_build_completion(self,project,):
