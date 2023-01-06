@@ -1,0 +1,7 @@
+kind: Fixes
+body: hotfixing variable name
+time: 2023-01-06T11:05:32.740588-06:00
+custom:
+  Author: callum-mcdata
+  Issue: "207"
+  PR: "207"
