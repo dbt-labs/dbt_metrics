@@ -48,13 +48,10 @@ metrics there are -#}
     start_date=start_date, 
     end_date=end_date) 
     }}
-
 {#- Next we check if it is a composite metric or single metric by checking the length of the list -#}
 {#- This filter forms the basis of how we construct the SQL -#}
-
 {#- If composite, we begin by looping through each of the metric names that make
 up the composite metric. -#}
-
 {%- for metric_name in metric_tree["parent_set"] -%}
 
     {{ metrics.build_metric_sql(

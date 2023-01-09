@@ -3,23 +3,20 @@
 {%- endmacro -%}
 
 {% macro default__gen_property_to_aggregate(metric_dictionary, grain, dimensions, calendar_dimensions) %}
-
-    -- WE NEED DIMS, CALENDAR DIMS, AND GRAIN
-
-    {%- if metric_dictionary.calculation_method == 'median' -%}
+    {% if metric_dictionary.calculation_method == 'median' -%}
         {{ return(adapter.dispatch('property_to_aggregate_median', 'metrics')(metric_dictionary.expression, grain, dimensions, calendar_dimensions)) }}
 
-    {%- elif metric_dictionary.calculation_method == 'count' -%}
+    {% elif metric_dictionary.calculation_method == 'count' -%}
         {{ return(adapter.dispatch('property_to_aggregate_count', 'metrics')()) }}
 
-    {%- elif metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
+    {% elif metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
         {{ return(adapter.dispatch('property_to_aggregate_default', 'metrics')(metric_dictionary.expression)) }}
 
-    {%- else -%}
+    {% else %}
         {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric_dictionary.name ~ "`") -%}  
-    {%- endif %}
+    {% endif %}
 
-{% endmacro %}
+{%- endmacro -%}
 
 {% macro default__property_to_aggregate_median(expression, grain, dimensions, calendar_dimensions) %}
     ({{expression }}) as property_to_aggregate
@@ -29,25 +26,23 @@
 
     percentile_cont({{expression }}, 0.5) over (
         partition by 
-        {%- if grain %}
+        {% if grain -%}
         calendar_table.date_{{ grain }}
-        {% endif -%}
-        
-        {%- for dim in dimensions %}
-            {%- if loop.first and not grain -%}
+        {%- endif %}
+        {% for dim in dimensions -%}
+            {%- if loop.first and not grain-%}
         base_model.{{ dim }}
             {%- else -%}
         ,base_model.{{ dim }}
             {%- endif -%}
-        {% endfor -%}
-        
-        {%- for calendar_dim in calendar_dimensions %}
-            {%- if loop.first and dimensions | length == 0 and not grain -%}
+        {%- endfor -%}
+        {% for calendar_dim in calendar_dimensions -%}
+            {%- if loop.first and dimensions | length == 0 and not grain %}
         calendar_table.{{ calendar_dim }}
-            {%- else -%}
+            {%else -%}
         ,calendar_table.{{ calendar_dim }}
             {%- endif -%}
-        {% endfor -%}
+        {%- endfor %}
     ) as property_to_aggregate
 
 {%- endmacro -%}

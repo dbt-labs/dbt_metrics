@@ -5,7 +5,6 @@
 {%- macro default__gen_calendar_cte(calendar_tbl, start_date, end_date) %}
 
 with calendar as (
-
     {# This CTE creates our base calendar and then limits the date range for the 
     start and end date provided by the macro call -#}
     select 
@@ -23,4 +22,4 @@ with calendar as (
     {% endif %} 
 )
 
-{% endmacro %}
+{%- endmacro -%}

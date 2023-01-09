@@ -9,6 +9,7 @@
     and THEN aggregating, we are instead aggregating from the beginning and then 
     joining downstream for performance. Additionally, we're using a subquery instead 
     of a CTE, which was significantly more performant during our testing. -#}
+    {#- #}
     select
 
         {%- if grain %}
@@ -37,12 +38,11 @@
 
         {%- if grain %}
         {{ bool_or('metric_date_day is not null') }} as has_data,
-        {% endif %}
+        {%- endif %}
 
         {#- This line performs the relevant aggregation by calling the 
         gen_primary_metric_aggregate macro. Take a look at that one if you're curious -#}
         {{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate') }} as {{ metric_dictionary.name }}
-
     from ({{ metrics.gen_base_query(
                 metric_dictionary=metric_dictionary,
                 grain=grain, 
@@ -57,11 +57,9 @@
     ) as base_query
 
     where 1=1
-
-    {% if metric_dictionary.window is not none and grain %}
+    {%- if metric_dictionary.window is not none and grain %}
     and date_{{grain}} = window_filter_date
-    {% endif %}
-
+    {%- endif %}
     {{ metrics.gen_group_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 
 )
