@@ -27,11 +27,8 @@
     {%- elif aggregate == 'derived' -%}
         {{ return(adapter.dispatch('metric_derived', 'metrics')(expression)) }}
     
-    {%- elif aggregate == 'cohort' -%}
-        {{ return(adapter.dispatch('metric_cohort', 'metrics')(expression, dimensions)) }}
-    
     {%- elif aggregate[:10] == 'custom_sql' -%}
-        {{ return(adapter.dispatch('metric_custom_sql', 'metrics')(aggregate, expression)) }}
+        {{ return(adapter.dispatch('metric_custom_sql', 'metrics')(aggregate, expression, dimensions)) }}
 
     {%- else -%}
         {%- do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) -%}  
@@ -70,12 +67,12 @@
         {{ expression }}
 {%- endmacro -%}
 
-{% macro default__metric_cohort(expression, dimensions) %}
-        case when (max(count(distinct {{ expression }})) over (partition by {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} )) != 0 
-            then (count(distinct {{ expression }})) / (max(count(distinct {{ expression }})) over (partition by {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %}))
-            else 0 end
-{%- endmacro -%}
-
-{% macro default__metric_custom_sql(aggregate, expression) %}
-        {{aggregate[13:]}}
+{% macro default__metric_custom_sql(aggregate, expression, dimensions) %}
+        {% if '<<dimensions>>' in aggregate[13:] %}
+            {% set first_part = aggregate[13:].split("<<dimensions>>")[0] %}
+            {% set second_part = aggregate[13:].split("<<dimensions>>")[1] %}
+            {{first_part}} {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} {{second_part}}
+        {% else %}
+            {{aggregate[13:]}}
+        {%endif%}
 {%- endmacro -%}
