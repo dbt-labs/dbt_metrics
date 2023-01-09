@@ -240,7 +240,7 @@ metrics:
       - order_country
 """
 
-# seeds/base_median_metric_no_time_grain__expected.csv
+# seeds/base_median_metric_complicated_source_expected.csv
 base_median_metric_complicated_source__expected_csv = """
 date_month,base_median_metric_complicated_source
 2022-01-01,3.34

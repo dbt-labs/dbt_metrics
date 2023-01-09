@@ -25,6 +25,7 @@
 {% macro bigquery__property_to_aggregate_median(expression, grain, dimensions, calendar_dimensions) %}
 
     percentile_cont({{expression }}, 0.5) over (
+        {% if grain or dimensions | length > 0 or calendar_dimensions | length > 0 -%}
         partition by 
         {% if grain -%}
         calendar_table.date_{{ grain }}
@@ -43,6 +44,7 @@
         ,calendar_table.{{ calendar_dim }}
             {%- endif -%}
         {%- endfor %}
+        {%- endif %}
     ) as property_to_aggregate
 
 {%- endmacro -%}
