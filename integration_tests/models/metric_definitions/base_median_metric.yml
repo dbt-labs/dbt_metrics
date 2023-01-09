@@ -1,0 +1,14 @@
+version: 2 
+metrics:
+  - name: base_median_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month, all_time]
+    calculation_method: median
+    expression: discount_total
+    dimensions:
+      - had_discount
+      - order_country
+
+    

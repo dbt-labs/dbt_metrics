@@ -23,6 +23,9 @@
     {%- elif aggregate == 'sum' -%}
         {{ return(adapter.dispatch('metric_sum', 'metrics')(expression)) }}
 
+    {%- elif aggregate == 'median' -%}
+        {{ return(adapter.dispatch('metric_median', 'metrics')(expression)) }}
+
     {%- elif aggregate == 'derived' -%}
         {{ return(adapter.dispatch('metric_derived', 'metrics')(expression)) }}
 
@@ -57,6 +60,18 @@
 
 {% macro default__metric_sum(expression) %}
         sum({{ expression }})
+{%- endmacro -%}
+
+{% macro default__metric_median(expression) %}
+        median({{ expression }})
+{%- endmacro -%}
+
+{% macro bigquery__metric_median(expression) %}
+        any_value({{ expression }})
+{%- endmacro -%}
+
+{% macro postgres__metric_median(expression) %}
+        percentile_cont(0.5) within group (order by {{ expression }})
 {%- endmacro -%}
 
 {% macro default__metric_derived(expression) %}

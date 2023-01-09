@@ -27,17 +27,7 @@
             calendar_table.{{ calendar_dim }},
             {% endfor %}
 
-
-            {%- if metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
-
-            ({{ metric_dictionary.expression }}) as property_to_aggregate
-            {%- elif metric_dictionary.calculation_method == 'count' -%} 
-            {# We use 1 as the property to aggregate in count so that it matches count(*) #}
-            1 as property_to_aggregate 
-            {%- else -%}
-                {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric_dictionary.name ~ "`") -%}  
-            {%- endif %}
-
+            {{ metrics.gen_property_to_aggregate(metric_dictionary, grain, dimensions, calendar_dimensions)}}
 
         from {{ metric_dictionary.metric_model }} base_model 
         
