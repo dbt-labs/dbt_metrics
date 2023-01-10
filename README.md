@@ -329,6 +329,7 @@ Below is the list of metric configs currently accepted by this package.
 |--------|------|-----------------|---------------|-------------|
 | `enabled` | boolean | True/False | True | Enables or disables a metric node. When disabled, dbt will not consider it as part of your project. |
 | `treat_null_values_as_zero` | boolean | True/False | True | Controls the `coalesce` behavior for metrics. By default, when there are no observations for a metric, the output of the metric as well as period Over period secondary calculations will include a `coalesce({{ field }}, 0)` to return 0's rather than nulls. Setting this config to False instead returns `NULL` values. |
+| `restrict_no_time_grain_false` | boolean | True/False | False | Controls whether this metric can be queried without a provided time grain. By default, all metrics will be able to be queried without a `grain` and aggregated in a non time-bound way. This config will restrict that behavior and require a `grain` input in order to query the metric. |
 
 ## Window Periods 
 Version `0.4.0` of this package, and beyond, offers support for the `window` attribute of the metric definition. This alters the underlying query to allow the metric definition to contain a window of time, such as the past 14 days or the past 3 months. Utilizing the window functionality requires a `grain` be provided in the query.

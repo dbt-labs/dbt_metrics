@@ -7,7 +7,8 @@
 
     {%- set accepted_configs = {
         "enabled" : {"accepted_values" : [True, False]},
-        "treat_null_values_as_zero" : {"accepted_values" : [True, False]}
+        "treat_null_values_as_zero" : {"accepted_values" : [True, False]},
+        "restrict_no_time_grain" : {"accepted_values" : [True, False]}
         }
     -%}
 
