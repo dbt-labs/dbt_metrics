@@ -3,7 +3,6 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
 
 # our file contents
 from tests.functional.fixtures import (
@@ -80,7 +79,7 @@ class TestInvalidMetricConfig:
             "invalid_metric_config.yml": invalid_metric_config_yml
         }
 
-    def test_metric_config(self,project,):
+    def test_invalid_metric_config(self,project,):
         # initial run
         results = run_dbt(["deps"])
 
@@ -90,4 +89,4 @@ class TestInvalidMetricConfig:
 
         # Here we expect the run to fail because the value provided
         # in the where clause isn't included in the final dataset
-        results = run_dbt(["run"], expect_pass = False)
+        run_dbt(["run"], expect_pass = False)

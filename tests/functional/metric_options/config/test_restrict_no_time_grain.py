@@ -2,7 +2,6 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
 
 
 # our file contents

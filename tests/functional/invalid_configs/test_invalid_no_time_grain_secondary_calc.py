@@ -2,8 +2,6 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
 
 # our file contents
 from tests.functional.fixtures import (
@@ -81,7 +79,7 @@ class TestNoTimeGrainSecondaryCalcMetric:
             "no_time_grain_base_sum_metric.yml": no_time_grain_base_sum_metric_yml
         }
 
-    def test_model(self,project,):
+    def test_invalid_no_time_grain_secondary_calc(self,project,):
         # initial run
         run_dbt(["deps"])
         run_dbt(["seed"])

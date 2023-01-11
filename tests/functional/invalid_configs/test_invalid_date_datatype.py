@@ -3,7 +3,6 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
 
 # our file contents
 from tests.functional.fixtures import (
@@ -73,10 +72,10 @@ class TestInvalidDatatypes:
             "invalid_metric_names.yml": invalid_metric_names_yml
         }
 
-    def test_build_completion(self,project,):
+    def test_invalid_date_datatype(self,project,):
         # running deps to install package
-        results = run_dbt(["deps"])
-        results = run_dbt(["seed"])
+        run_dbt(["deps"])
+        run_dbt(["seed"])
 
         # initial run
-        results = run_dbt(["run"],expect_pass = False)
+        run_dbt(["run"],expect_pass = False)

@@ -7,7 +7,7 @@
     {#- Need this here, since the actual ref is nested within loops/conditions: -#}
     -- depends on: {{ ref(var('dbt_metrics_calendar_model', 'dbt_metrics_default_calendar')) }}
     
-    {# ############
+    {#- ############
     VARIABLE SETTING - Creating the metric tree and making sure metric list is a list!
     ############ -#}
 

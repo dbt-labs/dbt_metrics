@@ -5,7 +5,7 @@
 {%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero) %}
 
 , {{metric_name}}__final as (
-
+    {# #}
     {%- if not treat_null_values_as_zero -%}
         {%- set metric_val = metric_name -%}
     {%- else -%}
@@ -15,9 +15,8 @@
             {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}
         {%- endif %}
     {%- endif %}
-    
     select
-        {% if grain %}
+        {%- if grain %}
         parent_metric_cte.date_{{grain}},
             {%- if secondary_calculations | length > 0 -%}
                 {% for period in relevant_periods %}
@@ -78,13 +77,10 @@
         )      
         {% endif %} 
 
-    {% else %}
-
+    {%- else %}
     from {{metric_name}}__aggregate as parent_metric_cte
-
-
     {% endif -%}
-
+    {# #}
 )
 
 {% endmacro %}

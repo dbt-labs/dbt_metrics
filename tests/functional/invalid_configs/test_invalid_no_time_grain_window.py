@@ -2,7 +2,7 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
+from dbt.exceptions import YamlParseDictError
 
 # our file contents
 from tests.functional.fixtures import (
@@ -75,7 +75,7 @@ class TestInvalidWindowNoTimeGrain:
         }
 
     def test_failing_window_no_time_grain(self,project):
-        with pytest.raises(ParsingException):
+        with pytest.raises(YamlParseDictError):
             run_dbt(["deps"])
             run_dbt(["run"])
 

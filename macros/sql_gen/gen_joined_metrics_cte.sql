@@ -17,8 +17,7 @@
     {%- endfor -%}
 {%- endif -%}
 
-{% set dimension_count = (dimensions | length + calendar_dimensions | length) | int %}
-
+{%- set dimension_count = (dimensions | length + calendar_dimensions | length) | int %}
 , first_join_metrics as (
 
     select
@@ -67,56 +66,55 @@
         coalesce({{metric_name}},0) as {{metric_name}} {%- if not loop.last -%}, {%- endif -%}
         {%- endif %}  
     {%- endfor %}  
-
-    from 
-        {#- Loop through leaf metric list -#}
-        {%- for metric_name in metric_tree.parent_set -%}
-            {%- if loop.first %}
-        {{ metric_name }}__final
-            {%- else %}
-                {%- if grain %}
-        full outer join {{metric_name}}__final
-                using (
-                    date_{{grain}}
-                    {%- for calendar_dim in calendar_dimensions %}
-                    , {{ calendar_dim }}
-                    {% endfor %}
-                    {%- for dim in dimensions %}
-                    , {{ dim }}
-                    {%- endfor %}
-                )
+    {#- Loop through leaf metric list -#}
+    {% for metric_name in metric_tree.parent_set %}
+        {%- if loop.first %}
+    from {{ metric_name }}__final
+        {%- else %}
+            {%- if grain %}
+    full outer join {{metric_name}}__final
+        using (
+            date_{{grain}}
+            {%- for calendar_dim in calendar_dimensions %}
+            , {{ calendar_dim }}
+            {% endfor %}
+            {%- for dim in dimensions %}
+            , {{ dim }}
+            {%- endfor %}
+        )
+            {%- else -%}
+                {% if dimension_count != 0 %}
+    full outer join {{metric_name}}__final
+        using (
+            {%- for calendar_dim in calendar_dimensions -%}
+                {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
+            {%- endfor -%}
+            
+            {%- for dim in dimensions %}
+                {%- if loop.first and calendar_dimensions | length == 0 -%}
+            {{ dim }}
+                {%- elif not loop.first and calendar_dimensions | length == 0 -%}
+            , {{ dim }}
                 {%- else -%}
-                    {% if dimension_count != 0 %}
-        full outer join {{metric_name}}__final
-                    using (
-                        {%- for calendar_dim in calendar_dimensions %}
-                            {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
-                        {% endfor -%}
-                        
-                        {%- for dim in dimensions %}
-                            {%- if loop.first and calendar_dimensions | length == 0 -%}
-                        {{ dim }}
-                            {%- elif not loop.first and calendar_dimensions | length == 0 -%}
-                        , {{ dim }}
-                            {%- else -%}
-                        , {{ dim }}
-                            {%- endif -%}
-                        {%- endfor -%}
-                    )
-                    {%- elif dimension_count == 0 %}
-        cross join {{metric_name}}__final
-                    {%- endif %}
+            , {{ dim }}
+                {%- endif -%}
+            {%- endfor -%}
+        )
+                {%- elif dimension_count == 0 %}
+    cross join {{metric_name}}__final
                 {%- endif %}
-            {%- endif -%}
-        {%- endfor %} 
+            {%- endif %}
+        {%- endif -%}
+    {%- endfor %} 
+{# #}
 )
 
 {%- for cte_number in cte_numbers | unique | sort %}
-    {% set previous_cte_number = cte_number - 1 %}
+{% set previous_cte_number = cte_number - 1 %}
 , join_metrics__{{cte_number}} as (
 
     select 
-    {% if loop.first %}
+    {%- if loop.first %}
         first_join_metrics.*
     {%- else %}
         join_metrics__{{previous_cte_number}}.*
@@ -137,14 +135,12 @@
         , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric].name }}
         {%- endif -%}
     {%- endfor -%}
-
     {% if loop.first %}
     from first_join_metrics
     {%- else %}
     from join_metrics__{{previous_cte_number}}
     {%- endif %}
-
-
+    {# #}
 )
     
 {%- endfor %}
