@@ -2,7 +2,6 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
 
 # our file contents
 from tests.functional.fixtures import (
@@ -76,7 +75,7 @@ class TestInvalidDerivedMetric:
             "invalid_derived_metric.yml": invalid_derived_metric_yml
         }
 
-    def test_build_completion(self,project,):
+    def test_invalid_derived_metric(self,project,):
         # running deps to install package
         results = run_dbt(["deps"])
 
@@ -86,4 +85,4 @@ class TestInvalidDerivedMetric:
 
         # Here we expect the run to fail because the incorrect
         # config won't allow it to compile
-        results = run_dbt(["run"], expect_pass = False)
+        run_dbt(["run"], expect_pass = False)

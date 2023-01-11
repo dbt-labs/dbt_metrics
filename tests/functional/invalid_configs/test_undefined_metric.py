@@ -3,7 +3,7 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
+from dbt.exceptions import TargetNotFoundError
 
 # our file contents
 from tests.functional.fixtures import (
@@ -79,9 +79,7 @@ class TestUndefinedMetric:
         }
 
     def test_undefined_metric(self,project,):
-        results = run_dbt(["deps"])
-        # Here we expect the run to fail because the macro is calling 
-        # an undefined metric
-        with pytest.raises(CompilationException):
+        with pytest.raises(TargetNotFoundError):
+            run_dbt(["deps"])
             run_dbt(["seed"])
             run_dbt(["run"])
