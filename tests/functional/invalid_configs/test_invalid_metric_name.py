@@ -3,7 +3,7 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
+from dbt.exceptions import ParsingError
 
 # our file contents
 from tests.functional.fixtures import (
@@ -80,6 +80,6 @@ class TestInvalidMetricName:
 
     def test_model_name(self,project,):
         # initial run
-        with pytest.raises(ParsingException):
+        with pytest.raises(ParsingError):
             run_dbt(["deps"])
             run_dbt(["run"])

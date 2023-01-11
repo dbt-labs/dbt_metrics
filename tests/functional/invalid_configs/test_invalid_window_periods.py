@@ -2,7 +2,7 @@ from struct import pack
 import os
 import pytest
 from dbt.tests.util import run_dbt
-from dbt.exceptions import CompilationException, ParsingException
+from dbt.exceptions import YamlParseDictError
 
 # our file contents
 from tests.functional.fixtures import (
@@ -68,10 +68,9 @@ class TestPluralDaysWindow:
         }
 
     def test_failing_plural_days(self,project,):
-        with pytest.raises(ParsingException):
+        with pytest.raises(YamlParseDictError):
             run_dbt(["deps"])
-            run_dbt(["seed"])
-            run_dbt(["compile"])
+            run_dbt(["run"])
 
 week_window_metric_yml = """
 version: 2 
@@ -129,10 +128,9 @@ class TestPluralWeeksWindow:
         }
 
     def test_failing_plural_weeks(self,project,):
-        with pytest.raises(ParsingException):
+        with pytest.raises(YamlParseDictError):
             run_dbt(["deps"])
-            run_dbt(["seed"])
-            run_dbt(["compile"])
+            run_dbt(["run"])
 
 month_window_metric_yml = """
 version: 2 
@@ -190,10 +188,9 @@ class TestPluralMonthWindow:
         }
 
     def test_failing_plural_months(self,project,):
-        with pytest.raises(ParsingException):
+        with pytest.raises(YamlParseDictError):
             run_dbt(["deps"])
-            run_dbt(["seed"])
-            run_dbt(["compile"])
+            run_dbt(["run"])
 
 year_window_metric_yml = """
 version: 2 
@@ -251,7 +248,6 @@ class TestPluralYearsWindow:
         }
 
     def test_failing_plural_years(self,project,):
-        with pytest.raises(ParsingException):
+        with pytest.raises(YamlParseDictError):
             run_dbt(["deps"])
-            run_dbt(["seed"])
-            run_dbt(["compile"])
+            run_dbt(["run"])
