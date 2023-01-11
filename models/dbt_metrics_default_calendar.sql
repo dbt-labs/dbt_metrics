@@ -11,8 +11,9 @@ with days as (
 
 final as (
     select 
-        cast(date_day as date) as date_day,
-        cast({{ date_trunc({% if target.type is 'bigquery' %}'isoweek'{% else %}'week'{% endif %}, 'date_day') }} as date) as date_week,
+        cast(date_day as date) as date_day,{% if target.type is 'bigquery' %}
+        cast({{ date_trunc('isoweek', 'date_day') }} as date) as date_week,{% else %}
+        cast({{ date_trunc('week', 'date_day') }} as date) as date_week,{% endif %}
         cast({{ date_trunc('month', 'date_day') }} as date) as date_month,
         cast({{ date_trunc('quarter', 'date_day') }} as date) as date_quarter,
         cast({{ date_trunc('year', 'date_day') }} as date) as date_year
