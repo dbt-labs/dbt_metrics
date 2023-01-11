@@ -5,7 +5,7 @@
 {%- macro default__gen_final_cte(metric_tree, metrics_dictionary, grain, dimensions, calendar_dimensions, relevant_periods, secondary_calculations, where, date_alias) %}
 {%- if secondary_calculations | length > 0 %}
 select 
-    date_{{grain}} {% if date_alias%}as {{date_alias}} {%endif%}
+    date_{{grain}} {% if date_alias%}as {{date_alias}}{%endif%}
     {%- if secondary_calculations | length > 0 -%}
         {%- for period in relevant_periods %}
     ,date_{{ period }}
@@ -33,7 +33,7 @@ where {{ where }}
 {%- if metric_tree.full_set | length > 1 %}
 select 
     {%- if grain %}
-    date_{{grain}} {% if date_alias%}as {{date_alias}} {%endif%},
+    date_{{grain}} {% if date_alias%}as {{date_alias}}{%endif%},
     {% endif -%}
     {%- for dim in dimensions %}
     {{ dim }},
@@ -55,7 +55,7 @@ where {{ where }}
 
 select 
     {%- if grain %}
-    date_{{grain}} {% if date_alias%}as {{date_alias}} {%endif%},
+    date_{{grain}} {% if date_alias%}as {{date_alias}}{%endif%},
     {%- endif %}
     {%- for dim in dimensions %}
     {{ dim }},
