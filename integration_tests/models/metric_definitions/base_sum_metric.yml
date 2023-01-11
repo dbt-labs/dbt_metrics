@@ -4,7 +4,20 @@ metrics:
     model: ref('fact_orders')
     label: Order Total ($)
     timestamp: order_date
-    time_grains: [day, week, month, all_time]
+    time_grains: [day, week, month]
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country
+    config:
+      restrict_no_time_grain: True
+
+  - name: base_sum_metric_duplicate
+    model: ref('fact_orders_duplicate')
+    label: Order Total ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
     calculation_method: sum
     expression: order_total
     dimensions:
@@ -15,7 +28,7 @@ metrics:
     model: ref('fact_orders')
     label: Order Total ($)
     timestamp: order_date
-    time_grains: [day, week, month, all_time]
+    time_grains: [day, week, month]
     calculation_method: sum
     expression: order_total
     window:
@@ -29,10 +42,18 @@ metrics:
     model: ref('fact_orders')
     label: Order Total ($)
     timestamp: order_date
-    time_grains: [day, week, month, all_time] 
+    time_grains: [day, week, month] 
     calculation_method: sum
     expression: order_total
     dimensions:
       - had_discount
       - order_country
   
+  - name: base_sum_metric__no_timestamp
+    model: ref('fact_orders')
+    label: Order Total ($)
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country

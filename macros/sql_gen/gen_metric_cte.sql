@@ -17,7 +17,7 @@
     {%- endif %}
     
     select
-        {% if grain != 'all_time' %}
+        {% if grain %}
         parent_metric_cte.date_{{grain}},
             {%- if secondary_calculations | length > 0 -%}
                 {% for period in relevant_periods %}
@@ -35,14 +35,7 @@
         {%- endfor %}
         {{ metric_val }}
         
-    {%- if grain == 'all_time' %}
-
-        ,metric_start_date
-        ,metric_end_date
-
-    from {{metric_name}}__aggregate as parent_metric_cte
-
-    {% else %}
+    {%- if secondary_calculations | length > 0 %}
 
     from {{metric_name}}__spine_time as parent_metric_cte
     left outer join {{metric_name}}__aggregate
@@ -84,6 +77,12 @@
             {%- endif %} 
         )      
         {% endif %} 
+
+    {% else %}
+
+    from {{metric_name}}__aggregate as parent_metric_cte
+
+
     {% endif -%}
 
 )

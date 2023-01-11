@@ -1,0 +1,467 @@
+from struct import pack
+import os
+import pytest
+from dbt.tests.util import run_dbt
+
+# our file contents
+from tests.functional.fixtures import (
+    fact_orders_source_csv,
+    fact_orders_sql,
+    fact_orders_yml,
+)
+
+# models/start_date_base_sum_metric.sql
+start_date_base_sum_metric_sql = """
+select *
+from 
+{{ metrics.calculate(metric('start_date_base_sum_metric'), 
+    grain='month',
+    start_date='2022-02-01'
+    )
+}}
+"""
+
+# models/start_date_base_sum_metric.yml
+start_date_base_sum_metric_yml = """
+version: 2 
+models:
+  - name: start_date_base_sum_metric
+    tests: 
+      - metrics.metric_equality:
+          compare_model: ref('start_date_base_sum_metric__expected')
+metrics:
+  - name: start_date_base_sum_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# seeds/start_date_base_sum_metric__expected.csv
+start_date_base_sum_metric__expected_csv = """
+date_month,start_date_base_sum_metric
+2022-02-01,6
+""".lstrip()
+
+class TestEarlyStartDateBaseSumMetric:
+
+    # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
+
+    # install current repo as package
+    @pytest.fixture(scope="class")
+    def packages(self):
+        return {
+            "packages": [
+                {"local": os.getcwd()}
+                ]
+        }
+
+
+    # everything that goes in the "seeds" directory
+    @pytest.fixture(scope="class")
+    def seeds(self):
+        return {
+            "fact_orders_source.csv": fact_orders_source_csv,
+            "start_date_base_sum_metric__expected.csv": start_date_base_sum_metric__expected_csv,
+        }
+
+    # everything that goes in the "models" directory
+    @pytest.fixture(scope="class")
+    def models(self):
+        return {
+            "fact_orders.sql": fact_orders_sql,
+            "fact_orders.yml": fact_orders_yml,
+            "start_date_base_sum_metric.sql": start_date_base_sum_metric_sql,
+            "start_date_base_sum_metric.yml": start_date_base_sum_metric_yml
+        }
+
+    def test_build_completion(self,project,):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
+        # seed seeds
+        results = run_dbt(["seed"])
+        assert len(results) == 2
+
+        # initial run
+        results = run_dbt(["run"])
+        assert len(results) == 3
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == 1
+
+        # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]
+
+# models/start_date_derived_metric.sql
+start_date_derived_metric_sql = """
+select *
+from 
+{{ metrics.calculate(metric('start_date_derived_metric'), 
+    grain='month',
+    start_date='2022-02-01'
+    )
+}}
+"""
+
+# models/base_sum_metric.yml
+base_sum_metric_yml = """
+version: 2 
+metrics:
+  - name: base_sum_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# models/start_date_derived_metric.yml
+start_date_derived_metric_yml = """
+version: 2 
+models:
+  - name: start_date_derived_metric
+    tests: 
+      - metrics.metric_equality:
+          compare_model: ref('start_date_derived_metric__expected')
+metrics:
+  - name: start_date_derived_metric
+    label: derived ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: derived
+    expression: "{{metric('base_sum_metric')}} + 1"
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# seeds/start_date_derived_metric__expected.csv
+start_date_derived_metric__expected_csv = """
+date_month,base_sum_metric,start_date_derived_metric
+2022-02-01,6,7
+""".lstrip()
+
+class TestEarlyStartDateDerivedMetric:
+
+    # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
+
+    # install current repo as package
+    @pytest.fixture(scope="class")
+    def packages(self):
+        return {
+            "packages": [
+                {"local": os.getcwd()}
+                ]
+        }
+
+
+    # everything that goes in the "seeds" directory
+    @pytest.fixture(scope="class")
+    def seeds(self):
+        return {
+            "fact_orders_source.csv": fact_orders_source_csv,
+            "start_date_derived_metric__expected.csv": start_date_derived_metric__expected_csv,
+        }
+
+    # everything that goes in the "models" directory
+    @pytest.fixture(scope="class")
+    def models(self):
+        return {
+            "fact_orders.yml": fact_orders_yml,
+            "base_sum_metric.yml": base_sum_metric_yml,
+            "start_date_derived_metric.yml": start_date_derived_metric_yml,
+            "fact_orders.sql": fact_orders_sql,
+            "start_date_derived_metric.sql": start_date_derived_metric_sql
+        }
+
+    def test_build_completion(self,project,):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
+        # seed seeds
+        results = run_dbt(["seed"])
+        assert len(results) == 2
+
+        # initial run
+        results = run_dbt(["run"])
+        assert len(results) == 3
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == 1
+
+        # # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]
+
+# models/late_start_date_derived_metric.sql
+late_start_date_derived_metric_sql = """
+select *
+from 
+{{ metrics.calculate(metric('late_start_date_derived_metric'), 
+    grain='month',
+    start_date='2022-02-04'
+    )
+}}
+"""
+
+# models/base_sum_metric.yml
+base_sum_metric_yml = """
+version: 2 
+metrics:
+  - name: base_sum_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# models/late_start_date_derived_metric.yml
+late_start_date_derived_metric_yml = """
+version: 2 
+models:
+  - name: late_start_date_derived_metric
+    tests: 
+      - metrics.metric_equality:
+          compare_model: ref('late_start_date_derived_metric__expected')
+metrics:
+  - name: late_start_date_derived_metric
+    label: derived ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: derived
+    expression: "{{metric('base_sum_metric')}} + 1"
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# seeds/late_start_date_derived_metric__expected.csv
+late_start_date_derived_metric__expected_csv = """
+date_month,base_sum_metric,late_start_date_derived_metric
+2022-02-01,5,6
+""".lstrip()
+
+class TestLateStartDateDerivedMetric:
+
+    # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
+
+    # install current repo as package
+    @pytest.fixture(scope="class")
+    def packages(self):
+        return {
+            "packages": [
+                {"local": os.getcwd()}
+                ]
+        }
+
+
+    # everything that goes in the "seeds" directory
+    @pytest.fixture(scope="class")
+    def seeds(self):
+        return {
+            "fact_orders_source.csv": fact_orders_source_csv,
+            "late_start_date_derived_metric__expected.csv": late_start_date_derived_metric__expected_csv,
+        }
+
+    # everything that goes in the "models" directory
+    @pytest.fixture(scope="class")
+    def models(self):
+        return {
+            "fact_orders.yml": fact_orders_yml,
+            "base_sum_metric.yml": base_sum_metric_yml,
+            "late_start_date_derived_metric.yml": late_start_date_derived_metric_yml,
+            "fact_orders.sql": fact_orders_sql,
+            "late_start_date_derived_metric.sql": late_start_date_derived_metric_sql
+        }
+
+    def test_build_completion(self,project,):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
+        # seed seeds
+        results = run_dbt(["seed"])
+        assert len(results) == 2
+
+        # initial run
+        results = run_dbt(["run"])
+        assert len(results) == 3
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == 1
+
+        # # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]
+
+# models/late_start_date_base_sum_metric.sql
+late_start_date_base_sum_metric_sql = """
+select *
+from 
+{{ metrics.calculate(metric('late_start_date_base_sum_metric'), 
+    grain='month',
+    start_date='2022-02-04'
+    )
+}}
+"""
+
+# models/late_start_date_base_sum_metric.yml
+late_start_date_base_sum_metric_yml = """
+version: 2 
+models:
+  - name: late_start_date_base_sum_metric
+    tests: 
+      - metrics.metric_equality:
+          compare_model: ref('late_start_date_base_sum_metric__expected')
+metrics:
+  - name: late_start_date_base_sum_metric
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: sum
+    expression: order_total
+    dimensions:
+      - had_discount
+      - order_country
+"""
+
+# seeds/late_start_date_base_sum_metric__expected.csv
+late_start_date_base_sum_metric__expected_csv = """
+date_month,late_start_date_base_sum_metric
+2022-02-01,5
+""".lstrip()
+
+class TestLateStartDateBaseSumMetric:
+
+    # configuration in dbt_project.yml
+    # setting bigquery as table to get around query complexity 
+    # resource constraints with compunding views
+    if os.getenv('dbt_target') == 'bigquery':
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "table"}
+            }
+    else: 
+        @pytest.fixture(scope="class")
+        def project_config_update(self):
+            return {
+            "name": "example",
+            "models": {"+materialized": "view"}
+            }  
+
+    # install current repo as package
+    @pytest.fixture(scope="class")
+    def packages(self):
+        return {
+            "packages": [
+                {"local": os.getcwd()}
+                ]
+        }
+
+
+    # everything that goes in the "seeds" directory
+    @pytest.fixture(scope="class")
+    def seeds(self):
+        return {
+            "fact_orders_source.csv": fact_orders_source_csv,
+            "late_start_date_base_sum_metric__expected.csv": late_start_date_base_sum_metric__expected_csv,
+        }
+
+    # everything that goes in the "models" directory
+    @pytest.fixture(scope="class")
+    def models(self):
+        return {
+            "fact_orders.sql": fact_orders_sql,
+            "fact_orders.yml": fact_orders_yml,
+            "late_start_date_base_sum_metric.sql": late_start_date_base_sum_metric_sql,
+            "late_start_date_base_sum_metric.yml": late_start_date_base_sum_metric_yml
+        }
+
+    def test_build_completion(self,project,):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
+        # seed seeds
+        results = run_dbt(["seed"])
+        assert len(results) == 2
+
+        # initial run
+        results = run_dbt(["run"])
+        assert len(results) == 3
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == 1
+
+        # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]

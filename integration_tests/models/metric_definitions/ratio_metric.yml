@@ -5,7 +5,7 @@ metrics:
   - name: ratio_metric
     label: Ratio ($)
     timestamp: order_date
-    time_grains: [day, week, month, all_time]
+    time_grains: [day, week, month]
     calculation_method: derived
     expression: "{{metric('base_sum_metric')}} / {{metric('base_average_metric')}}"
     dimensions:

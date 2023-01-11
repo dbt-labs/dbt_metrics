@@ -138,7 +138,7 @@ jobs:
           dbt_target: bigquery
 
   databricks:
-    needs: databricks
+    needs: postgres
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository

@@ -1,8 +1,8 @@
-{%- macro gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) -%}
-    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions)) }}
+{%- macro gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, total_dimension_count) -%}
+    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, total_dimension_count)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions) %}
+{%- macro default__gen_aggregate_cte(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, total_dimension_count) %}
 
 , {{metric_dictionary.name}}__aggregate as (
     {# This is the most important CTE. Instead of joining all relevant information
@@ -11,7 +11,7 @@
     of a CTE, which was significantly more performant during our testing. -#}
     select
 
-        {%- if grain != 'all_time' %}
+        {%- if grain %}
         date_{{grain}},
 
         {#- All of the other relevant periods that aren't currently selected as the grain
@@ -27,7 +27,7 @@
         {#- This is the consistent code you'll find that loops through the list of 
         dimensions. It is used throughout this macro, with slight differences to 
         account for comma syntax around loop last -#}
-        {% for dim in dimensions %}
+        {%- for dim in dimensions %}
         {{ dim }},
         {%- endfor %}
 
@@ -35,16 +35,13 @@
         {{ calendar_dim }},
         {% endfor -%}
 
+        {%- if grain %}
+        {{ bool_or('metric_date_day is not null') }} as has_data,
+        {% endif %}
+
         {#- This line performs the relevant aggregation by calling the 
         gen_primary_metric_aggregate macro. Take a look at that one if you're curious -#}
-        {{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate') }} as {{ metric_dictionary.name }},
-
-        {%- if grain != 'all_time' %}
-        {{ bool_or('metric_date_day is not null') }} as has_data
-        {% else %}
-        min(metric_date_day) as metric_start_date,
-        max(metric_date_day) as metric_end_date
-        {% endif %}
+        {{ metrics.gen_primary_metric_aggregate(metric_dictionary.calculation_method, 'property_to_aggregate') }} as {{ metric_dictionary.name }}
 
     from ({{ metrics.gen_base_query(
                 metric_dictionary=metric_dictionary,
@@ -55,12 +52,13 @@
                 end_date=end_date, 
                 calendar_tbl=calendar_tbl, 
                 relevant_periods=relevant_periods, 
-                calendar_dimensions=calendar_dimensions) }}
+                calendar_dimensions=calendar_dimensions,
+                total_dimension_count=total_dimension_count) }}
     ) as base_query
 
     where 1=1
 
-    {% if metric_dictionary.window is not none %}
+    {% if metric_dictionary.window is not none and grain %}
     and date_{{grain}} = window_filter_date
     {% endif %}
 

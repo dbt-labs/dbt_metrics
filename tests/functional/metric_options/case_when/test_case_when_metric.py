@@ -48,7 +48,6 @@ date_month,case_when_metric
 """.lstrip()
 
 class TestCaseWhenMetric:
-
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
     def project_config_update(self):
@@ -83,6 +82,95 @@ class TestCaseWhenMetric:
             "fact_orders.yml": fact_orders_yml,
             "case_when_metric.sql": case_when_metric_sql,
             "case_when_metric.yml": case_when_metric_yml
+        }
+
+    def test_build_completion(self,project,):
+        # running deps to install package
+        results = run_dbt(["deps"])
+
+        # seed seeds
+        results = run_dbt(["seed"])
+        assert len(results) == 2
+
+        # initial run
+        results = run_dbt(["run"])
+        assert len(results) == 3
+
+        # test tests
+        results = run_dbt(["test"]) # expect passing test
+        assert len(results) == 1
+
+        # # # validate that the results include pass
+        result_statuses = sorted(r.status for r in results)
+        assert result_statuses == ["pass"]
+
+# models/case_when_metric_no_time_grain_sql.sql
+case_when_metric_no_time_grain_sql = """
+select *
+from 
+{{ metrics.calculate(metric('case_when_metric_no_time_grain'))
+}}
+"""
+
+# models/case_when_metric_no_time_grain_yml.yml
+case_when_metric_no_time_grain_yml = """
+version: 2 
+models:
+  - name: case_when_metric_no_time_grain
+    tests: 
+      - metrics.metric_equality:
+          compare_model: ref('case_when_metric_no_time_grain__expected')
+metrics:
+  - name: case_when_metric_no_time_grain
+    model: ref('fact_orders')
+    label: Total Discount ($)
+    calculation_method: sum
+    expression: case when had_discount = true then 1 else 0 end 
+    dimensions:
+      - order_country
+"""
+
+# seeds/case_when_metric_no_time_grain__expected_csv.csv
+case_when_metric_no_time_grain__expected_csv = """
+case_when_metric_no_time_grain
+3
+""".lstrip()
+
+class TestNoTimestampCaseWhenMetric:
+    # configuration in dbt_project.yml
+    @pytest.fixture(scope="class")
+    def project_config_update(self):
+        return {
+          "name": "example",
+          "models": {"+materialized": "table"}
+        }
+
+    # install current repo as package
+    @pytest.fixture(scope="class")
+    def packages(self):
+        return {
+            "packages": [
+                {"local": os.getcwd()}
+                ]
+        }
+
+
+    # everything that goes in the "seeds" directory
+    @pytest.fixture(scope="class")
+    def seeds(self):
+        return {
+            "fact_orders_source.csv": fact_orders_source_csv,
+            "case_when_metric_no_time_grain__expected.csv": case_when_metric_no_time_grain__expected_csv,
+        }
+
+    # everything that goes in the "models" directory
+    @pytest.fixture(scope="class")
+    def models(self):
+        return {
+            "fact_orders.sql": fact_orders_sql,
+            "fact_orders.yml": fact_orders_yml,
+            "case_when_metric_no_time_grain.sql": case_when_metric_no_time_grain_sql,
+            "case_when_metric_no_time_grain.yml": case_when_metric_no_time_grain_yml
         }
 
     def test_build_completion(self,project,):

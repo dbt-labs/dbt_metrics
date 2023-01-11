@@ -1,4 +1,4 @@
-{% macro validate_dimension_list(dimensions, metric_tree) %}
+{% macro validate_dimension_list(dimensions, metric_tree, metrics_dictionary) %}
     
     {# This macro exists to invalidate dimensions provided to the metric macro that are not viable 
     candidates based on metric definitions. This prevents downstream run issues when the sql 
@@ -12,8 +12,8 @@
         {# Now we loop through all the metrics in the full set, which is all metrics, parent metrics,
         and derived metrics associated with the macro call #}
         {% for metric_name in metric_tree.full_set %}
-            {% set metric_relation = metric(metric_name)%}
-            
+            {% set metric_relation = metrics_dictionary[metric_name]%}
+
             {# This macro returns a list of dimensions that are inclusive of calendar dimensions #}
             {% set complete_dimension_list = metric_relation.dimensions + calendar_dimensions %}
 

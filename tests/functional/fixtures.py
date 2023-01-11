@@ -22,6 +22,21 @@ order_id,order_country,order_total,had_discount,customer_id,order_date
 8,France,4,true,1,2022-02-15
 """.lstrip()
 
+# seeds/fact_orders_duplicate_source.csv
+fact_orders_duplicate_source_csv = """
+order_id,order_country,order_total,had_discount,customer_id,order_date
+4,France,1,true,3,2022-01-07
+5,France,1,false,4,2022-01-09
+3,France,1,false,1,2022-01-14
+2,Japan,1,false,2,2022-01-21
+6,Japan,1,false,5,2022-01-22
+7,Japan,1,true,2,2022-01-23
+1,France,2,false,1,2022-01-29
+9,Japan,1,false,2,2022-02-04
+10,Japan,1,false,3,2022-02-14
+8,France,4,true,1,2022-02-16
+""".lstrip()
+
 # seeds/dim_customers_source.csv
 dim_customers_source_csv = """
 customer_id,first_name,last_name,email,gender,is_new_customer,date_added
@@ -64,6 +79,7 @@ final as (
         {% endif %}
         cast({{ date_trunc('month', 'date_day') }} as date) as date_month,
         cast({{ date_trunc('quarter', 'date_day') }} as date) as date_quarter,
+        cast('2022-01-01' as date) as date_test,
         cast({{ date_trunc('year', 'date_day') }} as date) as date_year,
         true as is_weekend
     from days
@@ -77,6 +93,14 @@ select
     *
     ,round(order_total - (order_total/2)) as discount_total
 from {{ref('fact_orders_source')}}
+"""
+
+# models/fact_orders_duplicate.sql
+fact_orders_duplicate_sql = """
+select 
+    *
+    ,round(order_total - (order_total/2)) as discount_total
+from {{ref('fact_orders_duplicate_source')}}
 """
 
 # models/dim_customers.sql
@@ -108,6 +132,26 @@ fact_orders_yml = """
 version: 2 
 models: 
   - name: fact_orders
+    columns:
+      - name: order_id
+        description: TBD
+      - name: order_country
+        description: TBD
+      - name: order_total
+        description: TBD
+      - name: had_discount
+        description: TBD
+      - name: customer_id
+        description: TBD
+      - name: order_date
+        description: TBD
+"""
+
+# models/fact_orders.yml
+fact_orders_duplicate_yml = """
+version: 2 
+models: 
+  - name: fact_orders_duplicate
     columns:
       - name: order_id
         description: TBD

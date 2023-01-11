@@ -1,5 +1,4 @@
 
---TODO: Do we have a list of aggregations that we're supporting on day one? 
 {%- macro gen_primary_metric_aggregate(aggregate, expression) -%}
     {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(aggregate, expression)) }}
 {%- endmacro -%}
