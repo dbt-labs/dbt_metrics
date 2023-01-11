@@ -64,7 +64,7 @@
                     min(case when has_data then date_{{grain}} end) 
                 from {{metric_name}}__aggregate
             )
-            and parent_metric_cte.date_{{grain}} < (
+            and parent_metric_cte.date_{{grain}} <= (
                 select 
                     max(case when has_data then date_{{grain}} end) 
                 from {{metric_name}}__aggregate
@@ -76,7 +76,7 @@
                 from {{metric_name}}__aggregate
             )
             {% elif start_date and not end_date -%}
-            parent_metric_cte.date_{{grain}} < (
+            parent_metric_cte.date_{{grain}} <= (
                 select 
                     max(case when has_data then date_{{grain}} end) 
                 from {{metric_name}}__aggregate
