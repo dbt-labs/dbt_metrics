@@ -1,4 +1,4 @@
-{%- macro get_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, where, metric_tree) %}
+{%- macro get_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, where, date_alias, metric_tree) %}
 
 {#- ############
 Most validation occurs in calculate and develop - please reference there for validation
@@ -66,7 +66,7 @@ up the composite metric. -#}
         calendar_dimensions=calendar_dimensions,
         dimensions_provided=dimensions_provided,
         total_dimension_count=total_dimension_count
-    ) 
+        ) 
     }}
 
 {%- endfor -%}
@@ -84,30 +84,18 @@ up the composite metric. -#}
         total_dimension_count=total_dimension_count ) 
     }}
 
-{% endif -%}
-
-{%- if secondary_calculations | length > 0 -%}
-
-    {{ metrics.gen_secondary_calculation_cte(
-        metric_tree=metric_tree,
-        grain=grain, 
-        dimensions=non_calendar_dimensions, 
-        secondary_calculations=secondary_calculations, 
-        calendar_dimensions=calendar_dimensions,
-        metric_dictionary=metrics_dictionary 
-        ) 
-        }}
-
 {%- endif -%}
 
 {{ metrics.gen_final_cte(
     metric_tree=metric_tree,
+    metrics_dictionary=metrics_dictionary,
     grain=grain, 
     dimensions=non_calendar_dimensions, 
     calendar_dimensions=calendar_dimensions, 
     relevant_periods=relevant_periods,
     secondary_calculations=secondary_calculations,
-    where=where) 
+    where=where,
+    date_alias=date_alias) 
     }} 
 
-{% endmacro %}
+{%- endmacro %}

@@ -10,16 +10,16 @@
             cast(base_model.{{metric_dictionary.timestamp}} as date) as metric_date_day,
             calendar_table.date_{{ grain }} as date_{{grain}},
             calendar_table.date_day as window_filter_date,
-                {% if secondary_calculations | length > 0 %}
+                {%- if secondary_calculations | length > 0 %}
                     {%- for period in relevant_periods %}
             calendar_table.date_{{ period }},
-                    {% endfor -%}
+                    {%- endfor -%}
                 {%- endif -%}
-            {%- endif %}
+            {%- endif -%}
             {#- -#}
-            {%- for dim in dimensions -%}
+            {%- for dim in dimensions %}
             base_model.{{ dim }},
-            {%- endfor -%}
+            {%- endfor %}
             {%- for calendar_dim in calendar_dimensions -%}
             calendar_table.{{ calendar_dim }},
             {%- endfor -%}
@@ -33,5 +33,6 @@
         where 1=1
         {#- -#}
         {{ metrics.gen_filters(metric_dictionary, start_date, end_date) }}
+        {# #}
 
 {%- endmacro -%}

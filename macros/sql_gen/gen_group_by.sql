@@ -15,15 +15,11 @@ remove the grain from the list of relevant periods so it isnt double counted -#}
     {%- set total_dimension_count = metrics.get_total_dimension_count(grain, dimensions, calendar_dimensions, relevant_periods) -%}
 
     {%- if grain -%}
-        group by
-        {% for number in range(1,total_dimension_count+1) -%}
-        {{ number }} {%- if not loop.last -%}, {%- endif -%}
+        group by {% for number in range(1,total_dimension_count+1) -%}{{ number }}{%- if not loop.last -%}, {% endif -%}
         {%- endfor -%}
     {%- else -%}
         {%- if total_dimension_count > 0 -%}
-            group by
-            {% for number in range(1,total_dimension_count+1) -%}
-            {{ number }} {%- if not loop.last -%}, {%- endif -%}
+            group by {% for number in range(1,total_dimension_count+1) -%}{{ number }} {%- if not loop.last -%}, {% endif -%}
             {%- endfor -%}
         {%- endif -%}
     {%- endif -%}

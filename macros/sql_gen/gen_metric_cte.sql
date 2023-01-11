@@ -3,6 +3,7 @@
 {%- endmacro -%}
 
 {%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero) %}
+{%- set combined_dimensions = calendar_dimensions | list + dimensions | list -%}
 
 , {{metric_name}}__final as (
     {# #}
@@ -35,52 +36,42 @@
         {{ metric_val }}
         
     {%- if secondary_calculations | length > 0 %}
-
     from {{metric_name}}__spine_time as parent_metric_cte
     left outer join {{metric_name}}__aggregate
-        using (
-            date_{{grain}}
-            {%- for calendar_dim in calendar_dimensions %}
-            , {{ calendar_dim }}
-            {%- endfor %}
-            {%- for dim in dimensions %}
-            , {{ dim }}
-            {%- endfor %}
-        )
+        using (date_{{grain}} {%- if combined_dimensions | length > 0 -%}, {{ combined_dimensions | join(", ") }} {%-endif-%} )
 
-        {% if not start_date or not end_date -%}
-        where (
-            {% if not start_date and not end_date -%}
-            parent_metric_cte.date_{{grain}} >= (
-                select 
-                    min(case when has_data then date_{{grain}} end) 
-                from {{metric_name}}__aggregate
-            )
-            and parent_metric_cte.date_{{grain}} <= (
-                select 
-                    max(case when has_data then date_{{grain}} end) 
-                from {{metric_name}}__aggregate
-            )
-            {% elif not start_date and end_date -%}
-            parent_metric_cte.date_{{grain}} >= (
-                select 
-                    min(case when has_data then date_{{grain}} end) 
-                from {{metric_name}}__aggregate
-            )
-            {% elif start_date and not end_date -%}
-            parent_metric_cte.date_{{grain}} <= (
-                select 
-                    max(case when has_data then date_{{grain}} end) 
-                from {{metric_name}}__aggregate
-            )
-            {%- endif %} 
-        )      
-        {% endif %} 
+    {% if not start_date or not end_date -%}
+    where (
+        {% if not start_date and not end_date -%}
+        parent_metric_cte.date_{{grain}} >= (
+            select 
+                min(case when has_data then date_{{grain}} end) 
+            from {{metric_name}}__aggregate
+        )
+        and parent_metric_cte.date_{{grain}} <= (
+            select 
+                max(case when has_data then date_{{grain}} end) 
+            from {{metric_name}}__aggregate
+        )
+        {% elif not start_date and end_date -%}
+        parent_metric_cte.date_{{grain}} >= (
+            select 
+                min(case when has_data then date_{{grain}} end) 
+            from {{metric_name}}__aggregate
+        )
+        {% elif start_date and not end_date -%}
+        parent_metric_cte.date_{{grain}} <= (
+            select 
+                max(case when has_data then date_{{grain}} end) 
+            from {{metric_name}}__aggregate
+        )
+        {%- endif %} 
+        )
+    {%- endif %} 
 
     {%- else %}
     from {{metric_name}}__aggregate as parent_metric_cte
-    {% endif -%}
-    {# #}
+    {%- endif %}
 )
 
 {% endmacro %}
