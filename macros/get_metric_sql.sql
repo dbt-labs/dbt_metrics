@@ -23,7 +23,7 @@ cleanliness -#}
 within the final dataset in order to accomplish base + secondary calc functionality. -#}
 {%- set relevant_periods = metrics.get_relevent_periods(grain, secondary_calculations) -%}
 
-{# Setting a variable to denote if the user has provided any dimensions #}
+{#- Setting a variable to denote if the user has provided any dimensions -#}
 {%- if non_calendar_dimensions | length > 0 -%}
     {%- set dimensions_provided = true -%}
 {%- else -%}
@@ -34,9 +34,11 @@ within the final dataset in order to accomplish base + secondary calc functional
 a custom calendar -#}
 {%- set calendar_tbl = ref(var('dbt_metrics_calendar_model', "dbt_metrics_default_calendar")) -%}
 
-{# Here we get the total dimension count for grouping #}
+{#- Here we get the total dimension count for grouping -#}
 {%- set total_dimension_count = metrics.get_total_dimension_count(grain, dimensions, calendar_dimensions, relevant_periods) -%}
 
+{#- Here we are creating the metric grouping that we use to determine if metrics can be pulled from the same base query -#}
+{%- set models_grouping = metrics.get_models_grouping(metric_tree=metric_tree,metrics_dictionary=metrics_dictionary) -%}
 {#- ############
 LET THE COMPOSITION BEGIN!
 ############ -#}
@@ -52,35 +54,38 @@ metrics there are -#}
 {#- This filter forms the basis of how we construct the SQL -#}
 {#- If composite, we begin by looping through each of the metric names that make
 up the composite metric. -#}
-{%- for metric_name in metric_tree["parent_set"] -%}
+
+{%- for model_name, model_values in models_grouping.items() -%}
 
     {{ metrics.build_metric_sql(
-        metric_dictionary=metrics_dictionary[metric_name], 
+        metrics_dictionary=metrics_dictionary, 
         grain=grain, 
         dimensions=non_calendar_dimensions, 
         secondary_calculations=secondary_calculations, 
         start_date=start_date, 
         end_date=end_date,
-        calendar_tbl=calendar_tbl, 
         relevant_periods=relevant_periods,
         calendar_dimensions=calendar_dimensions,
         dimensions_provided=dimensions_provided,
-        total_dimension_count=total_dimension_count
+        total_dimension_count=total_dimension_count,
+        model_name=model_name,
+        model_values=model_values
         ) 
     }}
 
 {%- endfor -%}
 
-{%- if metric_tree["full_set"] | length > 1 -%}
+{%- if models_grouping| length > 1 or metric_tree['derived_set'] | length > 0 -%}
 
     {{ metrics.gen_joined_metrics_cte(
         metric_tree=metric_tree,
+        metrics_dictionary=metrics_dictionary,
+        models_grouping=models_grouping,
         grain=grain, 
         dimensions=non_calendar_dimensions, 
         calendar_dimensions=calendar_dimensions, 
         secondary_calculations=secondary_calculations, 
         relevant_periods=relevant_periods,
-        metrics_dictionary=metrics_dictionary,
         total_dimension_count=total_dimension_count ) 
     }}
 
@@ -89,6 +94,7 @@ up the composite metric. -#}
 {{ metrics.gen_final_cte(
     metric_tree=metric_tree,
     metrics_dictionary=metrics_dictionary,
+    models_grouping=models_grouping,
     grain=grain, 
     dimensions=non_calendar_dimensions, 
     calendar_dimensions=calendar_dimensions, 

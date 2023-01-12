@@ -1,21 +1,12 @@
-{%- macro gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero) -%}
-    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero)) }}
+{%- macro gen_metric_cte(metrics_dictionary, model_name, model_values, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions) -%}
+    {{ return(adapter.dispatch('gen_metric_cte', 'metrics')(metrics_dictionary, model_name, model_values, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_metric_cte(metric_name, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, treat_null_values_as_zero) %}
-{%- set combined_dimensions = calendar_dimensions | list + dimensions | list -%}
+{%- macro default__gen_metric_cte(metrics_dictionary, model_name, model_values, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions) %}
 
-, {{metric_name}}__final as (
+{%- set combined_dimensions = calendar_dimensions | list + dimensions | list -%}
+, {{model_name}}__final as (
     {# #}
-    {%- if not treat_null_values_as_zero -%}
-        {%- set metric_val = metric_name -%}
-    {%- else -%}
-        {%- if target.name == 'databricks' -%}
-            {%- set metric_val = "cast(coalesce(" ~ metric_name ~ ", 0) as numeric) as " ~ metric_name -%}
-        {%- else -%}
-            {%- set metric_val = "coalesce(" ~ metric_name ~ ", 0) as " ~ metric_name -%}
-        {%- endif %}
-    {%- endif %}
     select
         {%- if grain %}
         parent_metric_cte.date_{{grain}},
@@ -33,11 +24,20 @@
         {%- for dim in dimensions %}
         parent_metric_cte.{{ dim }},
         {%- endfor %}
-        {{ metric_val }}
-        
+
+        {%- for metric_name in model_values.metric_names -%}
+            {# TODO: coalesce based on the value. Need to bring this config #}
+            {%- if not metrics_dictionary[metric_name].get("config").get("treat_null_values_as_zero", True) %}
+        {{ metric_name }}
+            {%- else %}
+        coalesce({{ metric_name }}, 0) as {{ metric_name }}
+            {%- endif %}
+        {%- if not loop.last-%},{%endif%}
+        {%- endfor %}
+
     {%- if secondary_calculations | length > 0 %}
-    from {{metric_name}}__spine_time as parent_metric_cte
-    left outer join {{metric_name}}__aggregate
+    from {{model_name}}__spine_time as parent_metric_cte
+    left outer join {{model_name}}__aggregate
         using (date_{{grain}} {%- if combined_dimensions | length > 0 -%}, {{ combined_dimensions | join(", ") }} {%-endif-%} )
 
     {% if not start_date or not end_date -%}
@@ -46,31 +46,31 @@
         parent_metric_cte.date_{{grain}} >= (
             select 
                 min(case when has_data then date_{{grain}} end) 
-            from {{metric_name}}__aggregate
+            from {{model_name}}__aggregate
         )
         and parent_metric_cte.date_{{grain}} <= (
             select 
                 max(case when has_data then date_{{grain}} end) 
-            from {{metric_name}}__aggregate
+            from {{model_name}}__aggregate
         )
         {% elif not start_date and end_date -%}
         parent_metric_cte.date_{{grain}} >= (
             select 
                 min(case when has_data then date_{{grain}} end) 
-            from {{metric_name}}__aggregate
+            from {{model_name}}__aggregate
         )
         {% elif start_date and not end_date -%}
         parent_metric_cte.date_{{grain}} <= (
             select 
                 max(case when has_data then date_{{grain}} end) 
-            from {{metric_name}}__aggregate
+            from {{model_name}}__aggregate
         )
         {%- endif %} 
         )
     {%- endif %} 
 
     {%- else %}
-    from {{metric_name}}__aggregate as parent_metric_cte
+    from {{model_name}}__aggregate as parent_metric_cte
     {%- endif %}
 )
 

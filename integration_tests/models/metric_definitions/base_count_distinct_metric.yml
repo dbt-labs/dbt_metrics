@@ -11,3 +11,13 @@ metrics:
     dimensions:
       - had_discount
       - order_country
+    window:
+      count: 14
+      period: month
+    filters:
+      - field: had_discount
+        operator: 'is'
+        value: 'true'
+      - field: order_country
+        operator: '='
+        value: "'CA'"

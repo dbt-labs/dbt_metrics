@@ -1,16 +1,16 @@
-{%- macro gen_dimensions_cte(metric_name, dimensions) -%}
-    {{ return(adapter.dispatch('gen_dimensions_cte', 'metrics')(metric_name, dimensions)) }}
+{%- macro gen_dimensions_cte(model_name, dimensions) -%}
+    {{ return(adapter.dispatch('gen_dimensions_cte', 'metrics')(model_name, dimensions)) }}
 {%- endmacro -%}
 
-{% macro default__gen_dimensions_cte(metric_name, dimensions) %}
+{% macro default__gen_dimensions_cte(model_name, dimensions) %}
 
-, {{metric_name}}__dims as (
+, {{model_name}}__dims as (
 
     select distinct
         {%- for dim in dimensions %}
         {{ dim }}{%- if not loop.last -%},{% endif -%}
         {%- endfor %}
-    from {{metric_name}}__aggregate
+    from {{model_name}}__aggregate
 )
 
 {%- endmacro -%}

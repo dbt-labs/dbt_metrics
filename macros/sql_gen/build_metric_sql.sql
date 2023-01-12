@@ -1,19 +1,19 @@
-{%- macro build_metric_sql(metric_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, calendar_tbl, relevant_periods, calendar_dimensions, dimensions_provided, total_dimension_count) %}
-
-    {%- set treat_null_values_as_zero = metric_dictionary.get("config").get("treat_null_values_as_zero", True)  -%}
+{%- macro build_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, dimensions_provided, total_dimension_count, model_name, model_values) %}
+    
     {#- This is the SQL Gen part - we've broken each component out into individual macros -#}
     {#- We broke this out so it can loop for composite metrics -#}
     {{ metrics.gen_aggregate_cte(
-        metric_dictionary=metric_dictionary,
+        metrics_dictionary=metrics_dictionary,
         grain=grain, 
         dimensions=dimensions, 
         secondary_calculations=secondary_calculations,
         start_date=start_date, 
         end_date=end_date, 
-        calendar_tbl=calendar_tbl, 
         relevant_periods=relevant_periods, 
         calendar_dimensions=calendar_dimensions,
-        total_dimension_count=total_dimension_count
+        total_dimension_count=total_dimension_count,
+        model_name=model_name,
+        model_values=model_values
     ) }}
     
     {#- Diverging path for secondary calcs and needing to datespine -#}
@@ -22,14 +22,14 @@
         {%- if dimensions_provided == true -%}
         
             {{ metrics.gen_dimensions_cte(
-                metric_name=metric_dictionary.name, 
+                model_name=model_name, 
                 dimensions=dimensions
             ) }}
         
         {%- endif -%}
 
         {{ metrics.gen_spine_time_cte(
-            metric_name=metric_dictionary.name, 
+            model_name=model_name, 
             grain=grain, 
             dimensions=dimensions, 
             secondary_calculations=secondary_calculations, 
@@ -41,15 +41,16 @@
     {%- endif -%}
 
     {{ metrics.gen_metric_cte(
-        metric_name=metric_dictionary.name, 
+        metrics_dictionary=metrics_dictionary,
+        model_name=model_name, 
+        model_values=model_values,
         grain=grain, 
         dimensions=dimensions, 
         secondary_calculations=secondary_calculations, 
         start_date=start_date, 
         end_date=end_date, 
         relevant_periods=relevant_periods, 
-        calendar_dimensions=calendar_dimensions,
-        treat_null_values_as_zero=treat_null_values_as_zero
+        calendar_dimensions=calendar_dimensions
     )}} 
 
 {%- endmacro -%}

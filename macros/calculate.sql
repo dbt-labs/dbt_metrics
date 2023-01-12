@@ -20,6 +20,9 @@
     {#- Here we are creating the metrics dictionary which contains all of the metric information needed for sql gen. -#}
     {%- set metrics_dictionary = metrics.get_metrics_dictionary(metric_tree=metric_tree) -%}
 
+    {#- Here we are creating the metric grouping that we use to determine if metrics can be pulled from the same base query -#}
+    {# {%- set metrics_grouping = metrics.get_metrics_grouping(metric_tree=metric_tree,metrics_dictionary=metrics_dictionary) -%} #}
+
     {#- ############
     VALIDATION - Make sure everything is good!
     ############ -#}

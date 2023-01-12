@@ -1,16 +1,16 @@
-{%- macro gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary, total_dimension_count) -%}
-    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary, total_dimension_count)) }}
+{%- macro gen_joined_metrics_cte(metric_tree, metrics_dictionary, models_grouping, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, total_dimension_count) -%}
+    {{ return(adapter.dispatch('gen_joined_metrics_cte', 'metrics')(metric_tree, metrics_dictionary, models_grouping, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, total_dimension_count)) }}
 {%- endmacro -%}
 
-{% macro default__gen_joined_metrics_cte(metric_tree, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, metrics_dictionary, total_dimension_count) %}
+{% macro default__gen_joined_metrics_cte(metric_tree, metrics_dictionary, models_grouping, grain, dimensions, calendar_dimensions, secondary_calculations, relevant_periods, total_dimension_count) %}
 
 {#- This section is a hacky workaround to account for postgres changes -#}
 {%- set cte_numbers = [] -%}
 {%- set unique_cte_numbers = [] -%}
 {#- the cte numbers are more representative of node depth -#}
-{%- if metric_tree.expression_set | length > 0 -%}
-    {%- for metric_name in metric_tree.ordered_expression_set -%}
-        {%- do cte_numbers.append(metric_tree.ordered_expression_set[metric_name]) -%}
+{%- if metric_tree.derived_set | length > 0 -%}
+    {%- for metric_name in metric_tree.ordered_derived_set -%}
+        {%- do cte_numbers.append(metric_tree.ordered_derived_set[metric_name]) -%}
     {%- endfor -%}
     {%- for cte_num in cte_numbers|unique -%}
         {%- do unique_cte_numbers.append(cte_num) -%}
@@ -26,9 +26,9 @@
         {%- endif -%}
         {%- for calendar_dim in calendar_dimensions %}
         coalesce(
-            {%- for metric_name in metric_tree.parent_set %}
-                {{metric_name}}__final.{{ calendar_dim }}{%- if not loop.last -%},{% endif %}
-                {%- if metric_tree.parent_set | length == 1 -%}
+        {%- for model_name, model_values in models_grouping.items() %}
+                {{model_name}}__final.{{ calendar_dim }}{%- if not loop.last -%},{% endif %}
+                {%- if models_grouping | length == 1 -%}
                 , NULL
                 {%- endif -%}
             {% endfor %}
@@ -36,9 +36,9 @@
         {% endfor %}
     {%- for period in relevant_periods %}
         coalesce(
-        {%- for metric_name in metric_tree.parent_set %}
-            {{metric_name}}__final.date_{{ period }} {%- if not loop.last -%},{% endif %}
-            {%- if metric_tree.parent_set | length == 1 %}
+        {%- for model_name, model_values in models_grouping.items() %}
+            {{model_name}}__final.date_{{ period }} {%- if not loop.last -%},{% endif %}
+            {%- if models_grouping | length == 1 %}
             , NULL
             {%- endif -%}
         {% endfor %}
@@ -46,9 +46,9 @@
     {%- endfor %}
     {%- for dim in dimensions %}
         coalesce(
-        {%- for metric_name in metric_tree.parent_set %}
-            {{metric_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
-            {%- if metric_tree.parent_set | length == 1 %}
+        {%- for model_name, model_values in models_grouping.items() %}
+            {{model_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
+            {%- if models_grouping | length == 1 %}
             , NULL
             {%- endif -%}
         {% endfor %}
@@ -63,12 +63,12 @@
         {%- endif %}  
     {%- endfor %}  
     {#- Loop through leaf metric list -#}
-    {% for metric_name in metric_tree.parent_set %}
+    {% for model_name, model_values in models_grouping.items() %}
         {%- if loop.first %}
-    from {{ metric_name }}__final
+    from {{ model_name }}__final
         {%- else %}
             {%- if grain %}
-    full outer join {{metric_name}}__final
+    full outer join {{model_name}}__final
         using (
             date_{{grain}}
             {%- for calendar_dim in calendar_dimensions %}
@@ -80,7 +80,7 @@
         )
             {%- else -%}
                 {% if dimension_count != 0 %}
-    full outer join {{metric_name}}__final
+    full outer join {{model_name}}__final
         using (
             {%- for calendar_dim in calendar_dimensions -%}
                 {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
@@ -97,7 +97,7 @@
             {%- endfor -%}
         )
                 {%- elif dimension_count == 0 %}
-    cross join {{metric_name}}__final
+    cross join {{model_name}}__final
                 {%- endif %}
             {%- endif %}
         {%- endif -%}
@@ -115,11 +115,11 @@
     {%- else %}
         join_metrics__{{previous_cte_number}}.*
     {%- endif %}
-    {%- for metric in metric_tree.expression_set %}
-        {%- if metric_tree.ordered_expression_set[metric] == cte_number %}
+    {%- for metric_name in metric_tree.derived_set %}
+        {%- if metric_tree.ordered_derived_set[metric_name] == cte_number %}
             {#- this logic will parse an expression for divisions signs (/) and wrap all divisors in nullif functions to prevent divide by zero -#}
             {#- "1 / 2 / 3 / ... / N" results in "1 / nullif(2, 0) / nullif(3, 0) / ... / nullif(N, 0)"  -#}
-            {%- set metric_expression = metrics_dictionary[metric].expression %}
+            {%- set metric_expression = metrics_dictionary[metric_name].expression %}
             {%- if "/" in metric_expression -%}
                 {%- set split_division_metric = metric_expression.split('/') -%}
                 {%- set dividend = split_division_metric[0] -%}
@@ -128,7 +128,7 @@
             {%- else -%}
                 {%- set expression = metric_expression -%}
             {%- endif %}
-        , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric].name }}
+        , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric_name].name }}
         {%- endif -%}
     {%- endfor -%}
     {% if loop.first %}
@@ -161,11 +161,11 @@
         {{ dim }},
     {%- endfor %}
 
-    {%- for metric in metric_tree.parent_set|list + metric_tree.expression_set|list %}
-        {{metric}}{%- if not loop.last -%}, {%- endif -%}
+    {%- for metric_name in metric_tree.parent_set|list + metric_tree.derived_set|list %}
+        {{metric_name}}{%- if not loop.last -%}, {%- endif -%}
     {%- endfor %}  
 
-    {%- if metric_tree.expression_set | length == 0 %}
+    {%- if metric_tree.derived_set | length == 0 %}
     from first_join_metrics
     {%- else %}
     from join_metrics__999
