@@ -28,7 +28,7 @@
                 {% if grain or dimensions | length > 0 or calendar_dimensions | length > 0 -%}
                 partition by 
                 {% if grain -%}
-                calendar_table.date_{{ grain }}
+                calendar.date_{{ grain }}
                 {%- endif %}
                 {% for dim in dimensions -%}
                     {%- if loop.first and not grain-%}
@@ -39,9 +39,9 @@
                 {%- endfor -%}
                 {% for calendar_dim in calendar_dimensions -%}
                     {%- if loop.first and dimensions | length == 0 and not grain %}
-                calendar_table.{{ calendar_dim }}
+                calendar.{{ calendar_dim }}
                     {%else -%}
-                ,calendar_table.{{ calendar_dim }}
+                ,calendar.{{ calendar_dim }}
                     {%- endif -%}
                 {%- endfor %}
                 {%- endif %}
