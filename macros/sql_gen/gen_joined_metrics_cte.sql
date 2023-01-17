@@ -24,7 +24,6 @@
         {% if grain -%}
         date_{{grain}},
         {%- endif -%}
-        
         {%- for calendar_dim in calendar_dimensions %}
         coalesce(
             {%- for metric_name in metric_tree.parent_set %}
@@ -35,7 +34,6 @@
             {% endfor %}
             ) as {{calendar_dim}},
         {% endfor %}
-
     {%- for period in relevant_periods %}
         coalesce(
         {%- for metric_name in metric_tree.parent_set %}
@@ -46,8 +44,6 @@
         {% endfor %}
         ) as date_{{period}},
     {%- endfor %}
-
-
     {%- for dim in dimensions %}
         coalesce(
         {%- for metric_name in metric_tree.parent_set %}
@@ -151,7 +147,7 @@
 
     {%- if grain %}
         date_{{grain}},
-    {% endif -%}
+    {%- endif %}
 
     {%- for period in relevant_periods %}
         date_{{ period }},
@@ -169,11 +165,11 @@
         {{metric}}{%- if not loop.last -%}, {%- endif -%}
     {%- endfor %}  
 
-    {% if metric_tree.expression_set | length == 0 %}
+    {%- if metric_tree.expression_set | length == 0 %}
     from first_join_metrics
-    {% else %}
+    {%- else %}
     from join_metrics__999
-    {% endif %}
+    {%- endif %}
 
 )
 

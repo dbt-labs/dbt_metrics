@@ -8,7 +8,6 @@
 
     select
         calendar.date_{{grain}}
-
         {%- if secondary_calculations | length > 0 -%}
             {% for period in relevant_periods %}
                 {%- if period != grain -%}
@@ -16,15 +15,12 @@
                 {%- endif -%}
             {% endfor -%}
         {% endif -%}
-
         {% for calendar_dim in calendar_dimensions %}
         , calendar.{{ calendar_dim }}
         {%- endfor %}
-
         {%- for dim in dimensions %}
         , {{metric_name}}__dims.{{ dim }}
         {%- endfor %}
-
     from calendar
     {%- if dimensions_provided %}
     cross join {{metric_name}}__dims

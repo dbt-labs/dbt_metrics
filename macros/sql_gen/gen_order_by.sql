@@ -3,12 +3,9 @@
 {%- endmacro -%}
 
 {% macro default__gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) %}
-
-{# This macro has gone through many revisions. As of 1.3.2, it will be changed to reduce its 
-functionality to only order by the date field #}
-
-    {% if grain %}
-    order by 1 desc
-    {% endif %}
-
+    {# #}
+    {%- if grain %}
+order by 1 desc
+    {% endif -%}
+    {# #}
 {% endmacro %}
