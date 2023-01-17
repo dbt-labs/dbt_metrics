@@ -55,7 +55,7 @@ metrics there are -#}
 {#- If composite, we begin by looping through each of the metric names that make
 up the composite metric. -#}
 
-{%- for model_name, model_values in models_grouping.items() -%}
+{%- for group_name, group_values in models_grouping.items() -%}
 
     {{ metrics.build_metric_sql(
         metrics_dictionary=metrics_dictionary, 
@@ -68,8 +68,8 @@ up the composite metric. -#}
         calendar_dimensions=calendar_dimensions,
         dimensions_provided=dimensions_provided,
         total_dimension_count=total_dimension_count,
-        model_name=model_name,
-        model_values=model_values
+        group_name=group_name,
+        group_values=group_values
         ) 
     }}
 

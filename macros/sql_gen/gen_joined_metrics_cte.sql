@@ -26,8 +26,8 @@
         {%- endif -%}
         {%- for calendar_dim in calendar_dimensions %}
         coalesce(
-        {%- for model_name, model_values in models_grouping.items() %}
-                {{model_name}}__final.{{ calendar_dim }}{%- if not loop.last -%},{% endif %}
+        {%- for group_name, group_values in models_grouping.items() %}
+                {{group_name}}__final.{{ calendar_dim }}{%- if not loop.last -%},{% endif %}
                 {%- if models_grouping | length == 1 -%}
                 , NULL
                 {%- endif -%}
@@ -36,8 +36,8 @@
         {% endfor %}
     {%- for period in relevant_periods %}
         coalesce(
-        {%- for model_name, model_values in models_grouping.items() %}
-            {{model_name}}__final.date_{{ period }} {%- if not loop.last -%},{% endif %}
+        {%- for group_name, group_values in models_grouping.items() %}
+            {{group_name}}__final.date_{{ period }} {%- if not loop.last -%},{% endif %}
             {%- if models_grouping | length == 1 %}
             , NULL
             {%- endif -%}
@@ -46,8 +46,8 @@
     {%- endfor %}
     {%- for dim in dimensions %}
         coalesce(
-        {%- for model_name, model_values in models_grouping.items() %}
-            {{model_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
+        {%- for group_name, group_values in models_grouping.items() %}
+            {{group_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
             {%- if models_grouping | length == 1 %}
             , NULL
             {%- endif -%}
@@ -63,12 +63,12 @@
         {%- endif %}  
     {%- endfor %}  
     {#- Loop through leaf metric list -#}
-    {% for model_name, model_values in models_grouping.items() %}
+    {% for group_name, group_values in models_grouping.items() %}
         {%- if loop.first %}
-    from {{ model_name }}__final
+    from {{ group_name }}__final
         {%- else %}
             {%- if grain %}
-    full outer join {{model_name}}__final
+    full outer join {{group_name}}__final
         using (
             date_{{grain}}
             {%- for calendar_dim in calendar_dimensions %}
@@ -80,7 +80,7 @@
         )
             {%- else -%}
                 {% if dimension_count != 0 %}
-    full outer join {{model_name}}__final
+    full outer join {{group_name}}__final
         using (
             {%- for calendar_dim in calendar_dimensions -%}
                 {%- if not loop.first -%},{%- endif -%} {{ calendar_dim }}
@@ -97,7 +97,7 @@
             {%- endfor -%}
         )
                 {%- elif dimension_count == 0 %}
-    cross join {{model_name}}__final
+    cross join {{group_name}}__final
                 {%- endif %}
             {%- endif %}
         {%- endif -%}

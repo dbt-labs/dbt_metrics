@@ -26,7 +26,7 @@ select
     {%- if models_grouping| length > 1 or metric_tree['derived_set'] | length > 0  %}
 from joined_metrics 
     {%- else %} 
-from {% for model_name, model_values in models_grouping.items()-%}{{model_name}}__final {%-endfor-%}
+from {% for group_name, group_values in models_grouping.items()-%}{{group_name}}__final {%-endfor-%}
     {%- endif %}
 {# metric where clauses #}
     {%- if where %}
@@ -74,7 +74,7 @@ select
     {# {%- for metric_name in metric_tree.full_set %}
     {{metric_name}}{%if not loop.last%},{%endif%}
     {%- endfor %} #}
-from {% for model_name, model_values in models_grouping.items()-%}{{model_name}}__final {%-endfor-%}
+from {% for group_name, group_values in models_grouping.items()-%}{{group_name}}__final {%-endfor-%}
     {%- if where %}
 where {{ where }}
     {%- endif -%}

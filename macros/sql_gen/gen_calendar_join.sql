@@ -1,43 +1,43 @@
-{% macro gen_calendar_join(model_values) %}
-    {{ return(adapter.dispatch('gen_calendar_join', 'metrics')(model_values)) }}
+{% macro gen_calendar_join(group_values) %}
+    {{ return(adapter.dispatch('gen_calendar_join', 'metrics')(group_values)) }}
 {%- endmacro -%}
 
-{% macro default__gen_calendar_join(model_values) %}
+{% macro default__gen_calendar_join(group_values) %}
         left join calendar
-        {%- if model_values.window is not none %}
-            on cast(base_model.{{model_values.timestamp}} as date) > dateadd({{model_values.window.period}}, -{{model_values.window.count}}, calendar.date_day)
-            and cast(base_model.{{metric_dictionary.timestamp}} as date) <= calendar.date_day
+        {%- if group_values.window is not none %}
+            on cast(base_model.{{group_values.timestamp}} as date) > dateadd({{group_values.window.period}}, -{{group_values.window.count}}, calendar.date_day)
+            and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
         {%- else %}
-            on cast(base_model.{{model_values.timestamp}} as date) = calendar.date_day
+            on cast(base_model.{{group_values.timestamp}} as date) = calendar.date_day
         {% endif -%}
 {% endmacro %}
 
-{% macro bigquery__gen_calendar_join(model_values) %}
+{% macro bigquery__gen_calendar_join(group_values) %}
         left join calendar
-        {%- if model_values.window is not none %}
-            on cast(base_model.{{model_values.timestamp}} as date) > date_sub(calendar.date_day, interval {{model_values.window.count}} {{model_values.window.period}})
-            and cast(base_model.{{model_values.timestamp}} as date) <= calendar.date_day
+        {%- if group_values.window is not none %}
+            on cast(base_model.{{group_values.timestamp}} as date) > date_sub(calendar.date_day, interval {{group_values.window.count}} {{group_values.window.period}})
+            and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
         {%- else %}
-            on cast(base_model.{{model_values.timestamp}} as date) = calendar.date_day
+            on cast(base_model.{{group_values.timestamp}} as date) = calendar.date_day
         {% endif -%}
 {% endmacro %}
 
-{% macro postgres__gen_calendar_join(model_values) %}
+{% macro postgres__gen_calendar_join(group_values) %}
         left join calendar
-        {%- if model_values.window is not none %}
-            on cast(base_model.{{model_values.timestamp}} as date) > calendar.date_day - interval '{{model_values.window.count}} {{model_values.window.period}}'
-            and cast(base_model.{{model_values.timestamp}} as date) <= calendar.date_day
+        {%- if group_values.window is not none %}
+            on cast(base_model.{{group_values.timestamp}} as date) > calendar.date_day - interval '{{group_values.window.count}} {{group_values.window.period}}'
+            and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
         {%- else %}
-            on cast(base_model.{{model_values.timestamp}} as date) = calendar.date_day
+            on cast(base_model.{{group_values.timestamp}} as date) = calendar.date_day
         {% endif -%}
 {% endmacro %}
 
-{% macro redshift__gen_calendar_join(model_values) %}
+{% macro redshift__gen_calendar_join(group_values) %}
         left join calendar
-        {%- if model_values.window is not none %}
-            on cast(base_model.{{model_values.timestamp}} as date) > dateadd({{model_values.window.period}}, -{{model_values.window.count}}, calendar.date_day)
-            and cast(base_model.{{model_values.timestamp}} as date) <= calendar.date_day
+        {%- if group_values.window is not none %}
+            on cast(base_model.{{group_values.timestamp}} as date) > dateadd({{group_values.window.period}}, -{{group_values.window.count}}, calendar.date_day)
+            and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
         {%- else %}
-            on cast(base_model.{{model_values.timestamp}} as date) = calendar.date_day
+            on cast(base_model.{{group_values.timestamp}} as date) = calendar.date_day
         {% endif -%}
 {% endmacro %}
