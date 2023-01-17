@@ -13,6 +13,7 @@
    * [Develop](#develop)
       * [Supported Inputs](#supported-inputs-1)
       * [Multiple Metrics Or Derived Metrics](#multiple-metrics-or-derived-metrics)
+   * [Available calculation methods](#available-calculation-methods)
 * [Use cases and examples](#use-cases-and-examples)
    * [Jaffle Shop Metrics](#jaffle-shop-metrics)
    * [Inside of dbt Models](#inside-of-dbt-models)
@@ -209,6 +210,20 @@ from {{ metrics.develop(
 ```
 
 The above example will return a dataset that contains the metric provided in the metric list (`derived_metric`) and the parent metric (`develop_metric`). It will **not** contain `some_other_metric_not_using` as it is not designated in the metric list or a parent of the metrics included.
+
+## Available calculation methods
+The method of calculation (aggregation or derived) that is applied to the expression.
+
+|  Metric Calculation Method  |  Description                                                               |
+|----------------|----------------------------------------------------------------------------|
+| count          | This metric type will apply the `count` aggregation to the specified field |
+| count_distinct | This metric type will apply the `count` aggregation to the specified field, with an additional distinct statement inside the aggregation |
+| sum            | This metric type will apply the `sum` aggregation to the specified field |
+| average        | This metric type will apply the `average` aggregation to the specified field |
+| min            | This metric type will apply the `min` aggregation to the specified field |
+| max            | This metric type will apply the `max` aggregation to the specified field |
+| median            | This metric type will apply the `median` aggregation to the specified field, or an alternative `percentile_cont` aggregation if `median` is not available |
+|derived | This metric type is defined as any _non-aggregating_ calculation of 1 or more metrics  |
 
 # Use cases and examples
 

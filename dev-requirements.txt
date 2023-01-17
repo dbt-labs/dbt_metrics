@@ -16,7 +16,7 @@ dbt-core==1.4.0rc1
 dbt-redshift==1.4.0rc1
 dbt-snowflake==1.4.0rc1
 dbt-bigquery==1.4.0rc1
-# dbt-databricks==1.4.0
+# dbt-databricks==1.3.0
 
 # Most recent stable release
 # dbt-tests-adapter==1.3.0
