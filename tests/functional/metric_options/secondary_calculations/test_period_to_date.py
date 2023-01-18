@@ -1032,7 +1032,7 @@ if os.getenv('dbt_target') == 'snowflake':
     period_to_date_sum__expected_csv = """
 date_month,date_year,period_to_date_sum,period_to_date_sum_this_year_sum,period_to_date_sum_max_for_year,period_to_date_sum_min_for_year,period_to_date_sum_average_for_year
 2022-01-01,2022-01-01,18,18,18,18,18.000000
-2022-02-01,2022-01-01,6,24,18,24,12.000000
+2022-02-01,2022-01-01,6,24,18,6,12.000000
 """.lstrip()
 else:
     period_to_date_sum__expected_csv = """
