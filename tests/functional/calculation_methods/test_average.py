@@ -175,7 +175,6 @@ seeds:
   - name: base_average_metric_no_time_grain__expected
     config:
       column_types:
-        date_month: date
         base_average_metric_no_time_grain: FLOAT64
 """.lstrip()
 else: 

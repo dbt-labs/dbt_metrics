@@ -11,6 +11,7 @@
     {% do metrics_dictionary_dict.update({'config': metric_definition.config})%}
     {% if metric_definition.calculation_method != 'derived' %}
         {% set metric_model_name = metrics.get_metric_model_name(metric_model=metric_definition.model) %}
+        {% do metrics_dictionary_dict.update({'metric_model_name': metric_model_name }) %}
         {% do metrics_dictionary_dict.update({'metric_model': metrics.get_model_relation(metric_model_name, metric_name)}) %}
     {% endif %}
 

@@ -6,6 +6,7 @@
     {# Keys are the primary aggregation, values are the permitted aggregations to run in secondary calculations. #}
     {% do return ({
         "average": ['min', 'max'],
+        "median": ['min', 'max'],
         "count": ['min', 'max', 'sum', 'average'],
         "count_distinct": ['min', 'max', 'sum', 'average'],
         "sum": ['min', 'max', 'sum', 'average'],
