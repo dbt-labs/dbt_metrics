@@ -1119,7 +1119,6 @@ class TestPeriodToDateSum:
 
         # initial run
         results = run_dbt(["run"])
-        breakpoint()
         assert len(results) == 3
 
         # test tests
