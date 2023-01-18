@@ -116,6 +116,7 @@ If no `grain` is provided to the macro in the query then the dataset returned wi
 | start_date  | `2022-01-01` | Limits the date range of data used in the metric calculation by not querying data before this date | Optional |
 | end_date    | `2022-12-31` | Limits the date range of data used in the metric claculation by not querying data after this date | Optional |
 | where       | `plan='paying_customer'` | A sql statment, or series of sql statements, that alter the **final** CTE in the generated sql. Most often used to limit the data to specific values of dimensions provided | Optional |
+| date_alias       | `'date_field'` | A string value that aliases the date field in the final dataset | Optional |
 
 ## Develop
 There are times when you want to test what a metric might look like before defining it in your project. In these cases you should use the `develop` metric, which allows you to provide a single metric in a contained yml in order to simulate what the metric might loook like if defined in your project.
@@ -157,6 +158,7 @@ from {{ metrics.develop(
 | start_date  | `2022-01-01` | Limits the date range of data used in the metric calculation by not querying data before this date | Optional |
 | end_date    | `2022-12-31` | Limits the date range of data used in the metric claculation by not querying data after this date | Optional |
 | where       | `plan='paying_customer'` | A sql statment, or series of sql statements, that alter the **final** CTE in the generated sql. Most often used to limit the data to specific values of dimensions provided | Optional |
+| date_alias       | `'date_field'` | A string value that aliases the date field in the final dataset | Optional |
 
 ### Multiple Metrics Or Derived Metrics
 If you have a more complicated use case that you are interested in testing, the develop macro also supports this behavior. The only caveat is that **you must include the raw tags** for any provided metric yml that contains a derived metric. Example below:
