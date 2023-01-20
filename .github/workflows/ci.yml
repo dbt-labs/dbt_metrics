@@ -128,7 +128,7 @@ jobs:
           mkdir -p $HOME/.dbt
           KEYFILE_PATH=$HOME/.dbt/bigquery-service-key.json
           echo $BIGQUERY_TEST_SERVICE_ACCOUNT_JSON > $KEYFILE_PATH
-          echo "KEYFILE_PATH=$KEYFILE_PATH" >> $GITHUB_OUTPUT
+          echo "path=${KEYFILE_PATH}" >> $GITHUB_OUTPUT
       - uses: ./.github/actions/end-to-end-test
         env:
           BIGQUERY_SERVICE_KEY_PATH: ${{ steps.keyfile.outputs.path }}
