@@ -12,7 +12,11 @@
                 the same windows & filters, we can base the conditional off of the first 
                 value in the list because the order doesn't matter. 
             -#}
-            cast(base_model.{{group_values.timestamp}} as date) as metric_date_day,
+            {% if grain == 'hour' %}
+                dateadd(HOUR, datediff(HOUR, 0, base_model.{{group_values.timestamp}}), 0) as metric_date_hour
+            {% else %}
+                cast(base_model.{{group_values.timestamp}} as date) as metric_date_day,
+            {% endif %}
             calendar.date_{{ grain }} as date_{{grain}},
             calendar.date_day as window_filter_date,
                 {%- if secondary_calculations | length > 0 %}
@@ -35,7 +39,7 @@
         from {{ group_values.metric_model }} base_model 
         {# -#}
         {%- if grain or calendar_dimensions|length > 0 -%}
-        {{ metrics.gen_calendar_join(group_values) }} 
+        {{ metrics.gen_calendar_join(group_values, grain) }} 
         {%- endif -%}
         {# #}
         where 1=1

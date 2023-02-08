@@ -48,7 +48,8 @@ metrics there are -#}
 {{ metrics.gen_calendar_cte(
     calendar_tbl=calendar_tbl,
     start_date=start_date, 
-    end_date=end_date) 
+    end_date=end_date,
+    grain=grain) 
     }}
 {#- Next we check if it is a composite metric or single metric by checking the length of the list -#}
 {#- This filter forms the basis of how we construct the SQL -#}
