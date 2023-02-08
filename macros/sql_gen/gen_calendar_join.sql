@@ -7,7 +7,7 @@
         {%- if group_values.window is not none and grain != 'hour' %}
             on cast(base_model.{{group_values.timestamp}} as date) > dateadd({{group_values.window.period}}, -{{group_values.window.count}}, calendar.date_day)
             and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
-        {%- elif grain == 'hour' -%}
+        {%- elif grain == 'hour' %}
             on date_trunc('hour', group_values.timestamp) = calendar.date_hour
         {%- else %}
             on cast(base_model.{{group_values.timestamp}} as date) = calendar.date_day
@@ -16,7 +16,7 @@
 
 {% macro bigquery__gen_calendar_join(group_values, grain) %}
         left join calendar
-        {%- if group_values.window is not none %}
+        {%- if group_values.window is not none and grain != 'hour' %}
             on cast(base_model.{{group_values.timestamp}} as date) > date_sub(calendar.date_day, interval {{group_values.window.count}} {{group_values.window.period}})
             and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
         {%- elif grain == 'hour' -%}
@@ -28,7 +28,7 @@
 
 {% macro postgres__gen_calendar_join(group_values, grain) %}
         left join calendar
-        {%- if group_values.window is not none %}
+        {%- if group_values.window is not none and grain != 'hour' %}
             on cast(base_model.{{group_values.timestamp}} as date) > calendar.date_day - interval '{{group_values.window.count}} {{group_values.window.period}}'
             and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
         {%- elif grain == 'hour' -%}
@@ -40,7 +40,7 @@
 
 {% macro redshift__gen_calendar_join(group_values, grain) %}
         left join calendar
-        {%- if group_values.window is not none %}
+        {%- if group_values.window is not none and grain != 'hour' %}
             on cast(base_model.{{group_values.timestamp}} as date) > dateadd({{group_values.window.period}}, -{{group_values.window.count}}, calendar.date_day)
             and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
        {%- elif grain == 'hour' -%}
