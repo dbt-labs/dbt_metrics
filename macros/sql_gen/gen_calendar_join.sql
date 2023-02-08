@@ -8,7 +8,7 @@
             on cast(base_model.{{group_values.timestamp}} as date) > dateadd({{group_values.window.period}}, -{{group_values.window.count}}, calendar.date_day)
             and cast(base_model.{{group_values.timestamp}} as date) <= calendar.date_day
         {%- elif grain == 'hour' -%}
-            on dateadd(HOUR, datediff(HOUR, 0, base_model.{{group_values.timestamp}}), 0) = calendar.date_hour
+            on date_trunc('hour', group_values.timestamp) = calendar.date_hour
         {%- else %}
             on cast(base_model.{{group_values.timestamp}} as date) = calendar.date_day
         {% endif -%}
