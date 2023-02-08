@@ -13,7 +13,7 @@
                 value in the list because the order doesn't matter. 
             -#}
             {% if grain == 'hour' %}
-                date_trunc('hour', group_values.timestamp) as metric_date_hour,
+                date_trunc('hour', {{group_values.timestamp}}) as metric_date_hour,
             {% else %}
                 cast(base_model.{{group_values.timestamp}} as date) as metric_date_day,
             {% endif %}
