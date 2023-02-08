@@ -9,7 +9,7 @@ with calendar as (
     start and end date provided by the macro call -#}
     select 
     {% if grain == 'hour' %}
-        to_timestamp_ntz(concat(date_day, ' ', date_hour), 'YYYY-MM-DD HH24') as date_hour,
+        to_timestamp_ntz(concat(date_day, ' ', hour), 'YYYY-MM-DD HH24') as date_hour,
     {% endif %}
         c.* 
     from {{ calendar_tbl }} c
@@ -41,7 +41,7 @@ with calendar as (
             ('21'),
             ('22'),
             ('23')
-    ) hours(date_hour)
+    ) hours(hour)
     {% endif %}
     {% if start_date or end_date %}
         {%- if start_date and end_date -%}
