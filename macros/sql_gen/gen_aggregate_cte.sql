@@ -1,5 +1,5 @@
 {%- macro gen_aggregate_cte(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where) -%}
-    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values)) }}
+    {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where)) }}
 {%- endmacro -%}
 
 {%- macro default__gen_aggregate_cte(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where) %}

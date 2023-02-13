@@ -2,7 +2,7 @@
     {{ return(adapter.dispatch('gen_filters', 'metrics')(model_values, start_date, end_date, where)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_filters(model_values, start_date, end_date) -%}
+{%- macro default__gen_filters(model_values, start_date, end_date, where) -%}
 
     {#- metric start/end dates also applied here to limit incoming data -#}
     {% if start_date or end_date %}

@@ -1,5 +1,5 @@
 {% macro gen_base_query(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where) %}
-    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values)) }}
+    {{ return(adapter.dispatch('gen_base_query', 'metrics')(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where)) }}
 {% endmacro %}
 
 {% macro default__gen_base_query(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where) %}
@@ -40,8 +40,7 @@
         {# #}
         where 1=1
         {#- -#}
-        {# {{ metrics.gen_filters(group_values, start_date, end_date) }} #}
-        {{ metrics.gen_filters(metric_dictionary, start_date, end_date, where) }}
+        {{ metrics.gen_filters(group_values, start_date, end_date, where) }}
         {# #}
 
 {%- endmacro -%}
