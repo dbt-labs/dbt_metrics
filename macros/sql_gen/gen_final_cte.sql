@@ -29,9 +29,9 @@ from joined_metrics
 from {% for group_name, group_values in models_grouping.items()-%}{{group_name}}__final {%-endfor-%}
     {%- endif %}
 {# metric where clauses #}
-    {%- if where %}
+    {# {%- if where %}
  where 1=1
-    {%- endif %}
+    {%- endif %} #}
 {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 
 {%- elif models_grouping| length > 1 or metric_tree['derived_set'] | length > 0 -%}
@@ -51,9 +51,9 @@ select
     {%- endfor %}  
 from joined_metrics
 {#- metric where clauses -#}
-    {%- if where %}
+    {# {%- if where %}
 where 1=1
-    {%- endif -%}
+    {%- endif -%} #}
 {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
     
 {%- else -%}
@@ -75,9 +75,9 @@ select
     {{metric_name}}{%if not loop.last%},{%endif%}
     {%- endfor %} #}
 from {% for group_name, group_values in models_grouping.items()-%}{{group_name}}__final {%-endfor-%}
-    {%- if where %}
+    {# {%- if where %}
     where 1=1
-    {%- endif -%}
+    {%- endif -%} #}
 {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 {%- endif %}
 
