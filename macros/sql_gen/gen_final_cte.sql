@@ -30,7 +30,7 @@ from {% for group_name, group_values in models_grouping.items()-%}{{group_name}}
     {%- endif %}
 {# metric where clauses #}
     {%- if where %}
-where 1=1
+ where 1=1
     {%- endif %}
 {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 
@@ -76,7 +76,7 @@ select
     {%- endfor %} #}
 from {% for group_name, group_values in models_grouping.items()-%}{{group_name}}__final {%-endfor-%}
     {%- if where %}
-where 1=1
+    where 1=1
     {%- endif -%}
 {{ metrics.gen_order_by(grain, dimensions, calendar_dimensions, relevant_periods) }}
 {%- endif %}
