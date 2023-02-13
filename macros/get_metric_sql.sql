@@ -69,7 +69,8 @@ up the composite metric. -#}
         dimensions_provided=dimensions_provided,
         total_dimension_count=total_dimension_count,
         group_name=group_name,
-        group_values=group_values
+        group_values=group_values,
+        where=where
         ) 
     }}
 

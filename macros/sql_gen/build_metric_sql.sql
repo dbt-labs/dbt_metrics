@@ -1,4 +1,4 @@
-{%- macro build_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, dimensions_provided, total_dimension_count, group_name, group_values) %}
+{%- macro build_metric_sql(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, dimensions_provided, total_dimension_count, group_name, group_values, where) %}
     
     {#- This is the SQL Gen part - we've broken each component out into individual macros -#}
     {#- We broke this out so it can loop for composite metrics -#}
@@ -13,7 +13,8 @@
         calendar_dimensions=calendar_dimensions,
         total_dimension_count=total_dimension_count,
         group_name=group_name,
-        group_values=group_values
+        group_values=group_values,
+        where=where
     ) }}
     
     {#- Diverging path for secondary calcs and needing to datespine -#}

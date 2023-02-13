@@ -1,9 +1,9 @@
 
-{%- macro gen_primary_metric_aggregate(aggregate, expression) -%}
-    {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(aggregate, expression)) }}
+{%- macro gen_primary_metric_aggregate(aggregate, expression, dimensions) -%}
+    {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(aggregate, expression, dimensions)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_primary_metric_aggregate(aggregate, expression) -%}
+{%- macro default__gen_primary_metric_aggregate(aggregate, expression, dimensions) -%}
 
     {%- if aggregate == 'count' -%}
         {{ return(adapter.dispatch('metric_count', 'metrics')(expression)) }}
@@ -28,6 +28,9 @@
 
     {%- elif aggregate == 'derived' -%}
         {{ return(adapter.dispatch('metric_derived', 'metrics')(expression)) }}
+    
+    {%- elif aggregate[:10] == 'custom_sql' -%}
+        {{ return(adapter.dispatch('metric_custom_sql', 'metrics')(aggregate, expression, dimensions)) }}
 
     {%- else -%}
         {%- do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) -%}  
@@ -76,4 +79,14 @@
 
 {% macro default__metric_derived(expression) %}
         {{ expression }}
+{%- endmacro -%}
+
+{% macro default__metric_custom_sql(aggregate, expression, dimensions) %}
+        {% if '<<dimensions>>' in aggregate[13:] %}
+            {% set first_part = aggregate[13:].split("<<dimensions>>")[0] %}
+            {% set second_part = aggregate[13:].split("<<dimensions>>")[1] %}
+            {{first_part}} {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} {{second_part}}
+        {% else %}
+            {{aggregate[13:]}}
+        {%endif%}
 {%- endmacro -%}

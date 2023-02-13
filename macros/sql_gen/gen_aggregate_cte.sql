@@ -1,8 +1,8 @@
-{%- macro gen_aggregate_cte(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values) -%}
+{%- macro gen_aggregate_cte(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where) -%}
     {{ return(adapter.dispatch('gen_aggregate_cte', 'metrics')(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_aggregate_cte(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values) %}
+{%- macro default__gen_aggregate_cte(metrics_dictionary, grain, dimensions, secondary_calculations, start_date, end_date, relevant_periods, calendar_dimensions, total_dimension_count, group_name, group_values, where) %}
 
 , {{group_name}}__aggregate as (
     {# This is the most important CTE. Instead of joining all relevant information
@@ -43,7 +43,7 @@
         {#- This line performs the relevant aggregation by calling the 
         gen_primary_metric_aggregate macro. Take a look at that one if you're curious -#}
         {%- for metric_name in group_values.metric_names -%} 
-        {{ metrics.gen_primary_metric_aggregate(metrics_dictionary[metric_name].calculation_method, 'property_to_aggregate__'~metric_name) }} as {{ metric_name }}
+        {{ metrics.gen_primary_metric_aggregate(metrics_dictionary[metric_name].calculation_method, 'property_to_aggregate__'~metric_name, dimensions) }} as {{ metric_name }}
         {%- if not loop.last -%},{%- endif -%}
         {%- endfor%}
     from ({{ metrics.gen_base_query(
@@ -57,7 +57,8 @@
                 calendar_dimensions=calendar_dimensions,
                 total_dimension_count=total_dimension_count,
                 group_name=group_name,
-                group_values=group_values
+                group_values=group_values,
+                where=where
                 )
             }}
     ) as base_query
