@@ -85,8 +85,8 @@
         {% if '<<dimensions>>' in aggregate[13:] %}
             {% set first_part = aggregate[13:].split("<<dimensions>>")[0] %}
             {% set second_part = aggregate[13:].split("<<dimensions>>")[1] %}
-            {{first_part}} {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} {{second_part}}
+            {{first_part.replace('property_to_aggregate', expression)}} {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} {{second_part.replace('property_to_aggregate', expression)}}
         {% else %}
-            {{aggregate[13:]}}
+            {{aggregate[13:].replace('property_to_aggregate', expression)}}
         {%endif%}
 {%- endmacro -%}
