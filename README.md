@@ -63,7 +63,7 @@ Include in your `package.yml`
 ```yaml
 packages:
   - package: dbt-labs/metrics
-    version: [">=1.3.0", "<1.4.0"]
+    version: [">=1.4.0", "<1.5.0"]
 ```
 
 ## Supported Adapters
