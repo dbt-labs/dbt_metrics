@@ -26,7 +26,6 @@
 * [Customisation](#customisation)
    * [Metric Configs](#metric-configs)
       * [Accepted Metric Configurations](#accepted-metric-configurations)
-   * [All_Time Grain](#all_time-grain)
    * [Window Periods](#window-periods)
    * [Derived Metrics](#derived-metrics)
    * [Multiple Metrics](#multiple-metrics)
@@ -63,7 +62,7 @@ Include in your `package.yml`
 ```yaml
 packages:
   - package: dbt-labs/metrics
-    version: [">=1.3.0", "<1.4.0"]
+    version: [">=1.4.0", "<1.5.0"]
 ```
 
 ## Supported Adapters
