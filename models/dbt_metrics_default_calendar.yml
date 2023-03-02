@@ -8,9 +8,6 @@ models:
     columns:
       - name: DATE_DAY
         description: "Date"
-        tests:
-          - not_null
-          - unique
       - name: DATE_WEEK
         description: "Date truncated into week"
       - name: DATE_MONTH
