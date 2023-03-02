@@ -7,9 +7,19 @@ from dbt.tests.util import run_dbt
 # our file contents
 from tests.functional.fixtures import (
     fact_orders_source_csv,
-    fact_orders_sql,
     fact_orders_yml,
 )
+
+# models/fact_orders.sql
+fact_orders_sql = """
+
+{{ config(materialized='ephemeral') }}
+
+select 
+    *
+    ,round(order_total - (order_total/2)) as discount_total
+from {{ref('fact_orders_source')}}
+"""
 
 # models/invalid_ephemeral_model.sql
 invalid_ephemeral_model_sql = """
@@ -49,7 +59,7 @@ class TestInvalidMetricConfig:
     def project_config_update(self):
         return {
           "name": "example",
-          "models": {"+materialized": "ephemeral"}
+          "models": {"+materialized": "table"}
         }
 
     # install current repo as package
