@@ -26,7 +26,6 @@
 * [Customisation](#customisation)
    * [Metric Configs](#metric-configs)
       * [Accepted Metric Configurations](#accepted-metric-configurations)
-   * [All_Time Grain](#all_time-grain)
    * [Window Periods](#window-periods)
    * [Derived Metrics](#derived-metrics)
    * [Multiple Metrics](#multiple-metrics)
