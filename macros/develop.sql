@@ -57,6 +57,9 @@
 
     {%- do metrics.validate_where(where=where) -%} 
 
+    {%- do metrics.validate_calendar_model() -%}
+
+
     {# ############
     SQL GENERATION - Lets build that SQL!
     ############ -#}

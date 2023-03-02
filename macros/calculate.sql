@@ -46,6 +46,8 @@
 
     {%- do metrics.validate_secondary_calculations(metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, grain=grain, secondary_calculations=secondary_calculations) -%} 
 
+    {%- do metrics.validate_calendar_model() -%}
+
     {#- ############
     SQL GENERATION - Lets build that SQL!
     ############ -#}
