@@ -11,12 +11,12 @@ pytest-dotenv
 # git+https://github.com/databricks/dbt-databricks.git
 
 # Most recent release candidates
-dbt-tests-adapter==1.4.0rc1
-dbt-core==1.4.0rc1
-dbt-redshift==1.4.0rc1
-dbt-snowflake==1.4.0rc1
-dbt-bigquery==1.4.0rc1
-# dbt-databricks==1.3.0
+dbt-tests-adapter
+dbt-core
+dbt-redshift
+dbt-snowflake
+dbt-bigquery
+dbt-databricks
 
 # Most recent stable release
 # dbt-tests-adapter==1.3.0
