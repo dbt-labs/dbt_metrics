@@ -127,6 +127,18 @@
                 {%- set expression = dividend ~ " / nullif(" ~ divisors | join(", 0) / nullif(") ~ ", 0)" -%}
             {%- else -%}
                 {%- set expression = metric_expression -%}
+            {% endif %}
+            {%- if '<<partition_by_dimensions>>' in expression %}
+                {% set dim_expression = [] %}
+                {%- set split_parts = expression.split("<<partition_by_dimensions>>") -%}
+                {%- if dimensions == [] -%}
+                    {%- set partition_by_expression = "" -%}
+                    {%- set dim_expression = split_parts | join(" ") -%}
+                {%- elif dimensions != [] -%}
+                    {%- set partition_by_expression = dimensions | join(', ') -%}
+                    {%- set dim_expression = split_parts | join(" partition by " ~ partition_by_expression) -%}
+                {%- endif -%}
+                {%- set expression = dim_expression -%}
             {%- endif %}
         , ({{ expression | replace(".metric_value","") }}) as {{ metrics_dictionary[metric_name].name }}
         {%- endif -%}
