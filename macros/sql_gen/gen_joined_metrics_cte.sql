@@ -138,6 +138,16 @@
                 {%- endif -%}
                 {%- set expression = dim_expression -%}
             {%- endif %}
+            {%- if '<<partition_by_date>>' in expression %}
+                {%- set split_string = "<<partition_by_date>>" -%}
+                {%- set split_parts = expression.split(split_string) -%}
+                {%- if grain is none -%}
+                    {%- set partition_by_time_expression = split_parts | join(" partition by true ") -%}
+                {%- elif grain is not none -%}
+                    {%- set partition_by_time_expression = split_parts | join(" partition by " + "date_"+ grain) -%}
+                {%- endif -%}
+                {%- set expression = partition_by_time_expression -%}
+            {%- endif -%}
             {%- if ('<<order_by_date_asc>>' in expression or '<<order_by_date_desc>>' in expression) %}
                 {% set order  = " asc " %}
                 {% set split_string = "<<order_by_date_asc>>" %}
