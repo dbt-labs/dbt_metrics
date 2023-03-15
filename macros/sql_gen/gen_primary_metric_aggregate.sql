@@ -1,9 +1,9 @@
 
-{%- macro gen_primary_metric_aggregate(aggregate, expression, dimensions) -%}
-    {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(aggregate, expression, dimensions)) }}
+{%- macro gen_primary_metric_aggregate(aggregate, expression, dimensions, grain) -%}
+    {{ return(adapter.dispatch('gen_primary_metric_aggregate', 'metrics')(aggregate, expression, dimensions, grain)) }}
 {%- endmacro -%}
 
-{%- macro default__gen_primary_metric_aggregate(aggregate, expression, dimensions) -%}
+{%- macro default__gen_primary_metric_aggregate(aggregate, expression, dimensions, grain) -%}
 
     {%- if aggregate == 'count' -%}
         {{ return(adapter.dispatch('metric_count', 'metrics')(expression)) }}
@@ -30,7 +30,7 @@
         {{ return(adapter.dispatch('metric_derived', 'metrics')(expression)) }}
     
     {%- elif aggregate[:10] == 'custom_sql' -%}
-        {{ return(adapter.dispatch('metric_custom_sql', 'metrics')(aggregate, expression, dimensions)) }}
+        {{ return(adapter.dispatch('metric_custom_sql', 'metrics')(aggregate, expression, dimensions, grain)) }}
 
     {%- else -%}
         {%- do exceptions.raise_compiler_error("Unknown aggregation style: " ~ aggregate) -%}  
@@ -81,21 +81,43 @@
         {{ expression }}
 {%- endmacro -%}
 
-{% macro default__metric_custom_sql(aggregate, expression, dimensions) %}
-        {% if '<<dimensions>>' in aggregate[13:] %}
-            {% set first_part = aggregate[13:].split("<<dimensions>>")[0] %}
-            {% set second_part = aggregate[13:].split("<<dimensions>>")[1] %}
-            {{first_part.replace('property_to_aggregate', expression)}} {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} {{second_part.replace('property_to_aggregate', expression)}}
-        {% elif '<<partition_by_dimensions>>' in aggregate[13:] %}
-            {% set split_parts = aggregate[13:].split("<<partition_by_dimensions>>") %}
+{% macro default__metric_custom_sql(aggregate, expression, dimensions, grain) %}
+    {% set sql_expression =  aggregate[13:] %}
+        {% if '<<partition_by_dimensions>>' in sql_expression %}
+            {% set split_parts = sql_expression.split("<<partition_by_dimensions>>") %}
             {% if dimensions == [] %}
-                {% for part in split_parts %} {{part.replace('property_to_aggregate', expression)}} {% endfor %}
+                {%- set dim_expression = split_parts | join(" partition by true ") -%}
             {% elif dimensions != [] %}
-                {% for part in split_parts %} 
-                {{part.replace('property_to_aggregate', expression)}} {% if not loop.last %} partition by {% for dimension in dimensions %} {{dimension}} {% if not loop.last %} , {% endif %} {% endfor %} {% endif %} 
-                {% endfor %}
+                {%- set partition_by_expression = dimensions | join(', ') -%}
+                {%- set dim_expression = split_parts | join(" partition by " ~ partition_by_expression) -%}
             {% endif %}
-        {% else %}
-            {{aggregate[13:].replace('property_to_aggregate', expression)}}
-        {%endif%}
+            {% set sql_expression = dim_expression %}
+        {% endif %}
+        {% if '<<partition_by_date>>' in sql_expression %}
+            {% set split_parts = sql_expression.split("<<partition_by_date>>") %}
+            {%- if grain is none -%}
+                {%- set partition_by_time_expression = split_parts | join(" partition by true ") -%}
+            {%- elif grain is not none -%}
+                {%- set partition_by_time_expression = split_parts | join(" partition by " + "date_"+ grain) -%}
+            {%- endif -%}
+            {%- set sql_expression = partition_by_time_expression -%}
+        {% endif %}
+        {%- if ('<<order_by_date_asc>>' in sql_expression or '<<order_by_date_desc>>' in sql_expression) %}
+            {% set order  = " asc " %}
+            {% set split_string = "<<order_by_date_asc>>" %}
+            {% if '<<order_by_date_desc>>' in sql_expression %}
+                {% set order  = " desc " %}
+                {% set split_string = "<<order_by_date_desc>>" %}
+            {% endif %}
+            {%- set split_parts = sql_expression.split(split_string) -%}
+            {%- if grain is none -%}
+                {%- set order_by_expression = " order by true " + order  -%}
+                {%- set time_expression = split_parts | join(order_by_expression) -%}
+            {%- elif grain is not none -%}
+                {%- set order_by_expression = " order by " + "date_"+ grain + " " + order -%}
+                {%- set time_expression = split_parts | join(order_by_expression) -%}
+            {%- endif -%}
+            {%- set sql_expression = time_expression -%}
+            {%- endif -%}
+    {{ sql_expression | replace("property_to_aggregate", expression) }}
 {%- endmacro -%}

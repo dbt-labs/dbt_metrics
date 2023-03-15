@@ -43,7 +43,7 @@
         {#- This line performs the relevant aggregation by calling the 
         gen_primary_metric_aggregate macro. Take a look at that one if you're curious -#}
         {%- for metric_name in group_values.metric_names -%} 
-        {{ metrics.gen_primary_metric_aggregate(metrics_dictionary[metric_name].calculation_method, 'property_to_aggregate__'~metric_name, dimensions) }} as {{ metric_name }}
+        {{ metrics.gen_primary_metric_aggregate(metrics_dictionary[metric_name].calculation_method, 'property_to_aggregate__'~metric_name, dimensions, grain) }} as {{ metric_name }}
         {%- if not loop.last -%},{%- endif -%}
         {%- endfor%}
     from ({{ metrics.gen_base_query(
