@@ -6,13 +6,13 @@ models:
       An auto generated calendar table that used for metrics.
   
     columns:
-      - name: DATE_DAY
+      - name: date_day
         description: "Date"
-      - name: DATE_WEEK
+      - name: date_week
         description: "Date truncated into week"
-      - name: DATE_MONTH
+      - name: date_month
         description: "Date truncated into month"
-      - name: DATE_QUARTER
+      - name: date_quarter
         description: "Date truncated into quarter"
-      - name: DATE_YEAR
+      - name: date_year
         description: "Date truncated into year"
