@@ -98,7 +98,7 @@ from {{ metrics.calculate(
     ],
     start_date='2022-01-01',
     end_date='2022-12-31',
-    where="some_column='filter_value'"
+    where="plan='filter_value'"
 ) }}
 ```
 If no `grain` is provided to the macro in the query then the dataset returned will not be time-bound.
