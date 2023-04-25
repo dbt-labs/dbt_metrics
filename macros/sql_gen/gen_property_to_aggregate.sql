@@ -54,5 +54,17 @@
 {%- endmacro -%}
 
 {% macro default__property_to_aggregate_default(metric_dictionary) %}
-            ({{metric_dictionary.expression }}) as property_to_aggregate__{{metric_dictionary.name}}
+    {% if '<<partition_by_dimensions>>' in metric_dictionary.expression %}
+        {% set expression =  metric_dictionary.expression %}
+        {% set split_parts = expression.split("<<partition_by_dimensions>>") %}
+        {% if dimensions == [] %}
+            {%- set dim_expression = split_parts | join(" partition by true ") -%}
+        {% elif dimensions != [] %}
+            {%- set partition_by_expression = dimensions | join(', ') -%}
+            {%- set dim_expression = split_parts | join(" partition by " ~ partition_by_expression) -%}
+        {% endif %}
+        ({{dim_expression}}) as property_to_aggregate__{{metric_dictionary.name}}
+    {% else %}
+        ({{metric_dictionary.expression }}) as property_to_aggregate__{{metric_dictionary.name}}
+    {% endif %}
 {%- endmacro -%}
