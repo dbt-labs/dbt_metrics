@@ -10,7 +10,7 @@
         {{ return(adapter.dispatch('property_to_aggregate_count', 'metrics')(metric_dictionary)) }}
 
     {% elif metric_dictionary.expression and metric_dictionary.expression | replace('*', '') | trim != '' %}
-        {{ return(adapter.dispatch('property_to_aggregate_default', 'metrics')(metric_dictionary)) }}
+        {{ return(adapter.dispatch('property_to_aggregate_default', 'metrics')(metric_dictionary, dimensions)) }}
 
     {% else %}
         {%- do exceptions.raise_compiler_error("Expression to aggregate is required for non-count aggregation in metric `" ~ metric_dictionary.name ~ "`") -%}  
@@ -53,7 +53,7 @@
             1 as property_to_aggregate__{{metric_dictionary.name}}
 {%- endmacro -%}
 
-{% macro default__property_to_aggregate_default(metric_dictionary) %}
+{% macro default__property_to_aggregate_default(metric_dictionary, dimensions) %}
     {% if '<<partition_by_dimensions>>' in metric_dictionary.expression %}
         {% set expression =  metric_dictionary.expression %}
         {% set split_parts = expression.split("<<partition_by_dimensions>>") %}
