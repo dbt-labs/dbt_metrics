@@ -51,7 +51,7 @@
     
     {%- do metrics.validate_dimension_list(dimensions=dimensions, metric_tree=metric_tree, metrics_dictionary=metrics_dictionary) -%} 
 
-    {%- do metrics.validate_metric_config(metrics_dictionary=metrics_dictionary) -%}
+    {# {%- do metrics.validate_metric_config(metrics_dictionary=metrics_dictionary) -%} #}
 
     {%- do metrics.validate_secondary_calculations(metric_tree=metric_tree, metrics_dictionary=metrics_dictionary, grain=grain, secondary_calculations=secondary_calculations) -%} 
 
