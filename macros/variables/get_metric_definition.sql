@@ -18,8 +18,7 @@
     {# Behavior specific to develop #}
     {% if metric_definition is mapping %}
         {# We need to do some cleanup for metric parsing #}
-        {% set metric_expression = metric_definition.expression | replace("metric(","") | replace(")","") | replace("{{","") | replace("}}","")  | replace("'","") | replace('"',"")  %}
-        {% do metrics_dictionary_dict.update({'expression': metric_expression})%} 
+        {% set metric_expression = metric_definition.expression | replace(" ","") | replace("{{metric('","") | replace("')}}","") | replace("'","") | replace('"',"") %}        {% do metrics_dictionary_dict.update({'expression': metric_expression})%} 
         {% if metric_definition.window %}
             {% do metrics_dictionary_dict.update({'window': metric_definition.window}) %}
         {% else %}
