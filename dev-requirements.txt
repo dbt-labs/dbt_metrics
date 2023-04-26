@@ -24,4 +24,4 @@ dbt-core==1.5.0-rc2
 dbt-redshift==1.5.0-rc1
 dbt-snowflake==1.5.0-rc1
 dbt-bigquery==1.5.0-rc1
-dbt-databricks==1.5.0-rc1
+# dbt-databricks==1.5.0-rc1
