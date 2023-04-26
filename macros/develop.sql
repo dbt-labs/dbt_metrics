@@ -7,6 +7,14 @@
     {#- Need this here, since the actual ref is nested within loops/conditions: -#}
     -- depends on: {{ ref(var('dbt_metrics_calendar_model', 'dbt_metrics_default_calendar')) }}
 
+    {%- if execute %}
+        {% do exceptions.warn(
+            "WARNING: dbt_metrics is going to be deprecated in dbt-core 1.6 in \
+July 2023 as part of the migration to MetricFlow. This package will \
+continue to work with dbt-core 1.5 but a 1.6 version will not be \
+released. If you have any questions, please join us in the #dbt-core-metrics in the dbt Community Slack") %}
+    {%- endif %}
+
     {% if not execute -%}
         {%- do return("not execute") -%}
     {%- endif %}
