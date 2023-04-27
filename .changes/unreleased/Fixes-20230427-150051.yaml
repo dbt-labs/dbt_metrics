@@ -1,0 +1,8 @@
+kind: Fixes
+body: 'Fix for issue 233: simplify the default__gen_joined_metrics_cte macro to avoid
+  failure when calculating multiple metrics in one model'
+time: 2023-04-27T15:00:51.522927+03:00
+custom:
+  Author: siljamardla
+  Issue: "233"
+  PR: "241"
