@@ -1,0 +1,7 @@
+kind: Breaking Changes
+body: Adding support for dbt-core 1.5
+time: 2023-04-26T16:36:23.710755-05:00
+custom:
+  Author: callum-mcdata
+  Issue: "239"
+  PR: "240"
