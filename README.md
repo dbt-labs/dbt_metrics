@@ -1,4 +1,4 @@
-## :bangbang: NOTICE: The dbt_metrics package will be deprecated upon the release of dbt-core 1.6 in July 2023. 
+## NOTICE: The dbt_metrics package will be deprecated upon the release of dbt-core 1.6 in July 2023. 
 
 # dbt_metrics
 <!--This table of contents is automatically generated. Any manual changes between the ts and te tags will be overridden!-->
