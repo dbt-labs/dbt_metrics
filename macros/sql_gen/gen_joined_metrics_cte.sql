@@ -45,14 +45,7 @@
         ) as date_{{period}},
     {%- endfor %}
     {%- for dim in dimensions %}
-        coalesce(
-        {%- for group_name, group_values in models_grouping.items() %}
-            {{group_name}}__final.{{ dim }} {%- if not loop.last -%},{% endif %}
-            {%- if models_grouping | length == 1 %}
-            , NULL
-            {%- endif -%}
-        {% endfor %}
-        ) as {{dim}},
+        {{dim}},
     {%- endfor %}
 
     {%- for metric_name in metric_tree.parent_set %}
