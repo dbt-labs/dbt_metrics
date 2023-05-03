@@ -7,28 +7,38 @@ from dbt.tests.util import run_dbt
 # our file contents
 from tests.functional.fixtures import (
     fact_orders_source_csv,
-    fact_orders_sql,
     fact_orders_yml,
 )
 
-# models/invalid_metric_config_value.sql
-invalid_metric_config_value_sql = """
+# models/fact_orders.sql
+fact_orders_sql = """
+
+{{ config(materialized='ephemeral') }}
+
+select 
+    *
+    ,round(order_total - (order_total/2)) as discount_total
+from {{ref('fact_orders_source')}}
+"""
+
+# models/invalid_ephemeral_model.sql
+invalid_ephemeral_model_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_metric_config_value'), 
+{{ metrics.calculate(metric('invalid_ephemeral_model'), 
     grain='month'
     )
 }}
 """
 
-# models/invalid_metric_config_value.yml
-invalid_metric_config_value_yml = """
+# models/invalid_ephemeral_model.yml
+invalid_ephemeral_model_yml = """
 version: 2 
 models:
-  - name: invalid_metric_config_value
+  - name: invalid_ephemeral_model
 
 metrics:
-  - name: invalid_metric_config_value
+  - name: invalid_ephemeral_model
     model: ref('fact_orders')
     label: Total Discount ($)
     timestamp: order_date
@@ -75,8 +85,8 @@ class TestInvalidMetricConfig:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "invalid_metric_config_value.sql": invalid_metric_config_value_sql,
-            "invalid_metric_config_value.yml": invalid_metric_config_value_yml
+            "invalid_ephemeral_model.sql": invalid_ephemeral_model_sql,
+            "invalid_ephemeral_model.yml": invalid_ephemeral_model_yml
         }
 
     def test_metric_config_value(self,project,):

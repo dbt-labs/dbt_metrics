@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: dbt_metrics_default_calendar
+    description: |
+      An auto generated calendar table that used for metrics.
+  
+    columns:
+      - name: date_day
+        description: "Date"
+      - name: date_week
+        description: "Date truncated into week"
+      - name: date_month
+        description: "Date truncated into month"
+      - name: date_quarter
+        description: "Date truncated into quarter"
+      - name: date_year
+        description: "Date truncated into year"

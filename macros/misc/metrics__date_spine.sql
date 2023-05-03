@@ -1,26 +1,3 @@
-{% macro metric_get_intervals_between(start_date, end_date, datepart) -%}
-    {{ return(adapter.dispatch('metric_get_intervals_between', 'metrics')(start_date, end_date, datepart)) }}
-{%- endmacro %}
-
-{% macro default__metric_get_intervals_between(start_date, end_date, datepart) -%}
-    {%- call statement('metric_get_intervals_between', fetch_result=True) %}
-
-        select {{ datediff(start_date, end_date, datepart) }}
-
-    {%- endcall -%}
-
-    {%- set value_list = load_result('metric_get_intervals_between') -%}
-
-    {%- if value_list and value_list['data'] -%}
-        {%- set values = value_list['data'] | map(attribute=0) | list %}
-        {{ return(values[0]) }}
-    {%- else -%}
-        {{ return(1) }}
-    {%- endif -%}
-
-{%- endmacro %}
-
-
 {% macro metric_date_spine(datepart, start_date, end_date) %}
     {{ return(adapter.dispatch('metric_date_spine', 'metrics')(datepart, start_date, end_date)) }}
 {%- endmacro %}
@@ -39,9 +16,7 @@ metric_date_spine(
 
 with rawdata as (
 
-    {{metrics.metric_generate_series(
-        metrics.metric_get_intervals_between(start_date, end_date, datepart)
-    )}}
+    {{metrics.metric_generate_series(14610)}}
 
 ),
 

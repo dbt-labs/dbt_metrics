@@ -10,8 +10,8 @@ metrics:
     dimensions:
       - had_discount
       - order_country
-    config:
-      restrict_no_time_grain: True
+    # config:
+    #   restrict_no_time_grain: True
 
   - name: base_sum_metric_duplicate
     model: ref('fact_orders_duplicate')

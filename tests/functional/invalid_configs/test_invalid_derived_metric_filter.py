@@ -1,4 +1,3 @@
-from configparser import ParsingError
 from struct import pack
 import os
 import pytest
@@ -11,38 +10,51 @@ from tests.functional.fixtures import (
     fact_orders_yml,
 )
 
-# models/invalid_metric_config.sql
-invalid_metric_config_sql = """
+# models/invalid_derived_metric.sql
+invalid_derived_metric_sql = """
 select *
 from 
-{{ metrics.calculate(metric('invalid_metric_config'), 
+{{ metrics.calculate(metric('invalid_derived_metric'), 
     grain='month'
     )
 }}
 """
 
-# models/invalid_metric_config.yml
-invalid_metric_config_yml = """
+# models/invalid_derived_metric.yml
+invalid_derived_metric_yml = """
 version: 2 
 models:
-  - name: invalid_metric_config
+  - name: invalid_derived_metric
 
 metrics:
-  - name: invalid_metric_config
+  - name: base_sum_metric
     model: ref('fact_orders')
-    label: Total Discount ($)
+    label: Order Total ($)
     timestamp: order_date
     time_grains: [day, week, month]
-    calculation_method: count
+    calculation_method: sum
     expression: order_total
     dimensions:
       - had_discount
       - order_country
-    config:
-      did_dave_write_this: true
+
+  - name: invalid_derived_metric
+    label: Total Discount ($)
+    timestamp: order_date
+    time_grains: [day, week, month]
+    calculation_method: derived
+    expression: "{{metric('base_sum_metric')}} - 1"
+    dimensions:
+      - had_discount
+      - order_country
+
+    filters:
+      - field: had_discount
+        operator: 'is'
+        value: 'true'
 """
 
-class TestInvalidMetricConfig:
+class TestInvalidDerivedMetric:
 
     # configuration in dbt_project.yml
     @pytest.fixture(scope="class")
@@ -75,18 +87,18 @@ class TestInvalidMetricConfig:
         return {
             "fact_orders.sql": fact_orders_sql,
             "fact_orders.yml": fact_orders_yml,
-            "invalid_metric_config.sql": invalid_metric_config_sql,
-            "invalid_metric_config.yml": invalid_metric_config_yml
+            "invalid_derived_metric.sql": invalid_derived_metric_sql,
+            "invalid_derived_metric.yml": invalid_derived_metric_yml
         }
 
-    def test_invalid_metric_config(self,project,):
-        # initial run
+    def test_invalid_derived_metric(self,project,):
+        # running deps to install package
         results = run_dbt(["deps"])
 
         # seed seeds
         results = run_dbt(["seed"])
         assert len(results) == 1
 
-        # Here we expect the run to fail because the value provided
-        # in the where clause isn't included in the final dataset
+        # Here we expect the run to fail because the incorrect
+        # config won't allow it to compile
         run_dbt(["run"], expect_pass = False)

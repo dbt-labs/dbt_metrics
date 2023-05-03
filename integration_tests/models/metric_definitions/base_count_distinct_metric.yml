@@ -16,7 +16,7 @@ metrics:
       period: month
     filters:
       - field: had_discount
-        operator: 'is'
+        operator: '='
         value: 'true'
       - field: order_country
         operator: '='
