@@ -1,3 +1,6 @@
+## Deprecation Notice
+The dbt_metrics package will no longer be maintained with the release of dbt-core 1.6 in July 2023. All semantic layer capability will be instead be found in [MetricFlow](https://github.com/dbt-labs/metricflow). 
+
 # dbt_metrics
 <!--This table of contents is automatically generated. Any manual changes between the ts and te tags will be overridden!-->
 <!--ts-->
