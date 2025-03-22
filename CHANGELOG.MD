@@ -7,6 +7,10 @@
 ## Contributors:
 --->
 
+# Unreleased
+
+* Moving dbt-expectations from Calogica to Metaplane n [#256](https://github.com/dbt-labs/dbt_metrics/pull/256)
+
 # dbt_metrics v0.1.5
 ## What's Changed
 * start_date and end_date casting fix by @fivetran-joemarkiewicz in [#22](https://github.com/dbt-labs/dbt_metrics/pull/22)
