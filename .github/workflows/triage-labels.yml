@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: initial labeling
-        uses: andymckay/labeler@master
+        uses: andymckay/labeler@3a4296e9dcdf9576b0456050db78cfd34853f260  # andymckay/labeler@master
         with:
           add-labels: "triage"
           remove-labels: "awaiting_response"
